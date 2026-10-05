@@ -43,7 +43,10 @@ NAMES = {'dong': '咚咚', 'cha': '嚓嚓', 'papa': '啪啪', 'beng': '嘣嘣', 
          'ling': '铃铃', 'dudu': '嘟嘟', 'huhu': '呼呼', 'lala': '啦啦', 'ying': '影影',
          'dang': '当当', 'weng': '嗡嗡', 'you': '悠悠', 'zheng': '铮铮', 'zizi': '滋滋', 'dongci': '动次', 'dada': '哒哒',
          'hong': '轰轰', 'jiu': '啾啾', 'hei': '嘿嘿',
-         'dada2': '嗒嗒', 'gudong': '咕咚', 'dingdang': '叮当', 'puca': '噗嚓', 'xiuxiu': '咻咻', 'wawa': '哇哇', 'kaka': '咔咔'}
+         'dada2': '嗒嗒', 'gudong': '咕咚', 'dingdang': '叮当', 'puca': '噗嚓', 'xiuxiu': '咻咻', 'wawa': '哇哇', 'kaka': '咔咔',
+         'dongda': '咚哒', 'bengcha': '嘣嚓', 'tongtong': '嗵嗵', 'qiangqiang': '锵锵', 'pada': '啪嗒', 'dida': '嘀嗒', 'dongqiang': '咚锵',
+         'dingdong': '叮咚', 'gulu': '咕噜', 'baba': '叭叭', 'dengdeng': '噔噔', 'bibi': '哔哔', 'pengpeng': '嘭嘭', 'heiha': '嘿哈',
+         'bobo': '啵啵', 'gege': '咯咯', 'wengwu': '嗡呜', 'dongba': '咚吧', 'guagua': '刮刮', 'miaomiao': '喵喵', 'wangwang': '汪汪'}
 PROMPTS.update({'n_' + k: v for k, v in NAMES.items()})
 
 sem = None

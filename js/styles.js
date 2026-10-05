@@ -1,12 +1,17 @@
 // 每个世界的风格：用哪套乐器声音、背景、角色挂件和恐怖件。
 // 角色全书固定；同一个世界里的几关只换内容，挂件按关号轮换，背景色调微调。
 // 设计依据见 docs/DESIGN.md 第 4、7 节。
-// 乐手按类别固定排列（不打乱，方便孩子每次都在老地方找到）：节奏、低音、和声旋律、音效人声
+// 乐手按类别固定排列（不打乱，方便孩子每次都在老地方找到）
 // 2026-10-05 删掉了不带感、容易打乱节奏的：呜呜 呼呼 啦啦 嘀嘟 嗡嗡 嘟嘟
-const INST = ['dong', 'dongci', 'dada2', 'papa', 'cha', 'dada', 'gudong', 'dingdang', 'puca', 'ying',
-  'beng', 'hong', 'wawa',
-  'dang', 'zizi', 'zheng', 'ling', 'you', 'jiu',
-  'ding', 'xiuxiu', 'kaka', 'hei'];
+export const GROUPS = [
+  ['鼓', ['dong', 'dongci', 'dongda', 'bengcha', 'dada2', 'papa', 'pengpeng', 'tongtong', 'dongqiang']],
+  ['小打击乐', ['cha', 'dada', 'qiangqiang', 'pada', 'dida', 'dingdang', 'gege', 'guagua', 'gudong', 'dongba']],
+  ['人声节奏', ['puca', 'ying', 'heiha', 'hei', 'miaomiao', 'wangwang']],
+  ['低音', ['beng', 'hong', 'wawa', 'dengdeng', 'wengwu']],
+  ['和声旋律', ['dang', 'zizi', 'zheng', 'ling', 'you', 'jiu', 'dingdong', 'gulu', 'baba', 'bibi']],
+  ['音效', ['ding', 'xiuxiu', 'kaka', 'bobo']],
+];
+const INST = GROUPS.flatMap((g) => g[1]);
 
 /* ---------- 恐怖件库：按位置分组，同一组只能选一个 ---------- */
 const GROUP = {
@@ -111,7 +116,10 @@ const FOREST_SINGER = [
 export const SINGER_COLORS = ['#86C5FF', '#FF8FA3', '#FFD166', '#8EE3A8', '#C3B1FF', '#FFB86B', '#7FDBFF', '#F7A1E0', '#B8E986', '#FFC2A8'];
 export const LOOPKEY = { dong: 'kick', cha: 'shaker', papa: 'clap', beng: 'bass', ding: 'chime', wuwu: 'sweep', didu: 'blip', ling: 'bells', dudu: 'lead', huhu: 'pad', lala: 'choir', ying: 'snap',
   dang: 'epiano', weng: 'cello', you: 'violin', zheng: 'guitar', zizi: 'saw', dongci: 'edm', dada: 'trap', hong: '808', jiu: 'arp', hei: 'vox',
-  dada2: 'snare', gudong: 'conga', dingdang: 'cowbell', puca: 'beatbox', xiuxiu: 'laser', wawa: 'wobble', kaka: 'scratch' };
+  dada2: 'snare', gudong: 'conga', dingdang: 'cowbell', puca: 'beatbox', xiuxiu: 'laser', wawa: 'wobble', kaka: 'scratch',
+  dongda: 'breaks', bengcha: 'dembow', tongtong: 'toms', qiangqiang: 'ride', pada: 'tamb', dida: 'clave', dongqiang: 'gong', dingdong: 'steel',
+  gulu: 'marimba', baba: 'brass', dengdeng: 'slap', bibi: 'chip', pengpeng: 'stomp', heiha: 'chant', bobo: 'bubble', gege: 'castanet',
+  wengwu: 'reese', dongba: 'djembe', guagua: 'guiro', miaomiao: 'meow', wangwang: 'bark' };
 export const INSTRUMENTS = INST;
 
 function hexMix(a, b, t) {
@@ -129,7 +137,7 @@ function themeLook(S, key, baseCol) {
 // stageId 用来在同一个世界里轮换挂件；baseCol 是角色本来的颜色（恐怖主题会混色）
 export function lookFor(style, id, stageId = 0, baseCol) {
   const S = STYLES[style];
-  if (style === 'horror1') return { dark: true, parts: FOREST[id] || [] };
+  if (style === 'horror1') return { dark: true, parts: FOREST[id] || pick('ultimate', id, 5) };
   if (S.dark) {
     const l = themeLook(S, id, baseCol);
     // 影影保留招牌的紫光眼和裂嘴笑

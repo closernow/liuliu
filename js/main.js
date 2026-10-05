@@ -1,7 +1,8 @@
 // 溜溜 主程序：舞台、拖拽、彩蛋、进化、阶段地图。
 // 四种关：识字（拖字）、拼音（拖声母韵母声调拼音节）、rap（拖唱词排顺序）、全书大混音。
 import { charSVG, CH } from './art.js';
-import { STYLES, LOOPKEY, INSTRUMENTS, SINGER_COLORS, lookFor, singerLook } from './styles.js';
+import { STYLES, LOOPKEY, INSTRUMENTS, GROUPS, SINGER_COLORS, lookFor, singerLook } from './styles.js';
+import * as U from './unlock.js';
 import { BG } from './bg.js';
 import * as A from './audio.js';
 import * as store from './store.js';
@@ -18,7 +19,9 @@ const wUrl = (w) => `audio/voice/w/${code(w)}.mp3`;
 const uiUrl = (k) => `audio/voice/ui/${k}.mp3`;
 const NAMES = { dong: '咚咚', cha: '嚓嚓', papa: '啪啪', beng: '嘣嘣', ding: '叮叮', wuwu: '呜呜', didu: '嘀嘟', ling: '铃铃', dudu: '嘟嘟', huhu: '呼呼', lala: '啦啦', ying: '影影',
   dang: '当当', weng: '嗡嗡', you: '悠悠', zheng: '铮铮', zizi: '滋滋', dongci: '动次', dada: '哒哒', hong: '轰轰', jiu: '啾啾', hei: '嘿嘿',
-  dada2: '嗒嗒', gudong: '咕咚', dingdang: '叮当', puca: '噗嚓', xiuxiu: '咻咻', wawa: '哇哇', kaka: '咔咔' };
+  dada2: '嗒嗒', gudong: '咕咚', dingdang: '叮当', puca: '噗嚓', xiuxiu: '咻咻', wawa: '哇哇', kaka: '咔咔',
+  dongda: '咚哒', bengcha: '嘣嚓', tongtong: '嗵嗵', qiangqiang: '锵锵', pada: '啪嗒', dida: '嘀嗒', dongqiang: '咚锵', dingdong: '叮咚', gulu: '咕噜', baba: '叭叭', dengdeng: '噔噔',
+  bibi: '哔哔', pengpeng: '嘭嘭', heiha: '嘿哈', bobo: '啵啵', gege: '咯咯', wengwu: '嗡呜', dongba: '咚吧', guagua: '刮刮', miaomiao: '喵喵', wangwang: '汪汪' };
 const TONE_PATH = ['M4 8 L36 8', 'M4 24 L36 6', 'M4 10 Q20 34 36 8', 'M4 6 L36 24'];
 
 let DATA, stage = null, selected = null, eggOrder = [];
@@ -28,6 +31,7 @@ let muted = Array(NS).fill(false);
 let save = { unlocked: 1, current: 1, found: {}, heard: {}, mixEggs: null };
 let text = null, recs = {}, noText = false, valid = new Set(), mixData = null;
 let clips = [];                 // 自由录音：[{id, url}]
+let unlocked = new Set(U.INITIAL);
 
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2400); }
 const persist = () => store.set('save', save);
@@ -56,7 +60,7 @@ async function enter(id) {
   if (stage.type === 'rap') await loadText();
   if (stage.type === 'mix') buildMix();
   eggOrder = []; renderBar(); renderEggs(); renderSlots(); renderLyrics();
-  const pre = INSTRUMENTS.map(loopUrl);
+  const pre = INSTRUMENTS.filter((id) => unlocked.has(id)).map(loopUrl);
   (stage.chars || []).forEach(([c]) => pre.push(zUrl(c)));
   (stage.eggs || []).forEach((e) => e.syl || e.kind || pre.push(wUrl(e.w)));
   A.preload(pre);
@@ -248,6 +252,7 @@ function applyPinyin(i, item) {
     } else s.formed = !s.sheng && valid.has(s.yun);
   }
   refreshAudio(i); renderSlots();
+  if (s.formed && item.kind !== 'tone') { save.pyOK = (save.pyOK || 0) + 1; persist(); if (save.pyOK === 30) setTimeout(refreshUnlocks, 1500); }
   if (s.formed && !checkEggs()) A.say(Py.url(Py.sylOf(s), s.tone));
   else if (!s.formed && item.kind === 'sheng') A.say(`audio/voice/sm/${item.v}.mp3`);
   else if (!s.formed && item.kind === 'yun') A.say(`audio/voice/ym/${item.v.replace('ü', 'v')}.mp3`);
@@ -322,8 +327,16 @@ function group(label, cls) {
 }
 function renderBar() {
   $('bar').innerHTML = '';
-  const gi = group('乐手', 'ginst');
-  INSTRUMENTS.forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id])));
+  const gi = group(`乐手 ${unlocked.size}/${INSTRUMENTS.length}`, 'ginst');
+  GROUPS.forEach(([, ids]) => ids.filter((id) => unlocked.has(id)).forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id]))));
+  U.next(save, DATA).forEach((id) => {
+    const b = document.createElement('button'); b.className = 'ic locked'; b.innerHTML = charSVG(id, {}) + '<span class="lk">🔒</span>';
+    b.setAttribute('aria-label', '还没解锁的伙伴');
+    b.addEventListener('click', () => toast('🔒 ' + U.hint(id, save)));
+    gi.appendChild(b);
+  });
+  const gal = document.createElement('button'); gal.className = 'ic galbtn'; gal.innerHTML = '👥<span>全部</span>'; gal.setAttribute('aria-label', '伙伴图鉴');
+  gal.addEventListener('click', openGallery); gi.appendChild(gal);
   const chars = stage.type === 'mix' ? mixData.chars : stage.chars;
   if (chars) {
     const gc = group('字宝宝');
@@ -362,7 +375,36 @@ async function newClip() {
   await store.set('clip:' + id, b);
   await store.set('clips', [...(await store.get('clips', [])), id]);
   await loadClips(); renderBar(); A.preload(clips.map((c) => c.url));
+  markSpecial('clip');
 }
+function markSpecial(k) { save.special = save.special || {}; if (!save.special[k]) { save.special[k] = 1; persist(); refreshUnlocks(); } }
+
+/* ================= 伙伴解锁 ================= */
+function refreshUnlocks(first = false) {
+  const now = U.compute(save, DATA), fresh = [...now].filter((id) => !unlocked.has(id));
+  unlocked = now;
+  if (!fresh.length) return;
+  if (stage) { renderBar(); A.preload(fresh.map(loopUrl)); }
+  if (!first || save.seenUnlock) showUnlock(fresh);
+  save.seenUnlock = 1; persist();
+}
+function showUnlock(ids) {
+  const box = $('unlockBody');
+  box.innerHTML = `<div class="ut">🎉 新伙伴${ids.length > 1 ? ` × ${ids.length}` : ''}！</div><div class="ugrid">` +
+    ids.map((id) => `<div class="ucard play" style="--ph:0s">${charSVG(id, {})}<b>${NAMES[id]}</b><small>${CH[id].sub}</small></div>`).join('') + '</div>';
+  $('unlockLayer').hidden = false;
+  A.say(ids.slice(0, 3).map((id) => uiUrl('n_' + id)), { user: false });
+}
+$('unlockOk').addEventListener('click', () => ($('unlockLayer').hidden = true));
+function openGallery() {
+  const box = $('galBody');
+  box.innerHTML = `<p class="note">已经有 ${unlocked.size} 个伙伴，一共 ${INSTRUMENTS.length} 个。找彩蛋、每天来玩、完成特殊任务都能解锁新伙伴。</p>` + GROUPS.map(([name, ids]) =>
+    `<h3>${name}</h3><div class="ggrid">` + ids.map((id) => unlocked.has(id)
+      ? `<div class="gcard">${charSVG(id, {})}<b>${NAMES[id]}</b><small>${CH[id].sub}</small></div>`
+      : `<div class="gcard off">${charSVG(id, {})}<b>？？</b><small>${U.hint(id, save)}</small></div>`).join('') + '</div>').join('');
+  $('galLayer').hidden = false;
+}
+$('galClose').addEventListener('click', () => ($('galLayer').hidden = true));
 function renderBarState() {
   document.querySelectorAll('.ginst .ic').forEach((b) => b.classList.toggle('on', slots.some((s) => s && s.kind === 'inst' && s.id === b.dataset.id)));
 }
@@ -481,7 +523,7 @@ function celebrate(e, k) {
   if (n === stage.eggs.length) list.push(uiUrl('allfound'));
   updateEvo();
   const hide = Promise.race([A.say(list), new Promise((r) => setTimeout(r, 6000))]);
-  Promise.all([hide, new Promise((r) => setTimeout(r, 2500))]).then(() => { $('banner').hidden = true; if (n === NEED && nextMade()) spotlight(); });
+  Promise.all([hide, new Promise((r) => setTimeout(r, 2500))]).then(() => { $('banner').hidden = true; if (n === NEED && nextMade()) spotlight(); refreshUnlocks(); });
   if (e.kind === 'all') { let c = 0; const iv = setInterval(() => { confetti(); if (++c > 3) clearInterval(iv); }, 1500); }
 }
 function confetti() {
@@ -582,7 +624,7 @@ $('songBtn').addEventListener('click', async () => {
   const id = Date.now().toString(36), list = await store.get('songs', []);
   list.push({ id, name: `第 ${list.length + 1} 首 · ${stage.lesson}`, date: new Date().toLocaleString('zh-CN') });
   await store.set('song:' + id, blob); await store.set('songs', list);
-  toast('录好啦，在"我的歌"里');
+  toast('录好啦，在"我的歌"里'); markSpecial('song');
 });
 $('mySongsBtn').addEventListener('click', renderSongs);
 async function renderSongs() {
@@ -644,6 +686,7 @@ $('recBtn').addEventListener('click', () => {
       recs = await Rec.loadAll(stage.text, text.lines.length);
       A.preload(text.lines.map((_, i) => lineUrl(i)));
       renderBar(); renderSlots(); checkEggs();
+      if (Object.keys(recs).length) markSpecial('rec');
     },
   });
 });
@@ -653,11 +696,22 @@ async function boot() {
   DATA = await (await fetch('content/stages.json')).json();
   save = Object.assign(save, await store.get('save', {}));
   await loadClips();
+  // 每天第一次来玩送一个礼物（第一天不算），然后按存档算出解锁了哪些伙伴
+  const today = new Date().toDateString();
+  if (save.lastDay !== today) { save.gifts = (save.gifts || 0) + (save.lastDay ? 1 : 0); save.lastDay = today; await store.set('save', save); }
+  unlocked = U.compute(save, DATA);
   $('startBtn').addEventListener('click', async () => {
     $('startLayer').hidden = true;
     await A.init();
     const cs = DATA.stages.find((s) => s.id === save.current);
-    enter(cs && isOpen(cs) ? cs.id : Math.min(save.unlocked, 33) || 1);
+    await enter(cs && isOpen(cs) ? cs.id : Math.min(save.unlocked, 33) || 1);
+    // 第一次用解锁系统：已经找到的彩蛋折算成伙伴，一起展示
+    if (!save.seenUnlock) { const extra = [...unlocked].filter((id) => !U.INITIAL.includes(id)); save.seenUnlock = 1; persist(); if (extra.length) showUnlock(extra); }
+    else if (save.giftShown !== new Date().toDateString() && save.gifts) {
+      save.giftShown = new Date().toDateString(); persist();
+      const id = U.QUEUE[Math.floor(U.eggCount(save) / 2) + save.gifts - 1];
+      if (id && unlocked.has(id)) { toast('🎁 今天来玩，送你一个新伙伴！'); }
+    }
   });
 }
 boot();

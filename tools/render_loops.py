@@ -391,6 +391,213 @@ def rhythm_insts(sfx, CH, BS, tr=0, dark=False):
     for i, s in enumerate(s_): put(b, st(s), scratch(.11, i % 2 == 0))
     mk('scratch' + sfx, [0, 8, 16, 24], b, wet=.05 if not dark else .4)
 
+# ===== 第四批：21 个节奏型乐手 =====
+def tom(f, d=0.35):
+    t = tt(d); ff = f * (1 + 0.5 * np.exp(-t / 0.03))
+    return np.sin(2 * np.pi * np.cumsum(ff) / SR) * env(t, 0.001, d * 0.4) + bp(noise(len(t)), 800, 4000) * env(t, 0.0005, 0.008) * 0.3
+
+def cymbal(d=0.8, bright=7000):
+    t = tt(d); x = sum(np.sign(np.sin(2 * np.pi * f * t)) for f in (305, 437, 561, 727, 901, 1043))
+    return hp(x + noise(len(t)) * 2, bright) * env(t, 0.001, d * 0.4) * 0.12
+
+def tambourine():
+    t = tt(0.18); x = hp(noise(len(t)), 6000) * env(t, 0.002, 0.05)
+    return x + sum(np.sin(2 * np.pi * f * t) for f in (5200, 6900)) * env(t, 0.001, 0.04) * 0.1
+
+def clave(f=2500):
+    t = tt(0.1); return np.sin(2 * np.pi * f * t) * env(t, 0.0005, 0.02) * 0.7
+
+def gong():
+    t = tt(2.0); x = sum(np.sin(2 * np.pi * f * t + 2 * np.sin(2 * np.pi * f * 0.5 * t)) / (k + 1) for k, f in enumerate((180, 270, 395, 540)))
+    return x * env(t, 0.005, 0.9) * 0.35
+
+def bigdrum():
+    k = lp(kick(110, 60, .45), 800); t2 = tom(150, .4); k[:len(t2)] += t2 * 0.4
+    return k
+
+def steelpan(m):
+    t = tt(0.8); f = mtof(m)
+    x = np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * f * 2.0 * t) * np.exp(-t / .1) + 0.3 * np.sin(2 * np.pi * f * 3.9 * t) * np.exp(-t / .05)
+    return x * env(t, 0.002, 0.3) * 0.5
+
+def marimba(m):
+    t = tt(0.5); f = mtof(m)
+    return (np.sin(2 * np.pi * f * t) + 0.4 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t / .03)) * env(t, 0.001, 0.15) * 0.6
+
+def brass(notes, d=0.18):
+    t = tt(d + 0.05); x = np.zeros_like(t)
+    for m in notes:
+        f = mtof(m); x += saw(f, t, 30) + saw(f * 1.004, t, 30)
+    cut = 600 + 3000 * np.exp(-t / 0.08)
+    y = np.zeros_like(x); zi = None
+    for k in range(0, len(x), 128):
+        bb, aa = signal.butter(2, min(cut[k], SR / 2 * .9) / (SR / 2))
+        if zi is None: zi = signal.lfilter_zi(bb, aa) * 0
+        y[k:k + 128], zi = signal.lfilter(bb, aa, x[k:k + 128], zi=zi)
+    return y * np.clip(t / 0.01, 0, 1) * np.clip((d + 0.05 - t) / 0.05, 0, 1) * 0.15
+
+def slap(m, pop=False):
+    t = tt(0.25); f = mtof(m + (12 if pop else 0))
+    x = saw(f, t, 25) * env(t, 0.001, 0.12) + np.sin(2 * np.pi * f * t) * env(t, 0.001, 0.2)
+    return lp(x, 2500 if pop else 1200) * 0.6 + bp(noise(len(t)), 2000, 6000) * env(t, 0.0005, 0.006) * (0.6 if pop else 0.2)
+
+def chip(m, d=0.08):
+    t = tt(d); x = np.where(np.sin(2 * np.pi * mtof(m) * t) > 0.4, 1.0, -1.0)
+    return x * env(t, 0.001, d * 0.7) * 0.25
+
+def stomp():
+    t = tt(0.3); return lp(noise(len(t)), 400) * env(t, 0.002, 0.08) * 1.2 + np.sin(2 * np.pi * 70 * t) * env(t, 0.002, 0.1)
+
+def shout(vowel='a', m=60):
+    t = tt(0.25); f = mtof(m) * (1 - 0.1 * t / 0.25)
+    ph = 2 * np.pi * np.cumsum(f) / SR; x = sum(np.sin(k * ph) / k for k in range(1, 30))
+    F = FORMANTS[vowel]; y = sum(bp(x, fc * .85, fc * 1.15) * a for fc, a in zip(F, (1, .7, .3)))
+    return (y * 1.5 + bp(noise(len(t)), 800, 3000) * 0.3) * np.exp(-t / 0.1)
+
+def pop_bubble(m):
+    t = tt(0.08); f = mtof(m) * (1 + 1.5 * t / 0.08)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * env(t, 0.001, 0.025) * 0.7
+
+def castanet():
+    t = tt(0.06); return bp(noise(len(t)), 2000, 7000) * env(t, 0.0003, 0.008) + np.sin(2 * np.pi * 1900 * t) * env(t, 0.0003, 0.006) * 0.4
+
+def reese(m, d):
+    t = tt(d); f = mtof(m)
+    x = saw(f, t, 30) + saw(f * 1.012, t, 30) + saw(f * 0.988, t, 30)
+    return lp(x, 700) * np.clip(t / 0.02, 0, 1) * np.clip((d - t) / 0.03, 0, 1) * 0.35
+
+def djembe(kind):
+    if kind == 'bass': return tom(90, .4) * 1.1
+    if kind == 'tone': return tom(260, .25) * 0.8
+    t = tt(0.15); x = bp(noise(len(t)), 1500, 7000) * env(t, 0.0005, 0.02); t2 = tom(400, .12); x[:len(t2)] += t2 * 0.4
+    return x
+
+def guiro(d=0.12):
+    t = tt(d); x = bp(noise(len(t)), 1500, 5000) * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 90 * t)))
+    return x * np.sin(np.pi * t / d) * 0.6
+
+def meow(m=76):
+    """喵：i-a-u 的元音滑动"""
+    t = tt(0.35); f = mtof(m) * (1 + 0.15 * np.sin(np.pi * t / 0.35))
+    ph = 2 * np.pi * np.cumsum(f) / SR; x = sum(np.sin(k * ph) / k for k in range(1, 20) if mtof(m) * k < SR / 2 * .9)
+    w = t / 0.35
+    F1 = 300 + 500 * np.sin(np.pi * w); F2 = 2300 - 1400 * w
+    y = np.zeros_like(x)
+    for k in range(0, len(x), 256):
+        seg = x[k:k + 256]
+        y[k:k + 256] = bp(seg, F1[k] * .8, F1[k] * 1.2) + bp(seg, F2[k] * .85, F2[k] * 1.15) * .6
+    return y * np.sin(np.pi * w) * 1.2
+
+def bark(m=55):
+    t = tt(0.16); f = mtof(m) * (1 + 0.6 * np.exp(-t / 0.03))
+    ph = 2 * np.pi * np.cumsum(f) / SR; x = sum(np.sin(k * ph) / k for k in range(1, 30))
+    return (bp(x, 400, 2500) + bp(noise(len(t)), 500, 2000) * 0.4) * env(t, 0.003, 0.05) * 1.3
+
+def more_insts(sfx, CH, BS, tr=0, dark=False):
+    D = dark
+    def m(name, steps, b, wet=0.1, rv=0.5):
+        mk(name + sfx, steps, b, wet=wet if not D else max(wet, .35), rv_decay=rv if not D else .9)
+    # 咚哒 碎拍鼓组
+    b = np.zeros(N); kicks = [0, 10, 16, 26]; snares = [4, 12, 20, 28]; ghosts = [7, 14, 23, 30, 31]
+    for s in kicks: put(b, st(s), kick() * .9)
+    for s in snares: put(b, st(s), snare())
+    for s in ghosts: put(b, st(s), snare() * .3)
+    for s in range(0, 32, 2): put(b, st(s), hat(.03) * .4)
+    m('breaks', kicks + snares, b)
+    # 嘣嚓 雷鬼顿（3-3-2）
+    b = np.zeros(N); s_ = []
+    for bar in range(0, 32, 8):
+        put(b, st(bar), kick() * .9); put(b, st(bar + 4), kick() * .7)
+        for o in (3, 6): put(b, st(bar + o), snare() * .8); s_.append(bar + o)
+    m('dembow', s_ + [0, 8, 16, 24], b)
+    # 嗵嗵 嗵鼓
+    b = np.zeros(N); pat = [(0, 110), (3, 110), (6, 150), (8, 110), (11, 150), (14, 200), (16, 110), (19, 110), (22, 150), (24, 200), (26, 150), (28, 110), (29, 150), (30, 200), (31, 240)]
+    for s, f in pat: put(b, st(s), tom(f * 2 ** ((tr - (4 if D else 0)) / 12)))
+    m('toms', [s for s, _ in pat], b)
+    # 锵锵 叮叮镲（叮叮镲点+重拍大镲）
+    b = np.zeros(N)
+    for s in range(0, 32, 2): put(b, st(s), cymbal(.4, 8000) * (1 if s % 4 == 0 else .6))
+    put(b, st(0), cymbal(1.5, 4000) * 1.5)
+    m('ride', list(range(0, 32, 4)), b, .2)
+    # 啪嗒 铃鼓
+    b = np.zeros(N); s_ = [2, 6, 10, 12, 14, 18, 22, 26, 28, 30]
+    for s in s_: put(b, st(s), tambourine() * (1 if s % 4 == 2 else .6))
+    m('tamb', s_, b)
+    # 嘀嗒 响棒（3-2 克拉维）
+    b = np.zeros(N); s_ = [0, 3, 6, 10, 12, 16, 19, 22, 26, 28]
+    for s in s_: put(b, st(s), clave(2500 if not D else 1500))
+    m('clave', s_, b, .15)
+    # 咚锵 中国大鼓和锣
+    b = np.zeros(N); s_ = [0, 2, 4, 8, 10, 12, 16, 18, 20, 24, 26, 27, 28]
+    for s in s_: put(b, st(s), bigdrum() * (1 if s % 8 == 0 else .7))
+    put(b, st(0), gong() * (1.2 if not D else 1.6)); put(b, st(16), gong() * .8)
+    m('gong', s_, b, .2)
+    # 叮咚 钢鼓
+    b = np.zeros(N); s_ = []
+    for h, c in enumerate(CH):
+        for o, k in ((0, 0), (2, 1), (3, 2), (6, 1)):
+            s = h * 8 + o; s_.append(s); put(b, st(s), steelpan(c[k] + 12))
+    m('steel', s_, b, .2)
+    # 咕噜 马林巴
+    b = np.zeros(N); s_ = list(range(0, 32, 2))
+    for s in s_:
+        c = CH[s // 8]; put(b, st(s), marimba([c[0], c[1], c[2], c[1]][(s // 2) % 4] + 12 - (12 if D else 0)))
+    m('marimba', s_, b, .15)
+    # 叭叭 铜管齐奏
+    b = np.zeros(N); s_ = [0, 3, 6, 14, 16, 19, 22, 30]
+    for s in s_:
+        c = CH[s // 8]; put(b, st(s), brass([x + 12 for x in c], .14 if s % 8 else .25))
+    m('brass', s_, b, .2)
+    # 噔噔 放克击弦贝斯
+    b = np.zeros(N); pat = [(0, 0, 0), (3, 12, 1), (4, 0, 0), (6, 0, 0), (7, 12, 1), (10, 7, 0), (11, 12, 1), (14, 10, 0)]
+    for h, root in enumerate(BS[::2]):
+        for s, iv, pop in pat: put(b, st(h * 16 + s), slap(root + iv, pop) * (1 if not D else 1.2))
+    m('slap', [h * 16 + s for h in (0, 1) for s, _, _ in pat], b, .05)
+    # 哔哔 8 位游戏机
+    b = np.zeros(N); s_ = list(range(32))
+    for s in s_:
+        c = CH[s // 8]; put(b, st(s), chip([c[0], c[2], c[1] + 12, c[2]][s % 4] + 12 - (1 if D and s % 3 == 0 else 0)))
+    m('chip', s_[::4], b, .1)
+    # 嘭嘭 跺脚拍手（嘭嘭啪）
+    b = np.zeros(N); s_ = []
+    for bar in range(0, 32, 8):
+        put(b, st(bar), stomp()); put(b, st(bar + 2), stomp()); put(b, st(bar + 4), clap()); s_ += [bar, bar + 2, bar + 4]
+    m('stomp', s_, b, .2)
+    # 嘿哈 喊口号
+    b = np.zeros(N); s_ = [4, 12, 20, 28]
+    for i, s in enumerate(s_): put(b, st(s), shout('a' if i % 2 == 0 else 'o', 57 - (5 if D else 0)))
+    m('chant', s_, b, .15)
+    # 啵啵 泡泡
+    b = np.zeros(N); s_ = [1, 3, 5, 9, 11, 13, 17, 19, 21, 25, 27, 29]
+    for i, s in enumerate(s_): put(b, st(s), pop_bubble(72 + (i * 5) % 12 - (12 if D else 0)))
+    m('bubble', s_, b, .1)
+    # 咯咯 响板
+    b = np.zeros(N); s_ = [0, 2, 3, 4, 8, 10, 11, 12, 16, 18, 19, 20, 24, 26, 27, 28, 29, 30, 31]
+    for s in s_: put(b, st(s), castanet() * (1 if s % 4 == 0 else .6))
+    m('castanet', s_, b, .1)
+    # 嗡呜 双锯齿低音
+    b = np.zeros(N)
+    for h, root in enumerate(BS):
+        put(b, st(h * 8), reese(root, 3 * S16 * .95)); put(b, st(h * 8 + 3), reese(root, 3 * S16 * .95)); put(b, st(h * 8 + 6), reese(root + 12, 2 * S16 * .95))
+    m('reese', [0, 3, 6, 8, 11, 14, 16, 19, 22, 24, 27, 30], b, .05)
+    # 咚吧 非洲鼓
+    b = np.zeros(N); pat = [(0, 'bass'), (2, 'tone'), (3, 'tone'), (4, 'slap'), (6, 'tone'), (7, 'slap'), (8, 'bass'), (10, 'tone'), (11, 'slap'), (12, 'slap'), (14, 'tone')]
+    for bar in (0, 16):
+        for s, k in pat: put(b, st(bar + s), djembe(k))
+    m('djembe', [bar + s for bar in (0, 16) for s, _ in pat], b, .1)
+    # 刮刮 刮葫芦
+    b = np.zeros(N); s_ = [0, 2, 3, 4, 6, 8, 10, 11, 12, 14, 16, 18, 19, 20, 22, 24, 26, 27, 28, 30]
+    for s in s_: put(b, st(s), guiro(.11 if s % 4 == 0 else .05))
+    m('guiro', s_, b, .1)
+    # 喵喵 猫叫
+    b = np.zeros(N); s_ = [0, 6, 12, 16, 22, 28]
+    for i, s in enumerate(s_): put(b, st(s), meow((76, 79, 74, 76, 81, 79)[i] + tr - (12 if D else 0)))
+    m('meow', s_, b, .2)
+    # 汪汪 狗叫
+    b = np.zeros(N); s_ = [4, 6, 12, 20, 22, 28, 30]
+    for s in s_: put(b, st(s), bark(55 - (6 if D else 0)))
+    m('bark', s_, b, .15)
+
 def new_insts(sfx, CH, BS, tr=0, dark=False):
     """新加的 10 个乐手：当当 嗡嗡 悠悠 铮铮 滋滋 动次 哒哒 轰轰 啾啾 嘿嘿"""
     # 当当 电钢琴：切分节奏弹和弦
@@ -536,6 +743,7 @@ def bright_set(sfx, tr=0, lead_kind='square', mel=MEL_A, bell_kind='fm', bells=B
     mk('snap' + sfx, s_, b, wet=.25)
     new_insts(sfx, CH, BS, tr)
     rhythm_insts(sfx, CH, BS, tr)
+    more_insts(sfx, CH, BS, tr)
 
 # ===== Phase 1：第 1 阶段 天和地 =====
 bright_set('1')
@@ -680,6 +888,7 @@ def dark_set(sfx, tr=0, flavor='forest'):
     mk('snap' + sfx, s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
     new_insts(sfx, CH, BS, tr, dark=True)
     rhythm_insts(sfx, CH, BS, tr, dark=True)
+    more_insts(sfx, CH, BS, tr, dark=True)
 
 dark_set('2', 0, 'forest')        # 第 3 关 黑森林
 dark_set('zb', -2, 'zombie')      # 第 8 关 僵尸
@@ -693,7 +902,9 @@ dark_set('ul', 0, 'ultimate')     # 第 33 关 大混合
 import soundfile as sf
 INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'lead', 'pad', 'choir', 'snap',
          'epiano', 'cello', 'violin', 'guitar', 'saw', 'edm', 'trap', '808', 'arp', 'vox',
-         'snare', 'conga', 'cowbell', 'beatbox', 'laser', 'wobble', 'scratch']
+         'snare', 'conga', 'cowbell', 'beatbox', 'laser', 'wobble', 'scratch',
+         'breaks', 'dembow', 'toms', 'ride', 'tamb', 'clave', 'gong', 'steel', 'marimba', 'brass', 'slap', 'chip', 'stomp', 'chant',
+         'bubble', 'castanet', 'reese', 'djembe', 'guiro', 'meow', 'bark']
 # 2026-10-05 删掉的乐手：呜呜 sweep、呼呼 pad、啦啦 choir、嘀嘟 blip、嗡嗡 cello、嘟嘟 lead（不带感、打乱节奏）
 RETIRED = {'sweep', 'pad', 'choir', 'blip', 'cello', 'lead'}
 def SPLIT(k):
