@@ -128,6 +128,23 @@ def main():
             lines.append({'t': ln, 'p': py})
         pub[poem['id']] = {'title': poem['title'], 'lines': lines}
         print(f"== {poem['title']}（古诗）", ' / '.join(' '.join(l['p']) for l in lines[:2]))
+    # 序章"我上学了"（课本第 2 到 6 页，没注拼音）：课本里的现代课文，只放 private/
+    PRO = {
+        'woshizhongguoren': ('我是中国人', ['我是中国人。', '我们都是中国人。', '中华民族是一家。', '我爱五星红旗。', '我爱北京天安门。', '我爱长江，我爱黄河。', '我爱中华人民共和国。']),
+        'shangxuege': ('上学歌', ['太阳当空照，花儿对我笑。', '小鸟说：“早，早，早，', '你为什么背上小书包？”', '我去上学校，天天不迟到。', '爱学习，爱劳动，', '长大要为人民立功劳。']),
+    }
+    FIXPY = {'当空': ['dāng', 'kōng'], '为什么': ['wèi', 'shén', 'me'], '背上': ['bēi', 'shàng'], '长大': ['zhǎng', 'dà'], '为人民': ['wèi', 'rén', 'mín'], '和国': ['hé', 'guó'], '花儿': ['huār', '']}
+    for key, (title, lines) in PRO.items():
+        out = []
+        for ln in lines:
+            han = ''.join(c for c in ln if CJK.match(c))
+            py = [p[0] for p in pinyin(han, style=Style.TONE)]
+            for w, fx in FIXPY.items():
+                k = han.find(w)
+                if k >= 0: py[k:k + len(w)] = fx
+            out.append({'t': ln, 'p': py})
+        priv[key] = {'title': title, 'lines': out}
+        print(f'== {title}（序章）', ' / '.join(' '.join(l['p']) for l in out[:2]))
     json.dump(priv, open('private/texts.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     json.dump(pub, open('content/rap_public.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 

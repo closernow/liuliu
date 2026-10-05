@@ -305,6 +305,92 @@ def hey():
     x = bp(noise(len(t)), 600, 2600) * 0.6 + chop(64, 'a', 0.22) * 0.8
     return x * np.exp(-t / 0.12)
 
+# ===== 第三批：节奏型乐手（嗒嗒 咕咚 叮当 噗嚓 咻咻 哇哇 咔咔） =====
+def conga(f, slap=False):
+    t = tt(0.35)
+    ff = f * (1 + 0.25 * np.exp(-t / 0.015))
+    x = np.sin(2 * np.pi * np.cumsum(ff) / SR) * env(t, 0.001, 0.12 if not slap else 0.05)
+    return x + bp(noise(len(t)), 1500, 6000) * env(t, 0.0005, 0.01 if not slap else 0.02) * (0.6 if slap else 0.25)
+
+def cowbell():
+    t = tt(0.3)
+    x = np.sign(np.sin(2 * np.pi * 540 * t)) + np.sign(np.sin(2 * np.pi * 800 * t))
+    return bp(x, 500, 3000) * env(t, 0.001, 0.07) * 0.5
+
+def bb_kick():      # 口技 "b"
+    t = tt(0.2)
+    return (np.sin(2 * np.pi * (60 + 80 * np.exp(-t / 0.02)) * t) + lp(noise(len(t)), 300) * 0.5) * env(t, 0.002, 0.07)
+def bb_hat():       # 口技 "ts"
+    t = tt(0.1)
+    return hp(noise(len(t)), 5000) * env(t, 0.003, 0.03) * 0.6
+def bb_snare():     # 口技 "k / pf"
+    t = tt(0.18)
+    return bp(noise(len(t)), 900, 4000) * env(t, 0.001, 0.04) + np.sin(2 * np.pi * 220 * t) * env(t, 0.001, 0.02) * 0.4
+
+def laser(f0=2400, f1=180, d=0.14):
+    t = tt(d); f = f0 * (f1 / f0) ** (t / d)
+    return np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * env(t, 0.001, d * 0.6) * 0.35
+
+def wobble(m, dur, rate, dark=False):
+    """电音"哇哇"低音：锯齿波过一个按节拍开合的滤波器"""
+    t = tt(dur); f = mtof(m)
+    x = saw(f, t, 40) + saw(f * 1.005, t, 40)
+    cut = 250 + 2200 * (0.5 - 0.5 * np.cos(2 * np.pi * rate * t))
+    y = np.zeros_like(x); zi = None
+    for k in range(0, len(x), 128):
+        bb, aa = signal.butter(2, min(cut[k], SR / 2 * .9) / (SR / 2))
+        if zi is None: zi = signal.lfilter_zi(bb, aa) * 0
+        y[k:k + 128], zi = signal.lfilter(bb, aa, x[k:k + 128], zi=zi)
+    if dark: y = np.tanh(y * 3)
+    return y * np.clip(t / 0.01, 0, 1) * np.clip((dur - t) / 0.02, 0, 1) * 0.6
+
+def scratch(d=0.12, up=True):
+    """搓碟：带音高的噪声来回滑"""
+    t = tt(d); f = (600 if up else 1400) * ((1400 if up else 600) / (600 if up else 1400)) ** (t / d)
+    x = bp(noise(len(t)), 300, 3000) * 0.5 + np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.5
+    return x * np.sin(np.pi * t / d) * 0.7
+
+def rhythm_insts(sfx, CH, BS, tr=0, dark=False):
+    # 嗒嗒 军鼓：二四拍反拍 + 轻的装饰音 + 小节末连打
+    b = np.zeros(N); s_ = [4, 12, 20, 28]
+    for s in s_: put(b, st(s), snare() * (np.tanh(3) if dark else 1))
+    for s in (7, 15, 23): put(b, st(s), snare() * .25)
+    for k in range(4): put(b, st(30) + int(k * S16 / 2 * SR), snare() * (.3 + k * .15))
+    mk('snare' + sfx, s_, b, wet=.15 if not dark else .4, rv_decay=.5 if not dark else .9)
+    # 咕咚 手鼓：低音鼓和高音鼓对话，有拍打音
+    b = np.zeros(N); pat = [(0, 'lo'), (3, 'hi'), (6, 'hi'), (8, 'lo'), (10, 'sl'), (11, 'hi'), (14, 'hi')]
+    for bar in (0, 16):
+        for s, k in pat:
+            f = {'lo': 160, 'hi': 240, 'sl': 300}[k] * 2 ** ((tr - (5 if dark else 0)) / 12)
+            put(b, st(bar + s), conga(f, k == 'sl') * (1 if k != 'hi' else .8))
+    mk('conga' + sfx, [0, 3, 6, 8, 10, 11, 14, 16, 19, 22, 24, 26, 27, 30], b, wet=.15)
+    # 叮当 牛铃
+    b = np.zeros(N); s_ = [0, 3, 6, 10, 12, 16, 19, 22, 26, 28]
+    for s in s_: put(b, st(s), cowbell() * (1 if s % 8 == 0 else .7))
+    mk('cowbell' + sfx, s_, b if not dark else delay(b, 3, .5, .5), wet=.1 if not dark else .5, rv_decay=.8)
+    # 噗嚓 口技：b ts k ts
+    b = np.zeros(N); s_ = []
+    for s in range(0, 32, 2):
+        ph = (s // 2) % 4
+        put(b, st(s), [bb_kick, bb_hat, bb_snare, bb_hat][ph]() * (1.1 if ph == 0 else 1)); s_.append(s)
+    put(b, st(27), bb_kick() * .7)
+    mk('beatbox' + sfx, [x for x in s_ if x % 4 == 0], b, wet=.05 if not dark else .35)
+    # 咻咻 激光：反拍上的下滑音
+    b = np.zeros(N); s_ = [6, 14, 22, 30]
+    for s in s_: put(b, st(s), laser(2400 if not dark else 1200, 180 if not dark else 60))
+    put(b, st(31), laser(3000, 600, .08) * .6)
+    mk('laser' + sfx, s_, delay(b, 3, .4, .35), wet=.15 if not dark else .5)
+    # 哇哇 电音低音：前半小节八分音符开合，后半十六分音符
+    b = np.zeros(N)
+    for h, root in enumerate(BS):
+        put(b, st(h * 8), wobble(root, 4 * S16, 1 / (2 * S16), dark))
+        put(b, st(h * 8 + 4), wobble(root + (0 if h % 2 == 0 else 7), 4 * S16, 1 / S16, dark))
+    mk('wobble' + sfx, [0, 4, 8, 12, 16, 20, 24, 28], b)
+    # 咔咔 搓碟：wika-wika
+    b = np.zeros(N); s_ = [0, 1, 2, 8, 9, 10, 11, 16, 17, 18, 24, 26, 27]
+    for i, s in enumerate(s_): put(b, st(s), scratch(.11, i % 2 == 0))
+    mk('scratch' + sfx, [0, 8, 16, 24], b, wet=.05 if not dark else .4)
+
 def new_insts(sfx, CH, BS, tr=0, dark=False):
     """新加的 10 个乐手：当当 嗡嗡 悠悠 铮铮 滋滋 动次 哒哒 轰轰 啾啾 嘿嘿"""
     # 当当 电钢琴：切分节奏弹和弦
@@ -449,6 +535,7 @@ def bright_set(sfx, tr=0, lead_kind='square', mel=MEL_A, bell_kind='fm', bells=B
     for h, m in enumerate([45, 45, 43, 48]): put(b, st(h * 8), drone(m + tr, 7.5 * S16))
     mk('snap' + sfx, s_, b, wet=.25)
     new_insts(sfx, CH, BS, tr)
+    rhythm_insts(sfx, CH, BS, tr)
 
 # ===== Phase 1：第 1 阶段 天和地 =====
 bright_set('1')
@@ -592,6 +679,7 @@ def dark_set(sfx, tr=0, flavor='forest'):
     for h, m in enumerate([40, 41, 40, 39]): put(b, st(h * 8), drone(m + tr, 7.5 * S16, dark=True))
     mk('snap' + sfx, s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
     new_insts(sfx, CH, BS, tr, dark=True)
+    rhythm_insts(sfx, CH, BS, tr, dark=True)
 
 dark_set('2', 0, 'forest')        # 第 3 关 黑森林
 dark_set('zb', -2, 'zombie')      # 第 8 关 僵尸
@@ -604,7 +692,10 @@ dark_set('ul', 0, 'ultimate')     # 第 33 关 大混合
 # ---------- export ----------
 import soundfile as sf
 INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'lead', 'pad', 'choir', 'snap',
-         'epiano', 'cello', 'violin', 'guitar', 'saw', 'edm', 'trap', '808', 'arp', 'vox']
+         'epiano', 'cello', 'violin', 'guitar', 'saw', 'edm', 'trap', '808', 'arp', 'vox',
+         'snare', 'conga', 'cowbell', 'beatbox', 'laser', 'wobble', 'scratch']
+# 2026-10-05 删掉的乐手：呜呜 sweep、呼呼 pad、啦啦 choir、嘀嘟 blip、嗡嗡 cello、嘟嘟 lead（不带感、打乱节奏）
+RETIRED = {'sweep', 'pad', 'choir', 'blip', 'cello', 'lead'}
 def SPLIT(k):
     for i in INSTS:
         if k.startswith(i): return i, k[len(i):]
@@ -619,6 +710,7 @@ for k, v in loops.items():
     if SPLIT(k)[1] in ('1', '2'): out[k] = 'data:audio/wav;base64,' + base64.b64encode(bio.getvalue()).decode()
     wavfile.write(f'build/wav/{k}.wav', SR, (v * 32767).astype(np.int16))
     inst, setname = SPLIT(k)
+    if inst in RETIRED: continue           # 不用的乐手不导出（原型里还用，所以照样生成）
     os.makedirs(f'audio/loops/{setname}', exist_ok=True)
     sf.write(f'audio/loops/{setname}/{inst}.flac', v.astype(np.float32), SR, subtype='PCM_16')
 json.dump({'loops': out, 'onsets': {k: v for k, v in onsets.items() if SPLIT(k)[1] in ('1', '2')}, 'bpm': BPM, 'steps': STEPS}, open('build/audio.json', 'w'))

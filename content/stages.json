@@ -2491,6 +2491,66 @@
    "style": "ultimate"
   },
   {
+   "id": 98,
+   "lesson": "我是中国人",
+   "unit": "我上学了",
+   "type": "rap",
+   "style": "sky",
+   "text": "woshizhongguoren",
+   "public": false,
+   "bonus": true,
+   "prologue": true,
+   "after": 0,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 99,
+   "lesson": "上学歌",
+   "unit": "我上学了",
+   "type": "rap",
+   "style": "campus",
+   "text": "shangxuege",
+   "public": false,
+   "bonus": true,
+   "prologue": true,
+   "after": 0,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
    "id": 101,
    "lesson": "咏鹅",
    "unit": "语文园地",

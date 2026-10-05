@@ -113,6 +113,11 @@ for sid, key, lesson, style, after in BONUS:
     stages.append({'id': sid, 'lesson': lesson, 'unit': '语文园地', 'type': 'rap', 'style': style, 'text': key, 'public': True, 'bonus': True, 'after': after,
                    'eggs': [{'w': '前两句排对', 'kind': 'first2'}, {'w': '前一半排对', 'kind': 'half'}, {'w': '整首排对', 'kind': 'all'}, {'w': '录一句自己的声音', 'kind': 'rec'}]})
 
+# ---------- 序章"我上学了"：一直可以玩，不进化 ----------
+for sid, key, lesson, style in [(98, 'woshizhongguoren', '我是中国人', 'sky'), (99, 'shangxuege', '上学歌', 'campus')]:
+    stages.append({'id': sid, 'lesson': lesson, 'unit': '我上学了', 'type': 'rap', 'style': style, 'text': key, 'public': False, 'bonus': True, 'prologue': True, 'after': 0,
+                   'eggs': [{'w': '前两句排对', 'kind': 'first2'}, {'w': '前一半排对', 'kind': 'half'}, {'w': '整首排对', 'kind': 'all'}, {'w': '录一句自己的声音', 'kind': 'rec'}]})
+
 stages.sort(key=lambda s: s['id'])
 data['stages'] = stages
 json.dump(data, open('content/stages.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

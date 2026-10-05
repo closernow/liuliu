@@ -42,7 +42,8 @@ PROMPTS = {
 NAMES = {'dong': '咚咚', 'cha': '嚓嚓', 'papa': '啪啪', 'beng': '嘣嘣', 'ding': '叮叮', 'wuwu': '呜呜', 'didu': '嘀嘟',
          'ling': '铃铃', 'dudu': '嘟嘟', 'huhu': '呼呼', 'lala': '啦啦', 'ying': '影影',
          'dang': '当当', 'weng': '嗡嗡', 'you': '悠悠', 'zheng': '铮铮', 'zizi': '滋滋', 'dongci': '动次', 'dada': '哒哒',
-         'hong': '轰轰', 'jiu': '啾啾', 'hei': '嘿嘿'}
+         'hong': '轰轰', 'jiu': '啾啾', 'hei': '嘿嘿',
+         'dada2': '嗒嗒', 'gudong': '咕咚', 'dingdang': '叮当', 'puca': '噗嚓', 'xiuxiu': '咻咻', 'wawa': '哇哇', 'kaka': '咔咔'}
 PROMPTS.update({'n_' + k: v for k, v in NAMES.items()})
 
 sem = None
@@ -69,7 +70,7 @@ def duration(path):
     return float(r.stdout.strip() or 0)
 
 # 多音字：读给 edge-tts 时换成同音字，免得读错（只影响朗读，屏幕上显示的还是原字）
-TTS_FIX = {'曲项': '区项', '花还在': '花孩在'}
+TTS_FIX = {'曲项': '区项', '花还在': '花孩在', '背上小书包': '杯上小书包'}
 
 async def rap_line(text, path):
     """唱词：先生成，再拉伸压缩到正好一个、两个或三个循环"""

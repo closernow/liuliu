@@ -34,6 +34,13 @@ export const CH={
  hong:{nm:'轰轰',sub:'低音炮',col:'#6A5AE0',head:'wide',inst:'speaker',eye:'round',iris:'#C9601E',hat:'shades2'},
  jiu:{nm:'啾啾',sub:'琶音',col:'#FFE066',head:'bean',inst:'pad',eye:'round',iris:'#2E9E6B',hat:'bulb'},
  hei:{nm:'嘿嘿',sub:'人声',col:'#FF8C42',head:'pear',inst:'megaphone',eye:'round',iris:'#3B6FD8',hat:'spikes'},
+ dada2:{nm:'嗒嗒',sub:'军鼓',col:'#E85D75',head:'small',inst:'snare',eye:'round',iris:'#2A2145',hat:'cap'},
+ gudong:{nm:'咕咚',sub:'手鼓',col:'#F4A259',head:'blob',inst:'conga',eye:'round',iris:'#2E9E6B',hat:'bandana'},
+ dingdang:{nm:'叮当',sub:'牛铃',col:'#7FD1AE',head:'box',inst:'cowbell',eye:'round',iris:'#B03A7A',hat:'starclip'},
+ puca:{nm:'噗嚓',sub:'口技',col:'#A06CD5',head:'pear',inst:'beatbox',eye:'round',iris:'#C9601E',hat:'cap'},
+ xiuxiu:{nm:'咻咻',sub:'激光',col:'#3BCEAC',head:'hex',inst:'laser',eye:'round',iris:'#2A2145',hat:'visor'},
+ wawa:{nm:'哇哇',sub:'电音低音',col:'#5E60CE',head:'wide',inst:'wobble',eye:'round',iris:'#C9601E',hat:'phones'},
+ kaka:{nm:'咔咔',sub:'搓碟',col:'#FF6B6B',head:'tall',inst:'scratch',eye:'round',iris:'#3B6FD8',hat:'spikes'},
  py:{nm:'拼音歌手',sub:'唱音节',col:'#FF8FA3',head:'bean',inst:'card',card:'bā',eye:'round',iris:'#3B6FD8',hat:'sprout',
    horror:['patchwork','bandLeg','backFeet'],hd:'补丁身体、腿缠绷带、脚长反了'},
  sz:{nm:'识字歌手',sub:'唱生字',col:'#86C5FF',head:'bean',inst:'card',card:'天',eye:'round',iris:'#2E9E6B',hat:'book',
@@ -280,6 +287,20 @@ function inst(C,h,st,c){
      o.pose={l:-12,r:12,sl:14,sr:-14,d:.5,dl:.25};break;
    case 'megaphone':o.hd=`<path d="M10 20L40 8L46 36L14 28Z" fill="${k('#F5F5F5')}" stroke="${st}" stroke-width="2.5"/><path d="M40 8L46 36" stroke="${k('#E5484D')}" stroke-width="5"/><rect x="18" y="26" width="6" height="12" fill="${st}"/>`;
      o.pose={l:150,r:-112,sl:-30,sr:-8,d:1,dl:0};break;
+   case 'snare':o.front=`<line x1="58" y1="146" x2="50" y2="182" stroke="${st}" stroke-width="2.5"/><line x1="82" y1="146" x2="90" y2="182" stroke="${st}" stroke-width="2.5"/><rect x="48" y="128" width="44" height="16" rx="3" fill="${k('#f4f4f4')}" stroke="${st}" stroke-width="2.5"/><path d="M48 132h44M48 140h44" stroke="${k('#c0c0c0')}" stroke-width="2"/><ellipse cx="70" cy="128" rx="22" ry="5" fill="${k('#fff')}" stroke="${st}" stroke-width="2.5"/>`;
+     o.l=stick(45,28,-4);o.r=stick(-45,-28,-4);o.pose={l:45,r:-45,sl:20,sr:-20,d:.5,dl:.25};break;
+   case 'conga':o.front=[48,92].map((x,i)=>`<path d="M${x-12} ${124-i*6}Q${x-15} 160 ${x-8} 182H${x+8}Q${x+15} 160 ${x+12} ${124-i*6}Z" fill="${k('#C0602A')}" stroke="${st}" stroke-width="2.5"/><ellipse cx="${x}" cy="${124-i*6}" rx="12" ry="4" fill="${k('#f3e3c3')}" stroke="${st}" stroke-width="2"/><path d="M${x-13} ${140}h26M${x-12} ${166}h24" stroke="${k('#8a5a2b')}" stroke-width="2"/>`).join('');
+     o.l=o.r=`<circle cx="0" cy="33" r="8" fill="${c}" stroke="${st}" stroke-width="3"/>`;o.pose={l:20,r:-20,sl:22,sr:-22,d:.5,dl:.25};break;
+   case 'cowbell':o.l=`<path d="M-8 34L-11 54H11L8 34Z" fill="${k('#c9a640')}" stroke="${st}" stroke-width="2"/><rect x="-3" y="30" width="6" height="5" fill="${st}"/>`;
+     o.r=stick(-150,-22,30);o.pose={l:-100,r:-150,sl:0,sr:-18,d:.5,dl:0};break;
+   case 'beatbox':o.l=`<circle cx="0" cy="36" r="7" fill="${k('#9aa3b5')}" stroke="${st}" stroke-width="2.5"/>`;
+     o.pose={l:-150,r:150,sl:-6,sr:6,d:.5,dl:0};break;
+   case 'laser':{const g=`<circle cx="0" cy="33" r="8" fill="${k('#5CFFE4')}" stroke="${st}" stroke-width="2.5" class="glow"/><g class="beat"><line x1="0" y1="40" x2="0" y2="80" stroke="${h?'#ff3b3b':'#5CFFE4'}" stroke-width="3" opacity=".8" stroke-linecap="round"/></g>`;
+     o.l=o.r=g;o.pose={l:160,r:-160,sl:-25,sr:25,d:1,dl:.5};break}
+   case 'wobble':o.front=`<rect x="40" y="118" width="60" height="30" rx="6" fill="${k('#22202e')}" stroke="${st}" stroke-width="2.5"/><g class="wobk"><circle cx="70" cy="133" r="10" fill="${k('#FFB347')}" stroke="${st}" stroke-width="2"/><line x1="70" y1="133" x2="70" y2="124" stroke="${st}" stroke-width="3"/></g><circle cx="50" cy="126" r="3" fill="#5CFFE4" class="glow"/><circle cx="90" cy="126" r="3" fill="#FF3D7F" class="glow"/>`;
+     o.pose={l:-25,r:25,sl:15,sr:-15,d:.5,dl:0};break;
+   case 'scratch':o.front=`<rect x="34" y="124" width="72" height="24" rx="4" fill="${k('#2A2145')}" stroke="${st}" stroke-width="2.5"/><g class="scr"><ellipse cx="62" cy="126" rx="20" ry="6" fill="#111" stroke="${st}" stroke-width="1.5"/><ellipse cx="62" cy="126" rx="6" ry="2" fill="${k('#FF6B6B')}"/></g><line x1="92" y1="122" x2="98" y2="132" stroke="${k('#ddd')}" stroke-width="3"/>`;
+     o.pose={l:-35,r:30,sl:-18,sr:0,d:.25,dl:0};break;
    case 'card':{const pin=/^[a-zü]/.test(C.card);
      const L=[...(C.card||'')].length, fs=pin?(L<=3?20:L<=4?17:L<=5?14:12):(L<=1?24:L<=2?18:14);
      o.front=`<g class="cardg"><rect x="46" y="112" width="48" height="34" rx="6" fill="${h?'#d8cfc0':'#fffdf5'}" stroke="${st}" stroke-width="3"/>`+

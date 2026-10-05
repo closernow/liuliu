@@ -17,7 +17,8 @@ const zUrl = (ch) => `audio/voice/z/${code(ch)}.mp3`;
 const wUrl = (w) => `audio/voice/w/${code(w)}.mp3`;
 const uiUrl = (k) => `audio/voice/ui/${k}.mp3`;
 const NAMES = { dong: '咚咚', cha: '嚓嚓', papa: '啪啪', beng: '嘣嘣', ding: '叮叮', wuwu: '呜呜', didu: '嘀嘟', ling: '铃铃', dudu: '嘟嘟', huhu: '呼呼', lala: '啦啦', ying: '影影',
-  dang: '当当', weng: '嗡嗡', you: '悠悠', zheng: '铮铮', zizi: '滋滋', dongci: '动次', dada: '哒哒', hong: '轰轰', jiu: '啾啾', hei: '嘿嘿' };
+  dang: '当当', weng: '嗡嗡', you: '悠悠', zheng: '铮铮', zizi: '滋滋', dongci: '动次', dada: '哒哒', hong: '轰轰', jiu: '啾啾', hei: '嘿嘿',
+  dada2: '嗒嗒', gudong: '咕咚', dingdang: '叮当', puca: '噗嚓', xiuxiu: '咻咻', wawa: '哇哇', kaka: '咔咔' };
 const TONE_PATH = ['M4 8 L36 8', 'M4 24 L36 6', 'M4 10 Q20 34 36 8', 'M4 6 L36 24'];
 
 let DATA, stage = null, selected = null, eggOrder = [];
@@ -43,7 +44,7 @@ async function enter(id) {
   $('bg').innerHTML = BG[stage.style]();
   // 同一个世界里的几关，背景色调稍微变一下
   $('bg').style.filter = style().dark ? '' : `hue-rotate(${((stage.id * 37) % 50) - 25}deg)`;
-  $('badge').textContent = stage.bonus ? `🎁 彩蛋关 · ${stage.lesson}` : `第 ${id} 关 · ${stage.lesson}`;
+  $('badge').textContent = stage.prologue ? `🏫 序章 · ${stage.lesson}` : stage.bonus ? `🎁 彩蛋关 · ${stage.lesson}` : `第 ${id} 关 · ${stage.lesson}`;
   $('recBtn').hidden = stage.type !== 'rap';
   // 乐手留在台上换新形态、换新声音；其他的是上一课的，请下台
   slots = slots.map((s) => (s && s.kind === 'inst' ? s : null));
@@ -322,7 +323,7 @@ function group(label, cls) {
 function renderBar() {
   $('bar').innerHTML = '';
   const gi = group('乐手', 'ginst');
-  shuffle(INSTRUMENTS).forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id])));
+  INSTRUMENTS.forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id])));
   const chars = stage.type === 'mix' ? mixData.chars : stage.chars;
   if (chars) {
     const gc = group('字宝宝');
@@ -540,8 +541,23 @@ function renderMap() {
     });
     box.appendChild(b);
   });
+  // 序章放在最前面，一直可以玩
+  const pro = DATA.stages.filter((s) => s.prologue);
+  if (pro.length) {
+    const ph = document.createElement('div'); ph.className = 'bhead'; ph.textContent = '🏫 序章：我上学了';
+    box.prepend(ph);
+    pro.reverse().forEach((s) => {
+      const b = document.createElement('button'), nf = (save.found[s.id] || []).length;
+      b.className = 'tile bonus open' + (stage && stage.id === s.id ? ' cur' : '');
+      b.innerHTML = `<span class="n">序章</span><span class="t">${s.lesson}</span><span class="s">${'⭐'.repeat(nf) || '可以玩'}</span>`;
+      b.addEventListener('click', () => { $('mapLayer').hidden = true; if (s.id !== stage.id) enter(s.id); });
+      ph.after(b);
+    });
+    const mh = document.createElement('div'); mh.className = 'bhead'; mh.textContent = '📚 主线：一年级上册';
+    box.insertBefore(mh, box.querySelector('.tile:not(.bonus)'));
+  }
   // 彩蛋关：语文园地里的古诗和绕口令，学到那里就打开
-  const bonus = DATA.stages.filter((s) => s.bonus);
+  const bonus = DATA.stages.filter((s) => s.bonus && !s.prologue);
   const head = document.createElement('div'); head.className = 'bhead'; head.textContent = '🎁 彩蛋关：语文园地里的古诗和绕口令'; box.appendChild(head);
   bonus.forEach((s) => {
     const open = isOpen(s), nf = (save.found[s.id] || []).length;

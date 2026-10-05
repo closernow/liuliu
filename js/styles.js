@@ -1,8 +1,12 @@
 // 每个世界的风格：用哪套乐器声音、背景、角色挂件和恐怖件。
 // 角色全书固定；同一个世界里的几关只换内容，挂件按关号轮换，背景色调微调。
 // 设计依据见 docs/DESIGN.md 第 4、7 节。
-const INST = ['dong', 'cha', 'papa', 'beng', 'ding', 'wuwu', 'didu', 'ling', 'dudu', 'huhu', 'lala', 'ying',
-  'dang', 'weng', 'you', 'zheng', 'zizi', 'dongci', 'dada', 'hong', 'jiu', 'hei'];
+// 乐手按类别固定排列（不打乱，方便孩子每次都在老地方找到）：节奏、低音、和声旋律、音效人声
+// 2026-10-05 删掉了不带感、容易打乱节奏的：呜呜 呼呼 啦啦 嘀嘟 嗡嗡 嘟嘟
+const INST = ['dong', 'dongci', 'dada2', 'papa', 'cha', 'dada', 'gudong', 'dingdang', 'puca', 'ying',
+  'beng', 'hong', 'wawa',
+  'dang', 'zizi', 'zheng', 'ling', 'you', 'jiu',
+  'ding', 'xiuxiu', 'kaka', 'hei'];
 
 /* ---------- 恐怖件库：按位置分组，同一组只能选一个 ---------- */
 const GROUP = {
@@ -94,6 +98,10 @@ const FOREST = {
   zizi: ['cyclops', 'veins', 'wires', 'zipBody'], dongci: ['multi', 'gapTeeth', 'lid', 'extraArm'],
   dada: ['wormR', 'scar', 'pegLeg', 'bodyStitch', 'flies'], hong: ['bigMouth', 'multiSmall', 'crack', 'chain'],
   jiu: ['sewnEyes', 'longTongue', 'nails', 'bugs', 'web'], hei: ['dangleR', 'stitchCheek', 'claws', 'shadow', 'bandHead'],
+  dada2: ['dangleL', 'teeth', 'bodyStitch', 'flies', 'chain'], gudong: ['hollow', 'bigMouth', 'claws', 'bugs'],
+  dingdang: ['buttonR', 'zipMouth', 'crack', 'web', 'pegLeg'], puca: ['multiSmall', 'stitchCheek', 'ribs', 'shadow'],
+  xiuxiu: ['cyclops', 'veins', 'wires', 'cracksBody'], wawa: ['wormL', 'gapTeeth', 'lid', 'extraArm'],
+  kaka: ['sewnEyes', 'longTongue', 'nails', 'bandArm', 'scar'],
 };
 const FOREST_SINGER = [
   ['handEyes', 'crack', 'zipMouth'], ['dangleL', 'bandLeg', 'stitchCheek'], ['multiSmall', 'gapTeeth', 'chain'], ['hollow', 'longTongue', 'cracksBody'],
@@ -102,7 +110,8 @@ const FOREST_SINGER = [
 
 export const SINGER_COLORS = ['#86C5FF', '#FF8FA3', '#FFD166', '#8EE3A8', '#C3B1FF', '#FFB86B', '#7FDBFF', '#F7A1E0', '#B8E986', '#FFC2A8'];
 export const LOOPKEY = { dong: 'kick', cha: 'shaker', papa: 'clap', beng: 'bass', ding: 'chime', wuwu: 'sweep', didu: 'blip', ling: 'bells', dudu: 'lead', huhu: 'pad', lala: 'choir', ying: 'snap',
-  dang: 'epiano', weng: 'cello', you: 'violin', zheng: 'guitar', zizi: 'saw', dongci: 'edm', dada: 'trap', hong: '808', jiu: 'arp', hei: 'vox' };
+  dang: 'epiano', weng: 'cello', you: 'violin', zheng: 'guitar', zizi: 'saw', dongci: 'edm', dada: 'trap', hong: '808', jiu: 'arp', hei: 'vox',
+  dada2: 'snare', gudong: 'conga', dingdang: 'cowbell', puca: 'beatbox', xiuxiu: 'laser', wawa: 'wobble', kaka: 'scratch' };
 export const INSTRUMENTS = INST;
 
 function hexMix(a, b, t) {
