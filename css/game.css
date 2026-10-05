@@ -173,7 +173,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @keyframes glowp{from{opacity:.55}to{opacity:1}}
 /* 新背景和挂件的动画 */
 .swim{animation:swim 14s linear infinite}
-@keyframes swim{0%{transform:translateX(-200px)}100%{transform:translateX(300px)}}
+@keyframes swim{0%{transform:translateX(250px)}100%{transform:translateX(-250px)}}
 .bubble2{animation:bub2 6s linear infinite}
 @keyframes bub2{to{transform:translateY(-700px);opacity:0}}
 .bubble{animation:bub 2.4s linear infinite}

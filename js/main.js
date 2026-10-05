@@ -67,11 +67,15 @@ async function enter(id) {
   (stage.eggs || []).forEach((e) => e.syl || e.kind || pre.push(wUrl(e.w)));
   A.preload(pre);
   for (let i = 0; i < NS; i++) if (slots[i]) A.startLoop(i, loopUrl(slots[i].id), muted[i]);
-  if (!save.heard[id]) {
-    save.heard[id] = 1; persist();
-    const hello = { shizi: 'hello', pinyin: 'pyhello', rap: noText ? 'local' : 'raphello', mix: 'mixhello' }[stage.type];
-    A.say(style().dark ? [uiUrl('dark'), uiUrl(hello)] : uiUrl(hello), { user: false });
-  } else if (noText) A.say(uiUrl('local'), { user: false });
+  // 语音提示从简（家长要求）：每种玩法只在第一次见到时教一句；课文缺失时提醒一句
+  save.heard[id] = 1;
+  const ht = (save.heardType ||= {});
+  if (noText) A.say(uiUrl('local'), { user: false });
+  else if (!ht[stage.type]) {
+    ht[stage.type] = 1;
+    A.say(uiUrl({ shizi: 'hello', pinyin: 'pyhello', rap: 'raphello', mix: 'mixhello' }[stage.type]), { user: false });
+  }
+  persist();
   updateEvo();
 }
 
@@ -216,7 +220,7 @@ function apply(i, item) {
     removeSlot(i);
     slots[i] = { kind: 'line', k: item.k };
     renderSlots(); renderBarState();
-    if (!checkEggs() && lineUrl(item.k)) A.say(lineUrl(item.k));
+    checkEggs();
     return;
   }
   if (item.kind === 'clip') {
@@ -554,7 +558,6 @@ function celebrate(e, k) {
   const n = foundOf().length, list = [uiUrl('found')];
   if (e.kind === 'all') { list[0] = uiUrl('rapall'); A.resetRap(); }
   else if (!e.kind) list.push(wUrl(e.w));
-  if (n === stage.eggs.length) list.push(uiUrl('allfound'));
   updateEvo();
   const hide = Promise.race([A.say(list), new Promise((r) => setTimeout(r, 6000))]);
   Promise.all([hide, new Promise((r) => setTimeout(r, 2500))]).then(() => { $('banner').hidden = true; if (n === NEED && nextMade()) spotlight(); refreshUnlocks(); });
@@ -598,7 +601,6 @@ $('evoBtn').addEventListener('click', async () => {
   await enter(nx.id);
   await new Promise((r) => setTimeout(r, 700));
   w.classList.remove('on');
-  if (!style().dark && save.heard[nx.id] === 1) A.say(uiUrl('evolve'), { user: false });
 });
 
 /* ================= 地图 ================= */

@@ -212,3 +212,10 @@ export function startSong(onTick, maxSec = 30) {
   });
 }
 export function stopSong() { if (songRec && songRec.state === 'recording') songRec.stop(); }
+
+/* ---------- 切到别的窗口或标签页时全部暂停，回来接着放（节拍不乱） ---------- */
+function pauseAll() { if (ctx && ctx.state === 'running') ctx.suspend(); }
+function resumeAll() { if (ctx && ctx.state === 'suspended' && document.visibilityState === 'visible' && document.hasFocus()) ctx.resume(); }
+window.addEventListener('blur', pauseAll);
+window.addEventListener('focus', resumeAll);
+document.addEventListener('visibilitychange', () => (document.hidden ? pauseAll() : resumeAll()));
