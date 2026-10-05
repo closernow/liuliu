@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/game.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#1d1633">
 </head>
 <body>
 <div class="app" id="app">
@@ -47,5 +50,9 @@
 </div>
 
 <script type="module" src="js/main.js"></script>
+<script>
+// 离线用：只在网上版本注册（本地预览时改代码要马上看到效果，不缓存）
+if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') navigator.serviceWorker.register('sw.js');
+</script>
 </body>
 </html>

@@ -116,6 +116,18 @@ def main():
         (pub if public else priv)[key] = {'title': title, 'lines': lines}
         print(f'== {title} ({len(lines)} 句)')
         for ln in lines: print('  ', ln['t'], len(ln['p']))
+    # 语文园地里的古诗和绕口令（公共领域，content/poems.json）：一年级前面的课本没注拼音，用 pypinyin 标，多音字按 poems.json 改
+    from pypinyin import pinyin, Style
+    for poem in json.load(open('content/poems.json', encoding='utf-8'))['poems']:
+        if poem['id'] == 'jiang-nan': continue          # 江南课本里有拼音，上面已经提取
+        lines = []
+        for ln in poem['lines']:
+            han = [c for c in ln if CJK.match(c)]
+            py = [p[0] for p in pinyin(''.join(han), style=Style.TONE)]
+            py = [poem['polyphones'].get(c, p) for c, p in zip(han, py)]
+            lines.append({'t': ln, 'p': py})
+        pub[poem['id']] = {'title': poem['title'], 'lines': lines}
+        print(f"== {poem['title']}（古诗）", ' / '.join(' '.join(l['p']) for l in lines[:2]))
     json.dump(priv, open('private/texts.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     json.dump(pub, open('content/rap_public.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 

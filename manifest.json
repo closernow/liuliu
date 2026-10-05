@@ -1,0 +1,14 @@
+{
+  "name": "溜溜",
+  "short_name": "溜溜",
+  "description": "一年级上册语文混音游戏",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1d1633",
+  "theme_color": "#1d1633",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

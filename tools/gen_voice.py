@@ -68,9 +68,13 @@ def duration(path):
     r = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path], capture_output=True, text=True)
     return float(r.stdout.strip() or 0)
 
+# 多音字：读给 edge-tts 时换成同音字，免得读错（只影响朗读，屏幕上显示的还是原字）
+TTS_FIX = {'曲项': '区项', '花还在': '花孩在'}
+
 async def rap_line(text, path):
     """唱词：先生成，再拉伸压缩到正好一个、两个或三个循环"""
     if os.path.exists(path): return 0
+    for a, b in TTS_FIX.items(): text = text.replace(a, b)
     raw = path[:-4] + '.raw.mp3'
     await tts(text, raw, CHILD, CHILD_RATE)
     if not os.path.exists(raw): return 0

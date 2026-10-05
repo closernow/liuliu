@@ -105,6 +105,14 @@ for sid, key, lesson, style, public in RAP:
 # ---------- 第 33 关：全书大混音 ----------
 stages.append({'id': 33, 'lesson': '全书大混音', 'unit': '综合', 'type': 'mix', 'style': 'ultimate'})
 
+# ---------- 彩蛋关：语文园地里的古诗和绕口令（公共领域，网上也能玩） ----------
+# after：学完第几关后打开
+BONUS = [(101, 'yong-e', '咏鹅', 'shanchuan', 4), (102, 'hua', '画', 'wuxing', 8), (103, 'si-shi-si', '绕口令', 'campus', 12),
+         (104, 'min-nong', '悯农', 'season', 18), (105, 'gu-lang-yue-xing', '古朗月行', 'night', 26)]
+for sid, key, lesson, style, after in BONUS:
+    stages.append({'id': sid, 'lesson': lesson, 'unit': '语文园地', 'type': 'rap', 'style': style, 'text': key, 'public': True, 'bonus': True, 'after': after,
+                   'eggs': [{'w': '前两句排对', 'kind': 'first2'}, {'w': '前一半排对', 'kind': 'half'}, {'w': '整首排对', 'kind': 'all'}, {'w': '录一句自己的声音', 'kind': 'rec'}]})
+
 stages.sort(key=lambda s: s['id'])
 data['stages'] = stages
 json.dump(data, open('content/stages.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

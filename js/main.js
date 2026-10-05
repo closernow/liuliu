@@ -43,7 +43,7 @@ async function enter(id) {
   $('bg').innerHTML = BG[stage.style]();
   // 同一个世界里的几关，背景色调稍微变一下
   $('bg').style.filter = style().dark ? '' : `hue-rotate(${((stage.id * 37) % 50) - 25}deg)`;
-  $('badge').textContent = `第 ${id} 关 · ${stage.lesson}`;
+  $('badge').textContent = stage.bonus ? `🎁 彩蛋关 · ${stage.lesson}` : `第 ${id} 关 · ${stage.lesson}`;
   $('recBtn').hidden = stage.type !== 'rap';
   // 乐手留在台上换新形态、换新声音；其他的是上一课的，请下台
   slots = slots.map((s) => (s && s.kind === 'inst' ? s : null));
@@ -494,10 +494,12 @@ function confetti() {
 }
 
 /* ================= 进化 ================= */
-const nextMade = () => DATA.stages.find((s) => s.id === stage.id + 1);
+const nextMade = () => !stage.bonus && DATA.stages.find((s) => s.id === stage.id + 1);
 function updateEvo() {
   const ready = noText || foundOf().length >= NEED;
   const btn = $('evoBtn');
+  btn.hidden = !!stage.bonus;
+  if (stage.bonus) return;
   btn.disabled = !ready; btn.classList.toggle('ready', ready && !!nextMade());
   if (ready && nextMade() && save.unlocked < stage.id + 1) { save.unlocked = stage.id + 1; persist(); }
 }
@@ -523,6 +525,7 @@ $('evoBtn').addEventListener('click', async () => {
 });
 
 /* ================= 地图 ================= */
+const isOpen = (s) => (s.bonus ? save.unlocked > s.after : s.id <= save.unlocked);
 function renderMap() {
   const box = $('tiles'); box.innerHTML = '';
   DATA.map.forEach((name, k) => {
@@ -535,6 +538,17 @@ function renderMap() {
       if (open) { $('mapLayer').hidden = true; if (id !== stage.id) enter(id); }
       else A.say(uiUrl(made ? 'locked' : 'soon'));
     });
+    box.appendChild(b);
+  });
+  // 彩蛋关：语文园地里的古诗和绕口令，学到那里就打开
+  const bonus = DATA.stages.filter((s) => s.bonus);
+  const head = document.createElement('div'); head.className = 'bhead'; head.textContent = '🎁 彩蛋关：语文园地里的古诗和绕口令'; box.appendChild(head);
+  bonus.forEach((s) => {
+    const open = isOpen(s), nf = (save.found[s.id] || []).length;
+    const b = document.createElement('button');
+    b.className = 'tile bonus' + (open ? ' open' : ' locked') + (stage && stage.id === s.id ? ' cur' : '');
+    b.innerHTML = `<span class="n">彩蛋关</span><span class="t">${s.lesson}</span><span class="s">${open ? '⭐'.repeat(nf) || '可以玩' : `学完第 ${s.after} 关打开`}</span>`;
+    b.addEventListener('click', () => { if (open) { $('mapLayer').hidden = true; if (s.id !== stage.id) enter(s.id); } else A.say(uiUrl('locked')); });
     box.appendChild(b);
   });
 }
@@ -626,8 +640,8 @@ async function boot() {
   $('startBtn').addEventListener('click', async () => {
     $('startLayer').hidden = true;
     await A.init();
-    const cur = DATA.stages.some((s) => s.id === save.current) ? save.current : 1;
-    enter(Math.min(cur, save.unlocked) || 1);
+    const cs = DATA.stages.find((s) => s.id === save.current);
+    enter(cs && isOpen(cs) ? cs.id : Math.min(save.unlocked, 33) || 1);
   });
 }
 boot();

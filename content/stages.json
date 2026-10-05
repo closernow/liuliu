@@ -2489,6 +2489,151 @@
    "unit": "综合",
    "type": "mix",
    "style": "ultimate"
+  },
+  {
+   "id": 101,
+   "lesson": "咏鹅",
+   "unit": "语文园地",
+   "type": "rap",
+   "style": "shanchuan",
+   "text": "yong-e",
+   "public": true,
+   "bonus": true,
+   "after": 4,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 102,
+   "lesson": "画",
+   "unit": "语文园地",
+   "type": "rap",
+   "style": "wuxing",
+   "text": "hua",
+   "public": true,
+   "bonus": true,
+   "after": 8,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 103,
+   "lesson": "绕口令",
+   "unit": "语文园地",
+   "type": "rap",
+   "style": "campus",
+   "text": "si-shi-si",
+   "public": true,
+   "bonus": true,
+   "after": 12,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 104,
+   "lesson": "悯农",
+   "unit": "语文园地",
+   "type": "rap",
+   "style": "season",
+   "text": "min-nong",
+   "public": true,
+   "bonus": true,
+   "after": 18,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 105,
+   "lesson": "古朗月行",
+   "unit": "语文园地",
+   "type": "rap",
+   "style": "night",
+   "text": "gu-lang-yue-xing",
+   "public": true,
+   "bonus": true,
+   "after": 26,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
   }
  ],
  "map": [
