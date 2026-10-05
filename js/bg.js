@@ -148,4 +148,57 @@ export const BG = {
     <path d="M0 720H1600V900H0Z" fill="#120608"/><ellipse cx="800" cy="760" rx="300" ry="20" fill="#7dff3b" opacity=".25"/>
     ${[0, 1].map((k) => `<path class="fog" d="M${k * 700 - 600} 660q300 -60 600 0t600 0v120h-1200z" fill="#8a6a6a" opacity=".3"/>`).join('')}`,
     `<linearGradient id="ul" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0204"/><stop offset=".6" stop-color="#3a0b12"/><stop offset="1" stop-color="#140406"/></linearGradient>`),
+  // ---------- 新恐怖世界 ----------
+  deepsea: () => wrap(`
+    <rect width="1600" height="900" fill="url(#dsg)"/>
+    ${Array.from({ length: 18 }, (_, i) => `<circle class="bubble2" style="animation-delay:${-i * 1.3}s" cx="${(i * 97) % 1600}" cy="880" r="${3 + i % 4}" fill="none" stroke="#5cf5ff" stroke-width="1.5" opacity=".4"/>`).join('')}
+    <g class="haunt"><path d="M1180 420c60 -30 130 -10 150 30c-40 10 -60 40 -150 20z" fill="#0a1a26"/><circle class="glow" cx="1325" cy="420" r="9" fill="#5cf5ff"/><path d="M1330 452l-20 -6M1300 455l-6 10M1280 456l-4 12" stroke="#cfe" stroke-width="3"/></g>
+    ${[200, 420, 1450].map((x, i) => `<g class="sway2" style="animation-delay:${-i}s"><path d="M${x} 900C${x - 60} 760 ${x + 70} 700 ${x + 10} 560C${x - 30} 500 ${x + 40} 470 ${x + 20} 430" stroke="#5a2a5a" stroke-width="${26 - i * 4}" fill="none" stroke-linecap="round"/>${[0, 1, 2, 3, 4].map((k) => `<circle cx="${x + 6 + k * 3}" cy="${560 + k * 60}" r="5" fill="#c86ab0"/>`).join('')}</g>`).join('')}
+    <path d="M0 760Q400 730 800 770T1600 750V900H0Z" fill="#0c1a1e"/>
+    ${[300, 700, 1100].map((x) => `<path d="M${x} 770l-30 -40l20 10l10 -30l10 30l20 -10z" fill="#3a1a3a"/>`).join('')}
+    <g transform="translate(860 780)"><path d="M-60 0q-20 -50 20 -60l80 0q40 10 20 60z" fill="#2a1a10"/><path d="M-40 -40h80" stroke="#6a4a2a" stroke-width="5"/></g>`,
+    `<linearGradient id="dsg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06222e"/><stop offset="1" stop-color="#020a10"/></linearGradient>`),
+
+  vampire: () => wrap(`
+    <rect width="1600" height="900" fill="url(#vpg)"/>
+    <circle cx="1200" cy="340" r="110" fill="#f0d8d8"/><circle cx="1200" cy="340" r="190" fill="#ff2a3a" opacity=".15"/>
+    <path d="M300 760V420H340V380H380V420H420V340L470 270L520 340V420H560V380H600V420H640V760Z" fill="#140812"/>
+    <path d="M700 760V460L780 360L860 460V760Z" fill="#1a0a16"/>
+    ${[[450, 470], [500, 470], [770, 520], [330, 520]].map(([x, y], i) => `<rect class="winflick" style="animation-delay:${-i}s" x="${x}" y="${y}" width="22" height="34" rx="11" fill="#ffcf5a" opacity=".85"/>`).join('')}
+    ${Array.from({ length: 6 }, (_, i) => `<g class="haunt" style="animation-delay:${-i * 1.2}s"><path d="M${200 + i * 220} ${360 + (i % 3) * 40}l-14 -8l4 8l-12 0l12 6zm0 0l14 -8l-4 8l12 0l-12 6z" fill="#000"/></g>`).join('')}
+    <path d="M0 760Q400 730 800 760T1600 750V900H0Z" fill="#100408"/>
+    ${[150, 1000, 1450].map((x) => `<path d="M${x} 770v-50h-12v-14h12v-12h10v12h12v14h-12v50z" fill="#2a0a14"/>`).join('')}`,
+    `<linearGradient id="vpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0614"/><stop offset="1" stop-color="#3a0a1e"/></linearGradient>`),
+
+  alien: () => wrap(`
+    <rect width="1600" height="900" fill="url(#alg)"/>
+    ${Array.from({ length: 40 }, (_, i) => `<circle class="twinkle" style="animation-delay:${-(i % 5) * .5}s" cx="${(i * 211) % 1600}" cy="${(i * 113) % 650}" r="${1 + i % 2}" fill="#d8ffd0"/>`).join('')}
+    <circle cx="350" cy="360" r="70" fill="#b6ff3b" opacity=".8"/><circle cx="330" cy="345" r="16" fill="#8ad02a"/><circle cx="1350" cy="300" r="40" fill="#c86ab0"/>
+    <g class="float"><ellipse cx="900" cy="380" rx="110" ry="28" fill="#6a7090"/><path d="M840 375a60 50 0 0 1 120 0z" fill="#9ae6ff" opacity=".7"/>${[860, 900, 940].map((x) => `<circle class="twinkle" cx="${x}" cy="392" r="6" fill="#ffe066"/>`).join('')}<path d="M840 405L760 760H1040L960 405Z" fill="#d8ff9a" opacity=".18"/></g>
+    <path d="M0 760Q300 700 600 750T1200 730T1600 750V900H0Z" fill="#2a3a20"/>
+    ${[150, 480, 1250, 1500].map((x, i) => `<g class="sway2" style="animation-delay:${-i}s"><path d="M${x} 770C${x - 20} 700 ${x + 30} 660 ${x} 600" stroke="#7a3a8a" stroke-width="12" fill="none" stroke-linecap="round"/><circle cx="${x}" cy="592" r="14" fill="#b6ff3b"/><circle cx="${x}" cy="592" r="6" fill="#000"/></g>`).join('')}
+    ${[700, 1050].map((x) => `<ellipse cx="${x}" cy="790" rx="70" ry="14" fill="#7dff3b" opacity=".35"/>`).join('')}`,
+    `<linearGradient id="alg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1a10"/><stop offset="1" stop-color="#1e2a3a"/></linearGradient>`),
+
+  mummy: () => wrap(`
+    <rect width="1600" height="900" fill="url(#mmg)"/>
+    <circle cx="1250" cy="330" r="80" fill="#ffd27a"/><circle cx="1250" cy="330" r="150" fill="#ff9a2e" opacity=".15"/>
+    <path d="M200 760L560 330L920 760Z" fill="#8a6a3a"/><path d="M560 330L920 760H760Z" fill="#6a4a24"/>
+    <path d="M900 760L1150 460L1400 760Z" fill="#9a7a4a"/><path d="M1150 460L1400 760H1300Z" fill="#7a5a30"/>
+    <rect x="520" y="660" width="80" height="100" fill="#1a1008"/><path d="M520 660q40 -40 80 0" fill="#1a1008"/>
+    ${[0, 1, 2].map((r) => [0, 1, 2, 3].map((c) => `<path d="M${330 + c * 80 + r * 40} ${740 - r * 50}h70" stroke="#6a4a24" stroke-width="3"/>`).join('')).join('')}
+    ${Array.from({ length: 10 }, (_, i) => `<circle class="ashfall" style="animation-delay:${-i}s" cx="${80 + i * 150}" cy="0" r="3" fill="#e8c88a" opacity=".6"/>`).join('')}
+    <path d="M0 760Q400 740 800 760T1600 750V900H0Z" fill="#c8a060"/>
+    ${[120, 1500].map((x) => `<g transform="translate(${x} 700)"><rect x="-14" y="0" width="28" height="70" fill="#a08050"/><circle cx="0" cy="-12" r="16" fill="#a08050"/><circle class="glow" cx="-6" cy="-14" r="3" fill="#ffd23a"/><circle class="glow" cx="6" cy="-14" r="3" fill="#ffd23a"/></g>`).join('')}`,
+    `<linearGradient id="mmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a2a"/><stop offset=".6" stop-color="#6a3a2a"/><stop offset="1" stop-color="#a0603a"/></linearGradient>`),
+
+  toys: () => wrap(`
+    <rect width="1600" height="900" fill="#2a1a2a"/>
+    ${Array.from({ length: 8 }, (_, i) => `<rect x="${i * 200}" y="260" width="100" height="500" fill="#3a2238"/>`).join('')}
+    <rect x="80" y="380" width="360" height="22" fill="#5a3a2a"/><rect x="1150" y="420" width="360" height="22" fill="#5a3a2a"/>
+    ${[[130, 380], [220, 380], [310, 380]].map(([x, y], i) => `<g class="haunt" style="animation-delay:${-i * 2}s;animation-duration:9s"><circle cx="${x}" cy="${y - 30}" r="22" fill="#f0d0d8" stroke="#000" stroke-width="2"/><circle cx="${x - 8}" cy="${y - 32}" r="5" fill="#000"/><circle cx="${x + 8}" cy="${y - 32}" r="5" fill="#000"/><path d="M${x - 8} ${y - 20}l4 4l4 -4l4 4l4 -4" stroke="#a00" stroke-width="2" fill="none"/></g>`).join('')}
+    <g transform="translate(1300 420)"><rect x="-40" y="-60" width="80" height="60" fill="#c03050" stroke="#000" stroke-width="3"/><g class="zhand"><path d="M0 -60v-40" stroke="#888" stroke-width="6" stroke-dasharray="6 4"/><circle cx="0" cy="-110" r="22" fill="#fff" stroke="#000" stroke-width="2"/><path d="M-10 -104q10 12 20 0" stroke="#c00" stroke-width="3" fill="none"/><circle cx="-8" cy="-114" r="3"/><circle cx="8" cy="-114" r="3"/></g></g>
+    <g class="spin" style="transform-origin:800px 360px"><circle cx="800" cy="360" r="60" fill="none" stroke="#6a4a6a" stroke-width="6"/>${[0, 60, 120, 180, 240, 300].map((a) => `<line x1="800" y1="360" x2="${800 + Math.cos(a * Math.PI / 180) * 60}" y2="${360 + Math.sin(a * Math.PI / 180) * 60}" stroke="#6a4a6a" stroke-width="4"/>`).join('')}</g>
+    <path d="M0 740H1600V900H0Z" fill="#4a2a3a"/>${Array.from({ length: 16 }, (_, i) => `<rect x="${i * 100}" y="740" width="50" height="160" fill="#5a3048"/>`).join('')}
+    ${[250, 650, 1000].map((x, i) => `<g transform="translate(${x} 760)"><rect x="-26" y="-40" width="52" height="40" fill="${['#e05a5a', '#5ab0e0', '#e0c05a'][i]}" stroke="#000" stroke-width="2"/><text x="0" y="-12" text-anchor="middle" font-size="26" font-weight="900" fill="#000">${'ABC'[i]}</text></g>`).join('')}`),
 };

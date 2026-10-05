@@ -149,7 +149,8 @@ function face(C,id,h,st){
   }
   // 嘴
   const my=22;
-  if(P.has('gasMask'))mouth=`<path d="M-24 4Q0 -2 24 4L20 30Q0 40 -20 30Z" fill="#3a3f45" stroke="#000" stroke-width="2"/><circle cx="-22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><circle cx="22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><path d="M-26 22h8M-26 26h8M-26 30h8M18 22h8M18 26h8M18 30h8" stroke="#222" stroke-width="1.5"/><circle class="glow" cx="0" cy="22" r="4" fill="${g}"/>`;
+  if(P.has('fangs'))mouth=`<g class="mouth"><path d="M-14 ${my-2}Q0 ${my+10} 14 ${my-2}Z" fill="#3a0010"/><path d="M-9 ${my-1}l3 9l3 -8zM3 ${my-1}l3 9l3 -9z" fill="#fff" stroke="#000" stroke-width=".8"/></g>`;
+  else if(P.has('gasMask'))mouth=`<path d="M-24 4Q0 -2 24 4L20 30Q0 40 -20 30Z" fill="#3a3f45" stroke="#000" stroke-width="2"/><circle cx="-22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><circle cx="22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><path d="M-26 22h8M-26 26h8M-26 30h8M18 22h8M18 26h8M18 30h8" stroke="#222" stroke-width="1.5"/><circle class="glow" cx="0" cy="22" r="4" fill="${g}"/>`;
   else if(P.has('zipMouth'))mouth=`<g class="mouth"><rect x="-16" y="${my-3}" width="32" height="6" rx="2" fill="#000"/>`+[...Array(8)].map((_,i)=>`<rect x="${-15+i*4}" y="${my-(i%2?3:0)}" width="2.5" height="3" fill="#cfc8b8"/>`).join('')+`</g><path d="M16 ${my}l6 0l0 8l-4 0z" fill="#cfc8b8" stroke="${st}" stroke-width="1.2"/>`;
   else if(P.has('gapTeeth'))mouth=`<g class="mouth"><path d="M-20 ${my-4}Q0 ${my+16} 20 ${my-4}Q0 ${my+2} -20 ${my-4}Z" fill="#000"/><rect x="-14" y="${my-2}" width="5" height="6" fill="#efe6c8"/><rect x="-2" y="${my}" width="5" height="7" fill="#efe6c8"/><rect x="10" y="${my-2}" width="4" height="5" fill="#d8c890"/></g>`;
   else if(P.has('sewnMouth'))mouth=`<path d="M-12 ${my}Q0 ${my+4} 12 ${my}" stroke="${st}" stroke-width="3" fill="none"/>`+[-8,-3,2,7].map(d=>`<path d="M${d-2} ${my-4}L${d+2} ${my+6}M${d+2} ${my-4}L${d-2} ${my+6}" stroke="${st}" stroke-width="1.8"/>`).join('');
@@ -160,6 +161,8 @@ function face(C,id,h,st){
   else if(h)mouth=`<g class="mouth"><path d="M-14 ${my}Q0 ${my+12} 14 ${my}Z" fill="#000"/><path d="M-11 ${my+1}l3 5l3 -4l3 5l3 -4l3 5l3 -5" fill="none" stroke="#eee" stroke-width="1.6"/></g>`;
   else mouth=`<ellipse class="mouth" cx="0" cy="${my}" rx="7" ry="${C.inst==='mic'||C.inst==='horn'?6:3.5}" fill="${st}"/>`;
   const cheeks=(h||C.eye==='cool')?'':`<ellipse cx="-30" cy="16" rx="7" ry="4" fill="#ff6b8b" opacity=".5"/><ellipse cx="30" cy="16" rx="7" ry="4" fill="#ff6b8b" opacity=".5"/>`;
+  if(P.has('gills'))extra+=[-1,1].map(d=>`<path d="M${d*30} 4q${d*-4} 5 0 10M${d*33} 2q${d*-4} 6 0 12" stroke="#7a3a5a" stroke-width="2" fill="none"/>`).join('');
+  if(P.has('thirdEye'))extra+=eyeH(0,-26,g,7).replace('class="eye"','class="eye" style="animation-delay:.9s"');
   if(P.has('drool'))extra+=`<path d="M8 ${my+4}q2 8 0 12" stroke="#8dff5a" stroke-width="3" fill="none" stroke-linecap="round"/><g class="drip"><circle cx="8" cy="${my+18}" r="2.5" fill="#8dff5a"/></g>`;
   if(P.has('longTongue'))extra+=`<g transform="translate(2 ${my+6})"><g class="dangle"><path d="M-5 0C-6 14 -4 30 0 38C4 30 6 14 5 0Z" fill="#c4384e" stroke="#000" stroke-width="1.5"/><path d="M0 4V30" stroke="#8a1f33" stroke-width="1.2"/></g></g>`;
   if(P.has('scar'))extra+=stitch(18,4,36,20,st,3)+stitch(36,4,18,20,st,3);
@@ -169,7 +172,7 @@ function face(C,id,h,st){
 
 /* ===== 头部零件：帽子挂件 + 恐怖件 ===== */
 function headParts(C,h,st,c){
-  const P=new Set(C.horror),T=HEAD[C.head].top,W=HEAD[C.head].w;let s='';
+  const P=new Set(C.horror),T=HEAD[C.head].top,W=HEAD[C.head].w,g=C.glow||GLOW[0];let s='';
   if(P.has('crack'))s+=`<path d="M-4 ${T+1}L4 ${T+12}L-3 ${T+20}L6 ${T+30}L0 ${T+36}L-6 ${T+28}L1 ${T+20}L-8 ${T+12}Z" fill="#000"/><path d="M-1 ${T+10}L3 ${T+20}" stroke="${GLOW[0]}" stroke-width="2" opacity=".8"/>`;
   if(P.has('melt'))s+=`<path d="M${-W+6} 28q2 12 6 2q4 18 8 0q4 10 7 -2" fill="${c}" stroke="${st}" stroke-width="2"/><g class="drip"><circle cx="${-W+12}" cy="40" r="3" fill="${c}"/></g><path d="M${W-20} 30q3 16 7 1q2 8 5 -1" fill="${c}" stroke="${st}" stroke-width="2"/>`;
   if(P.has('bandHead'))s+=`<path d="M${-W} ${T+22}Q0 ${T+8} ${W} ${T+18}L${W} ${T+30}Q0 ${T+20} ${-W} ${T+34}Z" fill="#d9ceb4" stroke="${st}" stroke-width="2"/><path d="M${W-4} ${T+22}l12 -4l-4 10z" fill="#d9ceb4" stroke="${st}" stroke-width="2"/><circle cx="-14" cy="${T+24}" r="3" fill="#8a6a4a" opacity=".6"/>`;
@@ -181,6 +184,10 @@ function headParts(C,h,st,c){
   }
   if(P.has('patchwork'))s+=`<path d="M8 ${T+8}L34 ${T+14}L30 ${T+36}L6 ${T+30}Z" fill="${blend(c,'#5a7a3a',.5)}" stroke="${st}" stroke-width="2"/>`+stitch(8,T+8,34,T+14,st,3)+stitch(6,T+30,30,T+36,st,3)+`<path d="M-30 6L-14 4L-16 18L-32 18Z" fill="${blend(c,'#3a4a7a',.5)}" stroke="${st}" stroke-width="2"/>`;
   if(P.has('tendrils'))s+=[[-20,-1],[0,1],[22,-1]].map(([x,d],i)=>`<g class="float" style="animation-delay:${i*.5}s"><path d="M${x} ${T+8}C${x+d*14} ${T-6} ${x-d*10} ${T-18} ${x+d*6} ${T-30}" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="${x+d*6}" cy="${T-31}" r="2.4" fill="#b26bff"/></g>`).join('');
+  if(P.has('angler'))s+=`<path d="M0 ${T}C4 ${T-20} 24 ${T-30} 30 ${T-16}" stroke="${st}" stroke-width="3" fill="none"/><circle class="glow" cx="30" cy="${T-12}" r="6" fill="${g}"/><circle cx="30" cy="${T-12}" r="11" fill="${g}" opacity=".2"/>`;
+  if(P.has('stalks'))s+=[-1,1].map(d=>`<g class="sway" style="animation-delay:${d*.3}s"><path d="M${d*12} ${T+4}Q${d*16} ${T-14} ${d*22} ${T-24}" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="${d*22}" cy="${T-28}" r="7" fill="#f3efe6" stroke="${st}" stroke-width="1.5"/><circle cx="${d*22}" cy="${T-27}" r="3.5" fill="${g}"/></g>`).join('');
+  if(P.has('mummyWrap'))s+=`<g opacity=".92">`+[-30,-16,-2,12,26].map((y,i)=>`<path d="M${-W-2} ${y}L${W+2} ${y+(i%2?6:-6)}L${W+2} ${y+(i%2?14:2)}L${-W-2} ${y+8}Z" fill="#e8dcc0" stroke="#b8a98a" stroke-width="1"/>`).join('')+`</g>`;
+  if(P.has('strings'))s+=[-20,0,20].map(x=>`<line x1="${x}" y1="${T-60}" x2="${x}" y2="${T+4}" stroke="#ddd" stroke-width="1"/>`).join('')+`<rect x="-30" y="${T-66}" width="60" height="6" rx="2" fill="#8a5a2b"/>`;
   if(P.has('goo'))s+=`<path d="M${-W+4} ${T+18}q8 -4 16 0q2 10 -2 16q-3 -8 -6 -2q-4 6 -8 -4z" fill="#7dff3b" opacity=".85"/><path d="M8 ${T+4}q10 -2 18 4q0 8 -4 12q-2 -6 -5 0q-4 -4 -9 -6z" fill="#7dff3b" opacity=".85"/><g class="drip"><circle cx="${-W+12}" cy="${T+36}" r="3" fill="#7dff3b"/></g>`;
   if(P.has('pustules'))s+=[[-26,-24,5],[22,-30,4],[30,-6,6],[-32,4,4],[10,-36,3.5]].map(([x,y,r],i)=>`<circle class="glow" style="animation-delay:${i*.3}s" cx="${x}" cy="${y}" r="${r}" fill="#b6ff5a" stroke="#4a8a1a" stroke-width="1.5"/>`).join('');
   if(P.has('rust'))s+=`<path d="M${-W+8} -10q8 -6 14 2q-2 8 -10 8q-6 -2 -4 -10z" fill="#8a4a20" opacity=".7"/><path d="M14 ${T+10}q10 -2 12 6q-4 6 -10 4z" fill="#a0582a" opacity=".6"/><circle cx="26" cy="14" r="4" fill="#7a3a18" opacity=".6"/>`;
@@ -249,6 +256,17 @@ function headParts(C,h,st,c){
    bear:[-26,26].map(x=>`<circle cx="${x}" cy="${T+8}" r="10" fill="${k('#9a6a40')}" stroke="${st}" stroke-width="2.5"/><circle cx="${x}" cy="${T+8}" r="4.5" fill="${k('#e8c8a0')}"/>`).join(''),
    catears:[-1,1].map(d=>`<path d="M${d*14} ${T+6}L${d*26} ${T-16}L${d*34} ${T+12}Z" fill="${c}" stroke="${st}" stroke-width="2.5"/><path d="M${d*20} ${T+4}L${d*26} ${T-8}L${d*30} ${T+8}Z" fill="${k('#FFC2E8')}"/>`).join('')+`<path d="M-30 14l-14 -2M-30 18l-14 2M30 14l14 -2M30 18l14 2" stroke="${st}" stroke-width="1.5"/>`,
    dogears:[-1,1].map(d=>`<path d="M${d*30} ${T+8}C${d*50} ${T+4} ${d*54} ${T+34} ${d*42} ${T+46}C${d*36} ${T+40} ${d*32} ${T+24} ${d*30} ${T+8}Z" fill="${k('#8a6a50')}" stroke="${st}" stroke-width="2.5"/>`).join('')+`<ellipse cx="0" cy="14" rx="6" ry="4" fill="${st}"/>`,
+   // 更多挂件
+   crown:`<path d="M-22 ${T+6}L-24 ${T-16}L-12 ${T-6}L0 ${T-22}L12 ${T-6}L24 ${T-16}L22 ${T+6}Z" fill="${k('#FFD84D')}" stroke="${st}" stroke-width="2.5"/>`+[-12,0,12].map(x=>`<circle cx="${x}" cy="${T}" r="3" fill="${k(['#E5484D','#5BB8F0','#8EE3A8'][(x/12+1)])}"/>`).join(''),
+   wizard:`<path d="M-30 ${T+8}L6 ${T-46}L30 ${T+8}Z" fill="${k('#5a3aa0')}" stroke="${st}" stroke-width="2.5"/><path d="M-40 ${T+8}Q0 ${T-2} 40 ${T+8}Q0 ${T+16} -40 ${T+8}Z" fill="${k('#5a3aa0')}" stroke="${st}" stroke-width="2"/><path d="M-4 ${T-20}l2 4 4 0 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 0z" fill="${k('#FFE07A')}"/>`,
+   pirate:`<path d="M-40 ${T+10}Q-30 ${T-24} 0 ${T-24}Q30 ${T-24} 40 ${T+10}Q0 ${T} -40 ${T+10}Z" fill="${k('#222')}" stroke="${st}" stroke-width="2"/><circle cx="0" cy="${T-8}" r="6" fill="#fff"/><path d="M-4 ${T-4}h8" stroke="#fff" stroke-width="2"/>`,
+   cowboy:`<ellipse cx="0" cy="${T+8}" rx="46" ry="9" fill="${k('#b0703a')}" stroke="${st}" stroke-width="2"/><path d="M-24 ${T+6}Q-24 ${T-24} 0 ${T-18}Q24 ${T-24} 24 ${T+6}Z" fill="${k('#b0703a')}" stroke="${st}" stroke-width="2"/><path d="M-24 ${T}h48" stroke="${k('#6a3a1a')}" stroke-width="4"/>`,
+   chef:`<rect x="-20" y="${T-10}" width="40" height="18" fill="#fff" stroke="${st}" stroke-width="2"/><path d="M-24 ${T-8}C-40 ${T-20} -24 ${T-44} -8 ${T-34}C0 ${T-50} 18 ${T-46} 16 ${T-34}C34 ${T-40} 40 ${T-16} 24 ${T-8}Z" fill="#fff" stroke="${st}" stroke-width="2"/>`,
+   viking:`<path d="M-30 ${T+10}Q-30 ${T-22} 0 ${T-22}Q30 ${T-22} 30 ${T+10}Z" fill="${k('#9aa3b5')}" stroke="${st}" stroke-width="2.5"/><path d="M-28 ${T}C-46 ${T-6} -50 ${T-24} -42 ${T-34}C-40 ${T-20} -34 ${T-12} -26 ${T-10}ZM28 ${T}C46 ${T-6} 50 ${T-24} 42 ${T-34}C40 ${T-20} 34 ${T-12} 26 ${T-10}Z" fill="${k('#f3efe0')}" stroke="${st}" stroke-width="2"/>`,
+   propeller:`<path d="M-26 ${T+8}Q0 ${T-20} 26 ${T+8}Z" fill="${k('#E5484D')}" stroke="${st}" stroke-width="2"/><path d="M-8 ${T-4}Q0 ${T-10} 8 ${T-4}" fill="${k('#5BB8F0')}"/><line x1="0" y1="${T-8}" x2="0" y2="${T-16}" stroke="${st}" stroke-width="2"/><g class="spin"><ellipse cx="0" cy="${T-17}" rx="22" ry="4" fill="${k('#FFD84D')}" stroke="${st}" stroke-width="1.5"/></g>`,
+   ninja:`<path d="M-44 ${T+20}Q0 ${T+4} 44 ${T+20}L44 ${T+30}Q0 ${T+14} -44 ${T+30}Z" fill="${k('#2a2a3a')}"/><path d="M42 ${T+22}l16 -6l-6 14zM42 ${T+26}l18 6l-12 6z" fill="${k('#2a2a3a')}"/>`,
+   knight:`<path d="M-34 6Q-36 ${T-10} 0 ${T-12}Q36 ${T-10} 34 6Z" fill="${k('#b8c0cc')}" stroke="${st}" stroke-width="2.5" opacity=".95"/><rect x="-28" y="-14" width="56" height="8" fill="#222"/><path d="M0 ${T-12}C10 ${T-30} 26 ${T-34} 30 ${T-26}" stroke="${k('#E5484D')}" stroke-width="8" fill="none" stroke-linecap="round"/>`,
+   party:`<path d="M-12 ${T+4}L2 ${T-30}L14 ${T+6}Z" fill="${k('#FF70A6')}" stroke="${st}" stroke-width="2"/><circle cx="2" cy="${T-32}" r="5" fill="${k('#FFE07A')}"/><circle cx="-2" cy="${T-8}" r="2.5" fill="#fff"/><circle cx="6" cy="${T-16}" r="2" fill="#fff"/>`,
    // 第 2 阶段 金木水火土
    goldcrown:`<path d="M-20 ${T+6}L-22 ${T-14}L-10 ${T-4}L0 ${T-18}L10 ${T-4}L22 ${T-14}L20 ${T+6}Z" fill="${k('#F5C04A')}" stroke="${st}" stroke-width="2.5"/><circle cx="0" cy="${T-2}" r="3.5" fill="${k('#FF5C5C')}"/>`,
    twig:`<path d="M-4 ${T+4}C-6 ${T-10} 4 ${T-18} 2 ${T-28}" stroke="${k('#8a5a2b')}" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="-8" cy="${T-16}" rx="8" ry="4" fill="${k('#5FD3A5')}" stroke="${st}" stroke-width="1.5" transform="rotate(-30 -8 ${T-16})"/><ellipse cx="10" cy="${T-24}" rx="8" ry="4" fill="${k('#8EE3A8')}" stroke="${st}" stroke-width="1.5" transform="rotate(25 10 ${T-24})"/>`,
@@ -401,6 +419,10 @@ export function charSVG(id,look={}){
     return `<g transform="translate(${x} 110)"><g class="arm" style="--a:${a}deg;--s:${s}deg;--d:calc(var(--b)*${pz.d});--dl:calc(var(--b)*${dl})">${body}${side=='l'?I.l:I.r}</g></g>`};
   let bodyX='';
   if(P.has('heart'))bodyX+=`<path d="M58 104Q70 100 82 104L80 124Q70 130 60 124Z" fill="#1a0006" stroke="${st}" stroke-width="2"/><path d="M61 108h18M61 114h18M62 120h16" stroke="#e9e2d0" stroke-width="2" opacity=".7"/><g class="beat"><path d="M70 124C60 116 60 107 66 107C69 107 70 110 70 111C70 110 71 107 74 107C80 107 80 116 70 124Z" fill="#b0102a" stroke="#000" stroke-width="1.5"/></g>`;
+  if(P.has('barnacles'))bodyX+=[[54,116,4],[84,130,5],[62,140,3],[88,112,3]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#b8b0a0" stroke="#6a6458" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="${r/2.5}" fill="#4a4438"/>`).join('');
+  if(P.has('scarab'))bodyX+=`<g class="crawl" style="animation-delay:-1s"><ellipse cx="0" cy="0" rx="5" ry="4" fill="#2a8a7a" stroke="#000" stroke-width="1"/><line x1="0" y1="-4" x2="0" y2="4" stroke="#000" stroke-width="1"/><path d="M-4 -3l-3 -2M4 -3l3 -2M-5 0h-3M5 0h3M-4 3l-3 2M4 3l3 2" stroke="#000" stroke-width="1"/></g>`;
+  if(P.has('mummyWrap'))bodyX+=[106,116,126,136,146].map((y,i)=>`<path d="M46 ${y}L94 ${y+(i%2?5:-5)}L94 ${y+(i%2?11:1)}L46 ${y+6}Z" fill="#e8dcc0" stroke="#b8a98a" stroke-width="1"/>`).join('');
+  if(P.has('windKey'))bodyX+=`<g transform="translate(96 124)"><rect x="0" y="-2" width="10" height="4" fill="#b8bec6" stroke="#000" stroke-width="1"/><g class="spin"><path d="M10 0c0 -10 14 -10 14 0c0 10 -14 10 -14 0zM10 0c0 -10 -0 -10 0 0" fill="#d4af37" stroke="#000" stroke-width="1.2"/></g></g>`;
   if(P.has('rags'))bodyX+=`<path d="M45 142L50 152L55 144L61 153L67 145L73 153L79 144L85 152L91 145L95 150V142Z" fill="${blend(c,'#000',.35)}" stroke="${st}" stroke-width="2"/><path d="M58 112l6 4l-4 5z M80 126l5 3l-4 4z" fill="#000" opacity=".6"/>`;
   if(P.has('hazmat'))bodyX+=`<path d="M52 100Q49 100 48 108L45 142Q45 152 55 152H85Q95 152 95 142L92 108Q91 100 88 100Z" fill="#f2c230" stroke="#000" stroke-width="2.5"/><circle cx="70" cy="126" r="9" fill="#111"/><g fill="#f2c230"><circle cx="70" cy="120" r="3"/><circle cx="65" cy="129" r="3"/><circle cx="75" cy="129" r="3"/></g><circle cx="70" cy="126" r="2" fill="#111"/>`;
   if(P.has('glowVeins'))bodyX+=`<path class="glow" d="M54 110q6 6 2 12q-4 6 2 12M86 108q-6 8 -2 14q4 8 -2 14M66 104q2 6 -2 10" stroke="#7dff3b" stroke-width="2" fill="none"/>`;
@@ -428,9 +450,14 @@ export function charSVG(id,look={}){
   const H=HEAD[C.head];
   const shadow=P.has('shadow')?`<g class="lurk"><path d="M70 30C40 30 34 70 40 110L36 180H104L100 110C106 70 100 30 70 30Z" fill="#000" opacity=".55"/><circle cx="58" cy="62" r="3.5" fill="#ff2e2e"/><circle cx="82" cy="62" r="3.5" fill="#ff2e2e"/></g>`:'';
   const extra=P.has('extraArm')?`<g transform="translate(92 128)"><g class="arm" style="--a:-60deg;--s:-30deg;--d:calc(var(--b)*1);--dl:0s"><path d="M0 0L0 24" stroke="${st}" stroke-width="11" stroke-linecap="round"/><path d="M0 0L0 24" stroke="${c}" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="26" r="5.5" fill="${c}" stroke="${st}" stroke-width="2.5"/></g></g>`:'';
+  // 斗篷和蝙蝠翅膀画在身体后面
+  const back=(P.has('cape')?`<path d="M44 100Q30 140 34 178L70 168L106 178Q110 140 96 100Z" fill="${h?'#3a0010':'#5a1020'}" stroke="#000" stroke-width="2"/><path d="M44 100L34 82L56 98M96 100L106 82L84 98" fill="#7a1020" stroke="#000" stroke-width="2"/>`:'')
+    +(P.has('batWings')?[-1,1].map(d=>`<g class="flap" style="transform-origin:${70+d*20}px 108px"><path d="M${70+d*20} 108L${70+d*60} 86L${70+d*54} 100L${70+d*64} 108L${70+d*52} 112L${70+d*56} 124Z" fill="#2a2030" stroke="#000" stroke-width="1.5"/></g>`).join(''):'')
+    +(P.has('tentacles')?[48,62,78,92].map((x,i)=>`<g class="sway2" style="animation-delay:${i*.35}s"><path d="M${x} 146C${x-8} 164 ${x+8} 172 ${x-2} 190" stroke="#8a3a7a" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="${x-4}" cy="168" r="1.6" fill="#f3c"/></g>`).join(''):'');
+  const bats=P.has('bats')?[0,1].map(i=>`<g transform="translate(70 30)"><g class="orbit" style="animation-delay:${-i*1.6}s"><g transform="translate(58 0)"><path d="M0 0l-6 -4l2 4l-6 0l6 3zM0 0l6 -4l-2 4l6 0l-6 3z" fill="#111"/></g></g></g>`).join(''):'';
   const longSh=P.has('longShadow')?`<path d="M40 184Q100 176 170 190Q110 196 40 188Z" fill="#000" opacity=".55"/>`:'';
   const ash=P.has('ash')?[0,1,2,3,4].map(i=>`<circle class="ashf" style="animation-delay:${-i*.9}s" cx="${20+i*26}" cy="0" r="1.8" fill="#bbb"/>`).join(''):'';
-  return `<svg viewBox="0 0 140 196" xmlns="http://www.w3.org/2000/svg"${P.has('ghostly')?' class="ghosty"':''}><ellipse cx="70" cy="184" rx="34" ry="5" fill="#000" opacity=".15"/>${longSh}${shadow}
+  return `<svg viewBox="0 0 140 196" xmlns="http://www.w3.org/2000/svg"${P.has('ghostly')?' class="ghosty"':''}><ellipse cx="70" cy="184" rx="34" ry="5" fill="#000" opacity=".15"/>${longSh}${shadow}${back}
   <g transform="translate(70 184)"><g class="bd"><g transform="translate(-70 -184)">
    ${leg(61,'l')}${leg(79,'r')}
    <path d="M52 100Q49 100 48 108L45 142Q45 152 55 152H85Q95 152 95 142L92 108Q91 100 88 100Z" fill="${c}" stroke="${st}" stroke-width="3"/>
@@ -440,7 +467,7 @@ export function charSVG(id,look={}){
      <path d="${H.d}" fill="${c}" stroke="${st}" stroke-width="3"/>${face(C,id,h,st)}${headParts(C,h,st,c)}${I.hd}
    </g></g></g>
    ${extra}${arm(50,'l')}${arm(90,'r')}
-  </g></g></g>${ash}${P.has('sheet')?sheetSVG(st):''}</svg>`;
+  </g></g></g>${ash}${bats}${P.has('sheet')?sheetSVG(st):''}</svg>`;
 }
 // 白布鬼：整块白布从头罩下来，只露两个黑洞
 function sheetSVG(st){

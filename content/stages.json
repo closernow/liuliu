@@ -307,7 +307,7 @@
    "lesson": "i u ü",
    "unit": "汉语拼音 2",
    "type": "pinyin",
-   "style": "ocean",
+   "style": "deepsea",
    "sheng": [],
    "yun": [
     "i",
@@ -1253,7 +1253,7 @@
    "lesson": "ao ou iu",
    "unit": "汉语拼音 11",
    "type": "pinyin",
-   "style": "space",
+   "style": "vampire",
    "sheng": [
     "d",
     "t",
@@ -1420,7 +1420,7 @@
    "lesson": "ie üe er",
    "unit": "汉语拼音 12",
    "type": "pinyin",
-   "style": "ghost",
+   "style": "space",
    "sheng": [
     "b",
     "p",
@@ -1737,7 +1737,7 @@
    "lesson": "ang eng ing ong",
    "unit": "汉语拼音 14",
    "type": "pinyin",
-   "style": "space",
+   "style": "alien",
    "sheng": [
     "b",
     "p",
@@ -2081,7 +2081,7 @@
    "lesson": "日月明",
    "unit": "第六单元·识字 6",
    "type": "shizi",
-   "style": "campus",
+   "style": "mummy",
    "chars": [
     [
      "力",
@@ -2326,7 +2326,7 @@
    "lesson": "小小的船",
    "unit": "阅读",
    "type": "rap",
-   "style": "night",
+   "style": "ghost",
    "text": "xiaoxiaodechuan",
    "public": false,
    "eggs": [
@@ -2407,7 +2407,7 @@
    "lesson": "比尾巴",
    "unit": "阅读",
    "type": "rap",
-   "style": "night",
+   "style": "toys",
    "text": "biweiba",
    "public": false,
    "eggs": [

@@ -5,7 +5,7 @@ export const INITIAL = ['dong', 'papa', 'cha', 'dada', 'beng', 'dang', 'ling', '
 export const QUEUE = ['dongci', 'dada2', 'hong', 'zizi', 'gudong', 'jiu', 'zheng', 'dingdang', 'wawa', 'you', 'kaka', 'xiuxiu',
   'dongda', 'bengcha', 'pengpeng', 'tongtong', 'qiangqiang', 'pada', 'dida', 'gege', 'guagua', 'dongba', 'dengdeng', 'wengwu',
   'dingdong', 'gulu', 'baba', 'bobo', 'wangwang'];
-const HORROR = [3, 8, 12, 16, 21, 28, 33];
+const HORROR = [3, 6, 8, 12, 15, 18, 21, 24, 27, 28, 30, 33];
 // 特殊任务：完成了就解锁对应的伙伴
 export const SPECIAL = {
   ying: { how: '在恐怖关找到一个彩蛋', test: (s) => HORROR.some((id) => (s.found[id] || []).length) },

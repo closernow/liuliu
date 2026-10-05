@@ -26,7 +26,7 @@ def egg(w, p):
 # 关号 -> (课号, 风格, 彩蛋)
 PINYIN = {
     5: ('1', 'ocean', [egg('鹅', 'é'), egg('饿', 'è'), egg('啊', 'ā'), egg('哦', 'ó')]),
-    6: ('2', 'ocean', [{'w': '衣', 'p': 'ī', 'syl': [['i', 1]]}, {'w': '五', 'p': 'ǔ', 'syl': [['u', 3]]}, {'w': '鱼', 'p': 'ǘ', 'syl': [['ü', 2]]}, {'w': '雨', 'p': 'ǚ', 'syl': [['ü', 3]]}]),
+    6: ('2', 'deepsea', [{'w': '衣', 'p': 'ī', 'syl': [['i', 1]]}, {'w': '五', 'p': 'ǔ', 'syl': [['u', 3]]}, {'w': '鱼', 'p': 'ǘ', 'syl': [['ü', 2]]}, {'w': '雨', 'p': 'ǚ', 'syl': [['ü', 3]]}]),
     7: ('3', 'ocean', [egg('爸爸', 'bà ba'), egg('妈妈', 'mā ma'), egg('爬坡', 'pá pō'), egg('木马', 'mù mǎ')]),
     8: ('4', 'zombie', [egg('大地', 'dà dì'), egg('马路', 'mǎ lù'), egg('泥土', 'ní tǔ'), egg('弟弟', 'dì di')]),
     9: ('5', 'ocean', [egg('哥哥', 'gē ge'), egg('弟弟', 'dì di'), egg('画画', 'huà huà'), egg('荷花', 'hé huā')]),
@@ -35,10 +35,10 @@ PINYIN = {
     12: ('8', 'virus', [egg('擦桌子', 'cā zhuō zi'), egg('折纸', 'zhé zhǐ'), egg('读书', 'dú shū'), egg('吃', 'chī')]),
     13: ('9', 'space', [egg('鱼', 'yú'), egg('鸭子', 'yā zi'), egg('乌鸦', 'wū yā'), egg('蚂蚁', 'mǎ yǐ')]),
     14: ('10', 'space', [egg('白菜', 'bái cài'), egg('西瓜', 'xī guā'), egg('水果', 'shuǐ guǒ'), egg('萝卜', 'luó bo')]),
-    15: ('11', 'space', [egg('小桥', 'xiǎo qiáo'), egg('流水', 'liú shuǐ'), egg('垂柳', 'chuí liǔ'), egg('桃花', 'táo huā')]),
-    16: ('12', 'ghost', [egg('雪花飘', 'xuě huā piāo'), egg('夜色美', 'yè sè měi'), egg('学', 'xué'), egg('姐姐', 'jiě jie')]),
+    15: ('11', 'vampire', [egg('小桥', 'xiǎo qiáo'), egg('流水', 'liú shuǐ'), egg('垂柳', 'chuí liǔ'), egg('桃花', 'táo huā')]),
+    16: ('12', 'space', [egg('雪花飘', 'xuě huā piāo'), egg('夜色美', 'yè sè měi'), egg('学', 'xué'), egg('姐姐', 'jiě jie')]),
     17: ('13', 'space', [egg('蓝天', 'lán tiān'), egg('白云', 'bái yún'), egg('草原', 'cǎo yuán'), egg('森林', 'sēn lín')]),
-    18: ('14', 'space', [egg('游泳', 'yóu yǒng'), egg('滑冰', 'huá bīng'), egg('骑自行车', 'qí zì xíng chē'), egg('打乒乓球', 'dǎ pīng pāng qiú')]),
+    18: ('14', 'alien', [egg('游泳', 'yóu yǒng'), egg('滑冰', 'huá bīng'), egg('骑自行车', 'qí zì xíng chē'), egg('打乒乓球', 'dǎ pīng pāng qiú')]),
 }
 learned_sh, learned_yun, learned_whole = set(), set(), set()
 for sid, (no, style, eggs) in PINYIN.items():
@@ -90,13 +90,13 @@ SHIZI2 = [
      [{'w': '国旗', 'p': 'guó qí'}, {'w': '升旗', 'p': 'shēng qí'}, {'w': '中国', 'p': 'zhōng guó'}, {'w': '多么', 'p': 'duō me'}]),
 ]
 for sid, lesson, unit, cs, eggs in SHIZI2:
-    stages.append({'id': sid, 'lesson': lesson, 'unit': unit, 'type': 'shizi', 'style': 'campus', 'chars': cs, 'eggs': eggs})
+    stages.append({'id': sid, 'lesson': lesson, 'unit': unit, 'type': 'shizi', 'style': 'mummy' if sid == 24 else 'campus', 'chars': cs, 'eggs': eggs})
 
 # ---------- 阅读和古诗：rap 模式 ----------
 # public=True 的课文在 content/rap_public.json（公共领域），其余在 private/texts.json（只在本机）
 RAP = [(19, 'qiutian', '秋天', 'season', False), (20, 'jiangnan', '江南', 'season', True), (21, 'xuedi', '雪地里的小画家', 'fog', False),
-       (22, 'siji', '四季', 'season', False), (27, 'xiaoxiaodechuan', '小小的船', 'night', False), (28, 'yingzi', '影子', 'shadow', False),
-       (29, 'liangjianbao', '两件宝', 'night', False), (30, 'biweiba', '比尾巴', 'night', False), (31, 'wuyaheshui', '乌鸦喝水', 'night', False),
+       (22, 'siji', '四季', 'season', False), (27, 'xiaoxiaodechuan', '小小的船', 'ghost', False), (28, 'yingzi', '影子', 'shadow', False),
+       (29, 'liangjianbao', '两件宝', 'night', False), (30, 'biweiba', '比尾巴', 'toys', False), (31, 'wuyaheshui', '乌鸦喝水', 'night', False),
        (32, 'yudianer', '雨点儿', 'night', False)]
 for sid, key, lesson, style, public in RAP:
     stages.append({'id': sid, 'lesson': lesson, 'unit': '阅读', 'type': 'rap', 'style': style, 'text': key, 'public': public,

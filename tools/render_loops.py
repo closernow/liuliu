@@ -802,6 +802,41 @@ def glitch(m):
     x = np.round(x * 3) / 3
     return x * env(t, .001, .03) * 0.5
 
+def sonar(m):
+    """深海声纳"叮——" """
+    t = tt(1.5); f = mtof(m)
+    return np.sin(2 * np.pi * f * t) * env(t, 0.003, 0.6) * 0.5 + np.sin(2 * np.pi * f * 1.5 * t) * env(t, 0.003, 0.3) * 0.15
+
+def harpsi(m):
+    """古堡羽管键琴：很亮的拨弦"""
+    t = tt(0.6); f = mtof(m); x = saw(f, t, 40) * env(t, 0.001, 0.12)
+    return hp(x, 300) * 0.5
+
+def churchbell(m=55):
+    t = tt(2.5); f = mtof(m)
+    x = sum(np.sin(2 * np.pi * f * r * t) * a for r, a in ((0.5, .6), (1, 1), (1.19, .5), (1.5, .4), (2, .5), (2.74, .3)))
+    return x * env(t, 0.002, 1.0) * 0.25
+
+def warble(m, d):
+    """外星人颤音"""
+    t = tt(d); f = mtof(m) * (1 + 0.08 * np.sin(2 * np.pi * 9 * t) + 0.3 * np.sin(2 * np.pi * 0.7 * t))
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.clip(t / 0.05, 0, 1) * np.clip((d - t) / 0.08, 0, 1) * 0.4
+
+def pungi(m, d):
+    """木乃伊：弄蛇人的笛子，带鼻音"""
+    t = tt(d + 0.05); f = mtof(m) * (1 + 0.01 * np.sin(2 * np.pi * 6 * t))
+    ph = 2 * np.pi * np.cumsum(f) / SR; x = np.sign(np.sin(ph)) * 0.5 + np.sin(2 * ph) * 0.3
+    return bp(x, 500, 3000) * np.clip(t / 0.02, 0, 1) * np.clip((d + 0.05 - t) / 0.05, 0, 1) * 0.5
+
+def fingercymbal():
+    t = tt(1.0); return (np.sin(2 * np.pi * 3100 * t) + 0.6 * np.sin(2 * np.pi * 4700 * t)) * env(t, 0.001, 0.35) * 0.25
+
+def ratchet(d=0.3):
+    """上发条的咔咔声"""
+    t = tt(d); x = np.zeros(len(t))
+    for k in range(0, len(t), int(SR * 0.025)): x[k:k + 60] = noise(min(60, len(t) - k))
+    return bp(x, 1500, 6000) * 0.8
+
 def dark_set(sfx, tr=0, flavor='forest'):
     """恐怖风格的一整套 22 个乐器。flavor：forest 黑森林、zombie 僵尸、virus 生化、ghost 鬼屋、fog 雾镇、shadow 影子、ultimate 大混合"""
     global rng; rng = np.random.default_rng(zlib.crc32(sfx.encode()))
@@ -809,7 +844,7 @@ def dark_set(sfx, tr=0, flavor='forest'):
     # 鼓
     b = np.zeros(N); s_ = []
     for base in (0, 8, 16, 24):
-        if flavor in ('shadow', 'ghost'):
+        if flavor in ('shadow', 'ghost', 'deepsea', 'vampire'):
             put(b, st(base), heartbeat()); put(b, st(base) + int(.22 * SR), heartbeat() * .6)
         else:
             k1 = lp(kick(90, 38, .4), 500)
@@ -820,7 +855,7 @@ def dark_set(sfx, tr=0, flavor='forest'):
     # 沙锤
     b = np.zeros(N); s_ = []
     for s in range(0, 32, 4):
-        if flavor in ('fog', 'virus'): put(b, st(s), static_burst(.12) * (1 if s % 8 == 0 else .6))
+        if flavor in ('fog', 'virus', 'alien'): put(b, st(s), static_burst(.12) * (1 if s % 8 == 0 else .6))
         else: put(b, st(s), bp(noise(st(.4)), 2500 if (s // 4) % 2 == 0 else 1600, 4500 if (s // 4) % 2 == 0 else 2600) * env(tt(.4)[:st(.4)], .001, .012))
         s_.append(s)
     for s in (14, 30):
@@ -830,6 +865,9 @@ def dark_set(sfx, tr=0, flavor='forest'):
     b = np.zeros(N); s_ = [12, 28]
     for s in s_:
         if flavor in ('fog', 'ultimate'): put(b, st(s), clang(60 + tr))
+        elif flavor == 'mummy': put(b, st(s), fingercymbal())
+        elif flavor == 'deepsea': put(b, st(s), pop_bubble(60) * 1.5)
+        elif flavor == 'toys': put(b, st(s), ratchet(.25))
         elif flavor == 'zombie': put(b, st(s), np.tanh(woodblock(300) * 4) * .6)
         else:
             t = tt(.2); put(b, st(s), (np.sin(2 * np.pi * 820 * t) * env(t, .001, .02) + bp(noise(len(t)), 2000, 5000) * env(t, .001, .015)))
@@ -844,7 +882,13 @@ def dark_set(sfx, tr=0, flavor='forest'):
     mk('bass' + sfx, [0, 8, 16, 24], x, wet=.15)
     # 叮叮
     b = np.zeros(N); pat = [(3, 96, -30), (11, 99, 25), (19, 95, -40), (27, 92, 35)]
-    for s, m, d in pat: put(b, st(s), musicbox(m + tr, d) * .6 if flavor != 'virus' else glitch(m + tr - 12))
+    for s, m, d in pat:
+        if flavor == 'virus': sig = glitch(m + tr - 12)
+        elif flavor == 'deepsea': sig = sonar(m + tr - 24)
+        elif flavor == 'vampire': sig = churchbell(m + tr - 36) if s == 3 else musicbox(m + tr, d) * .4
+        elif flavor == 'alien': sig = warble(m + tr - 12, .4)
+        else: sig = musicbox(m + tr, d) * .6
+        put(b, st(s), sig)
     mk('chime' + sfx, [s for s, _, _ in pat], delay(b, 3, .5, .5), wet=.45, rv_decay=.9)
     # 呜呜：每个主题的招牌声音
     t = np.arange(N) / SR
@@ -866,7 +910,13 @@ def dark_set(sfx, tr=0, flavor='forest'):
     mk('blip' + sfx, [s for s, _ in pat], b, wet=.2)
     # 铃铃：八音盒
     b = np.zeros(N); mel = [(0, 72, 2), (2, 75, 2), (4, 79, 2), (6, 78, 2), (8, 79, 4), (12, 75, 2), (14, 74, 2), (16, 72, 2), (18, 71, 2), (20, 68, 4), (24, 67, 4), (28, 71, 4)]
-    for s, m, l in mel: put(b, st(s), musicbox(m + 12 + tr, rng.uniform(-25, 25) * (2 if flavor == 'ghost' else 1)))
+    for s, m, l in mel:
+        if flavor == 'vampire': sig = harpsi(m + tr)
+        elif flavor == 'mummy': sig = pungi([72, 73, 76, 77, 79, 80, 83, 84][(m - 67) % 8] + tr, l * S16 * .9)   # 双和声小调
+        elif flavor == 'alien': sig = warble(m + tr, l * S16 * .9)
+        elif flavor == 'deepsea': sig = sonar(m + tr - 12) * .6
+        else: sig = musicbox(m + 12 + tr, rng.uniform(-25, 25) * (2 if flavor in ('ghost', 'toys') else 1))
+        put(b, st(s), sig)
     mk('bells' + sfx, [s for s, _, _ in mel], b, wet=.4 if flavor != 'ghost' else .6, rv_decay=.8)
     # 嘟嘟：特雷门琴
     b = np.zeros(N); mel = [(0, 72, 75, 8), (8, 75, 72, 8), (16, 68, 71, 8), (24, 71, 67, 8)]
@@ -897,6 +947,11 @@ dark_set('gh', 3, 'ghost')        # 第 16 关 鬼屋
 dark_set('fg', -4, 'fog')         # 第 21 关 雾镇
 dark_set('sd', -1, 'shadow')      # 第 28 关 影子
 dark_set('ul', 0, 'ultimate')     # 第 33 关 大混合
+dark_set('ds', -3, 'deepsea')     # 第 6 关 深海怪
+dark_set('vp', 2, 'vampire')      # 第 15 关 吸血鬼城堡
+dark_set('al', 4, 'alien')        # 第 18 关 外星寄生
+dark_set('mm', -1, 'mummy')       # 第 24 关 木乃伊金字塔
+dark_set('ty', 5, 'toys')         # 第 30 关 诡异玩具屋
 
 # ---------- export ----------
 import soundfile as sf

@@ -17,13 +17,15 @@ const INST = GROUPS.flatMap((g) => g[1]);
 const GROUP = {
   eyeL: ['dangleL', 'wormL', 'buttonL', 'patchL', 'blankL'],
   eyeR: ['dangleR', 'wormR', 'buttonR'],
+  eyeTop: ['thirdEye', 'stalks'],
   eyes: ['hollow', 'sewnEyes', 'cyclops'],
   mouth: ['zipMouth', 'gapTeeth', 'sewnMouth', 'bigMouth', 'teeth', 'gasMask'],
   front: ['heart', 'ribs', 'hole', 'zipBody', 'bellyMouth', 'hazmat'],
   legs: ['pegLeg', 'wisp', 'bandLeg', 'backFeet'],
   armL: ['boneL', 'armOffL'],
   top: ['lid', 'knife', 'candle', 'web'],
-  wrap: ['bandHead', 'faceWrap'],
+  wrap: ['bandHead', 'faceWrap', 'mummyWrap'],
+  back: ['cape', 'batWings', 'tentacles'],
 };
 const groupOf = (p) => Object.keys(GROUP).find((g) => GROUP[g].includes(p));
 // 通用恐怖件（每个主题都能抽）
@@ -38,6 +40,11 @@ const THEME = {
   fog: { sig: ['rust', 'ash', 'faceWrap', 'barbed', 'radio', 'nails'], glow: '#ffb02e', tint: '#8a8a8a', mix: 0.6 },
   shadow: { sig: ['shadow', 'longShadow', 'smoky', 'hollow', 'bodyEyes', 'tendrils'], glow: '#d6b8ff', black: true },
   ultimate: { sig: ['rags', 'goo', 'chains', 'ash', 'smoky', 'shadow', 'lid', 'pustules', 'barbed', 'drool'], glow: '#ff3b3b' },
+  deepsea: { sig: ['tentacles', 'angler', 'barnacles', 'gills', 'hollow', 'melt'], glow: '#5cf5ff', tint: '#3a6a8a', mix: 0.5 },
+  vampire: { sig: ['fangs', 'cape', 'batWings', 'bats', 'hollow'], glow: '#ff2a3a', tint: '#d8d0e0', mix: 0.55 },
+  alien: { sig: ['stalks', 'thirdEye', 'goo', 'tentacles', 'pustules'], glow: '#b6ff3b', tint: '#7ac46a', mix: 0.5 },
+  mummy: { sig: ['mummyWrap', 'scarab', 'hollow', 'bugs', 'cracksBody'], glow: '#ffd23a', tint: '#c8b48a', mix: 0.55 },
+  toys: { sig: ['buttonL', 'buttonR', 'windKey', 'strings', 'cracksBody', 'stitchCheek', 'zipMouth'], glow: '#ff7ac8', tint: '#f0d0e0', mix: 0.35 },
 };
 // 固定随机数：同一个角色在同一主题里每次都一样
 function rand(seed) {
@@ -71,20 +78,25 @@ const bright = (name, loops, hats, singerHat) => ({ name, loops, dark: false, ha
 const horror = (name, loops, theme, level) => ({ name, loops, dark: true, theme, level });
 
 export const STYLES = {
-  sky: bright('天和地', '1', null, 'sprout'),
-  wuxing: bright('金木水火土', 'wx', ['goldcrown', 'twig', 'drop', 'flame', 'clay'], 'clay'),
-  shanchuan: bright('日月山川', 'sc', ['sunhat', 'moonclip', 'peaks', 'wave', 'rice', 'straw'], 'straw'),
-  ocean: bright('海底', 'oc', ['goggles', 'seaweed', 'bubbles', 'starfish', 'shell', 'snorkel'], 'shell'),
-  space: bright('太空', 'sp', ['helmet', 'antenna2', 'planet', 'visor', 'rocket', 'ufo'], 'antenna2'),
-  campus: bright('校园和节日', 'xy', ['gradcap', 'pencil', 'flagclip', 'lantern', 'redscarf', 'book'], 'redscarf'),
-  season: bright('四季和江南', 'sj', ['maple', 'snowflake', 'flowercrown', 'sunhat', 'umbrella', 'lotus'], 'lotus'),
-  night: bright('夜空和动物', 'ye', ['moonboat', 'feather', 'rabbit', 'bear', 'drop', 'starclip'], 'moonboat'),
+  sky: bright('天和地', '1', null, 'sprout'),   // 第 1 关用角色自带的挂件；序章《我是中国人》也用这个世界
+  wuxing: bright('金木水火土', 'wx', ['goldcrown', 'twig', 'drop', 'flame', 'clay', 'chef', 'crown'], 'clay'),
+  shanchuan: bright('日月山川', 'sc', ['sunhat', 'moonclip', 'peaks', 'wave', 'rice', 'straw', 'cowboy', 'party'], 'straw'),
+  ocean: bright('海底', 'oc', ['goggles', 'seaweed', 'bubbles', 'starfish', 'shell', 'snorkel', 'pirate', 'crown'], 'shell'),
+  space: bright('太空', 'sp', ['helmet', 'antenna2', 'planet', 'visor', 'rocket', 'ufo', 'propeller', 'knight'], 'antenna2'),
+  campus: bright('校园和节日', 'xy', ['gradcap', 'pencil', 'flagclip', 'lantern', 'redscarf', 'book', 'chef', 'propeller', 'party'], 'redscarf'),
+  season: bright('四季和江南', 'sj', ['maple', 'snowflake', 'flowercrown', 'sunhat', 'umbrella', 'lotus', 'cowboy', 'viking'], 'lotus'),
+  night: bright('夜空和动物', 'ye', ['moonboat', 'feather', 'rabbit', 'bear', 'drop', 'starclip', 'wizard', 'ninja', 'catears'], 'moonboat'),
   horror1: { name: '黑森林', loops: '2', dark: true, level: 1 },
   zombie: horror('僵尸', 'zb', 'zombie', 2),
   virus: horror('病毒和生化实验室', 'vr', 'virus', 3),
   ghost: horror('幽灵鬼屋', 'gh', 'ghost', 4),
   fog: horror('雾中小镇', 'fg', 'fog', 5),
   shadow: horror('影子怪', 'sd', 'shadow', 6),
+  deepsea: horror('深海怪', 'ds', 'deepsea', 2),
+  vampire: horror('吸血鬼城堡', 'vp', 'vampire', 3),
+  alien: horror('外星寄生', 'al', 'alien', 4),
+  mummy: horror('木乃伊金字塔', 'mm', 'mummy', 5),
+  toys: horror('诡异玩具屋', 'ty', 'toys', 6),
   ultimate: horror('终极大混合', 'ul', 'ultimate', 7),
 };
 // 恐怖等级越高，每个角色的恐怖件越多

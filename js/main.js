@@ -4,6 +4,7 @@ import { charSVG, CH } from './art.js';
 import { STYLES, LOOPKEY, INSTRUMENTS, GROUPS, SINGER_COLORS, lookFor, singerLook } from './styles.js';
 import * as U from './unlock.js';
 import { BG } from './bg.js';
+import { sceneFor } from './scenes.js';
 import * as A from './audio.js';
 import * as store from './store.js';
 import * as Py from './pinyin.js';
@@ -11,7 +12,8 @@ import * as Rec from './studio.js';
 
 const $ = (id) => document.getElementById(id);
 const NS = 10, NEED = 3;                      // 10 个空位；找到 3 个彩蛋解锁下一关
-const HORROR = new Set([3, 8, 12, 16, 21, 28, 33]);
+// 恐怖关占三分之一（家长要求）
+const HORROR = new Set([3, 6, 8, 12, 15, 18, 21, 24, 27, 28, 30, 33]);
 const shuffle = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const code = (w) => [...w].map((c) => c.codePointAt(0).toString(16)).join('-');
 const zUrl = (ch) => `audio/voice/z/${code(ch)}.mp3`;
@@ -45,7 +47,7 @@ async function enter(id) {
   stage = DATA.stages.find((s) => s.id === id);
   save.current = id; persist();
   document.documentElement.classList.toggle('dark', !!style().dark);
-  $('bg').innerHTML = BG[stage.style]();
+  $('bg').innerHTML = BG[stage.style]() + sceneFor(stage.id);   // 世界背景 + 这一课的专属场景
   // 同一个世界里的几关，背景色调稍微变一下
   $('bg').style.filter = style().dark ? '' : `hue-rotate(${((stage.id * 37) % 50) - 25}deg)`;
   $('badge').textContent = stage.prologue ? `🏫 序章 · ${stage.lesson}` : stage.bonus ? `🎁 彩蛋关 · ${stage.lesson}` : `第 ${id} 关 · ${stage.lesson}`;
@@ -328,7 +330,8 @@ function group(label, cls) {
 function renderBar() {
   $('bar').innerHTML = '';
   const gi = group(`乐手 ${unlocked.size}/${INSTRUMENTS.length}`, 'ginst');
-  GROUPS.forEach(([, ids]) => ids.filter((id) => unlocked.has(id)).forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id]))));
+  // 按发现的先后顺序：最开始的 8 个在前，之后每发现一个排到最后，位置不再变
+  syncOrder().forEach((id) => gi.appendChild(icon({ kind: 'inst', id }, charSVG(id, look(id)), 'ic', NAMES[id])));
   U.next(save, DATA).forEach((id) => {
     const b = document.createElement('button'); b.className = 'ic locked'; b.innerHTML = charSVG(id, {}) + '<span class="lk">🔒</span>';
     b.setAttribute('aria-label', '还没解锁的伙伴');
@@ -380,6 +383,15 @@ async function newClip() {
 function markSpecial(k) { save.special = save.special || {}; if (!save.special[k]) { save.special[k] = 1; persist(); refreshUnlocks(); } }
 
 /* ================= 伙伴解锁 ================= */
+function syncOrder() {
+  const order = (save.order ||= [...U.INITIAL]);
+  let changed = false;
+  U.INITIAL.forEach((id) => { if (!order.includes(id)) { order.push(id); changed = true; } });
+  // 新解锁的按解锁顺序接到最后（排队的按排队顺序，特殊任务的跟在后面）
+  [...U.QUEUE, ...Object.keys(U.SPECIAL)].forEach((id) => { if (unlocked.has(id) && !order.includes(id)) { order.push(id); changed = true; } });
+  if (changed) persist();
+  return order.filter((id) => unlocked.has(id));
+}
 function refreshUnlocks(first = false) {
   const now = U.compute(save, DATA), fresh = [...now].filter((id) => !unlocked.has(id));
   unlocked = now;
