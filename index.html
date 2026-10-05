@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>溜溜</title>
+<meta name="description" content="一年级上册语文混音游戏：拖字宝宝到音豆身上，听它们唱歌。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <button class="tbtn" id="mapBtn" aria-label="阶段地图">🗺️ 地图</button>
+    <div class="badge" id="badge"></div>
+    <div class="eggs" id="eggs"></div>
+    <button class="evo" id="evoBtn" disabled>✨ 进化</button>
+    <button class="tbtn" id="clearBtn" aria-label="清空舞台">🧹</button>
+  </header>
+  <main class="stage" id="stage">
+    <div class="bg" id="bg"></div>
+    <div class="row" id="row"></div>
+  </main>
+  <nav class="bar" id="bar">
+    <div class="grp"><div class="gl">乐手</div><div class="icons" id="gInst"></div></div>
+    <div class="grp"><div class="gl" id="charLabel">字宝宝</div><div class="icons" id="gChar"></div></div>
+  </nav>
+</div>
+
+<div class="overlay" id="mapLayer" hidden>
+  <div class="mapbox">
+    <div class="maphead"><b>阶段地图</b><button class="tbtn" id="mapClose">✕ 关闭</button></div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+</div>
+<div class="banner" id="banner" hidden><div class="bw" id="bw"></div><div class="bp" id="bp"></div></div>
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast"></div>
+<div class="overlay start" id="startLayer">
+  <button class="startbtn" id="startBtn">▶ 开始</button>
+  <div class="hint">溜溜 · 一年级上册语文</div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

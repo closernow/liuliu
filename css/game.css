@@ -1,0 +1,158 @@
+:root{
+  --b:.545s;
+  --ink:#fff; --bar:#1d1633; --panel:rgba(16,10,32,.72); --accent:#F5C04A; --muted:#b8acd8;
+  --py:'Andika','Avenir Next','Segoe UI',sans-serif;
+  --ui:system-ui,-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+.dark{--bar:#12060a;--panel:rgba(20,4,8,.78);--accent:#ff5a5a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#1d1633;color:var(--ink);font-family:var(--ui);user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{display:flex;flex-direction:column;height:100%}
+
+/* 顶栏 */
+.top{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bar);z-index:5;flex-wrap:wrap}
+.tbtn{border:none;border-radius:999px;padding:9px 14px;font-weight:800;font-size:16px;background:rgba(255,255,255,.14)}
+.badge{font-weight:900;font-size:17px;color:var(--accent);border:2px solid var(--accent);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.eggs{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:wrap}
+.egg{min-width:76px;height:52px;border-radius:14px;border:2px dashed var(--muted);background:rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;font-weight:800}
+.egg .w{font-size:19px}.egg .p{font-family:var(--py);font-size:13px;color:var(--accent)}
+.egg.found{border-style:solid;border-color:var(--accent);background:rgba(245,192,74,.18)}
+.egg.pop{animation:pop .6s}
+.evo{border:none;border-radius:999px;padding:11px 20px;font-weight:900;font-size:18px;background:#3d3558;color:#7f769c;cursor:not-allowed}
+.evo.ready{background:linear-gradient(90deg,#F5C04A,#FF8FA3,#86C5FF);color:#1A1430;cursor:pointer;animation:pulse 1s infinite}
+.evo.spot{position:relative;z-index:30;box-shadow:0 0 0 9999px rgba(0,0,0,.55),0 0 30px #F5C04A}
+@keyframes pulse{50%{transform:scale(1.08)}}
+@keyframes pop{30%{transform:scale(1.25)}}
+
+/* 舞台 */
+.stage{flex:1;position:relative;overflow:hidden;min-height:240px}
+.bg,.bg svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.row{position:absolute;left:0;right:0;bottom:3%;display:flex;justify-content:center;align-items:flex-end;gap:clamp(2px,1vw,14px);padding:0 8px}
+.slot{position:relative;width:clamp(84px,12.2vw,176px);text-align:center;cursor:pointer;touch-action:none}
+.slot .fig svg{width:100%;height:auto;display:block;overflow:visible}
+.slot.drop .fig{filter:drop-shadow(0 0 14px var(--accent))}
+.slot.muted .fig{filter:grayscale(1) brightness(.5)}
+.slot.muted::after{content:'z z';position:absolute;top:14%;right:12%;font-weight:900;font-size:18px;color:#fff}
+.slot .lab{display:inline-block;min-height:32px;min-width:58px;padding:2px 10px;border-radius:999px;background:rgba(0,0,0,.5);font-size:20px;font-weight:800;margin-top:2px;white-space:nowrap}
+.slot:not(.used) .lab{visibility:hidden}
+.slot .lab .py{font-family:var(--py);font-size:16px;color:var(--accent);margin-left:4px}
+.slot .x{position:absolute;top:-6px;right:-2px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.6);font-size:15px;display:none}
+.slot.used:hover .x,.slot.used.sel .x{display:block}
+.slot.no{animation:shake .5s}
+.slot.cheer .fig{animation:hop .45s 3}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes hop{50%{transform:translateY(-26px)}}
+.empty path{fill:rgba(255,255,255,.12);stroke:rgba(255,255,255,.55);stroke-width:3;stroke-dasharray:8 7}
+
+/* 图标栏 */
+.bar{display:flex;gap:12px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--bar);overflow-x:auto;z-index:5}
+.grp{display:flex;flex-direction:column;gap:4px;min-width:0}
+.gl{font-size:13px;color:var(--muted);font-weight:700}
+.icons{display:flex;gap:8px;flex-wrap:wrap}
+.ic{border:none;border-radius:16px;background:rgba(255,255,255,.1);padding:4px;width:66px;height:78px;display:flex;align-items:center;justify-content:center;touch-action:none;position:relative}
+.ic svg{width:60px;height:auto;overflow:visible;pointer-events:none}
+.ic.ch{flex-direction:column;background:#fffdf5;color:#1f1a33;width:70px}
+.dark .ic.ch{background:#d8cfc0;color:#3a0a10}
+.ic.ch .c{font-size:36px;font-weight:700;line-height:1}
+.ic.ch .p{font-family:var(--py);font-size:15px;color:#c9601e}
+.ic.sel{outline:4px solid var(--accent)}
+.ic.on{box-shadow:inset 0 0 0 3px rgba(245,192,74,.6)}
+.ghost{position:fixed;pointer-events:none;z-index:50;transform:translate(-50%,-50%) scale(1.15);opacity:.9}
+
+/* 弹层 */
+.overlay{position:fixed;inset:0;background:rgba(10,6,20,.82);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay[hidden]{display:none}
+.mapbox{background:#241c40;border-radius:20px;padding:16px;max-width:1000px;width:100%;max-height:100%;overflow:auto}
+.maphead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.tile{border:none;border-radius:14px;padding:10px 6px;min-height:84px;background:#3a3060;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:800}
+.tile .n{font-size:13px;color:var(--muted)}.tile .t{font-size:16px}
+.tile.open{background:linear-gradient(160deg,#5a49a8,#3a3060)}
+.tile.cur{outline:3px solid var(--accent)}
+.tile.horror{background:linear-gradient(160deg,#6a1420,#2a0a10)}
+.tile.locked,.tile.soon{opacity:.45}
+.tile .s{font-size:12px;color:var(--accent)}
+.start{flex-direction:column;gap:18px;background:#1d1633}
+.startbtn{border:none;border-radius:999px;padding:22px 54px;font-size:34px;font-weight:900;background:linear-gradient(90deg,#F5C04A,#FF8FA3,#86C5FF);color:#1A1430;animation:pulse 1.2s infinite}
+.hint{color:var(--muted);font-size:16px}
+.banner{position:fixed;left:50%;top:24%;transform:translateX(-50%);z-index:35;background:linear-gradient(90deg,#F5C04A,#FF8FA3);color:#1A1430;border-radius:24px;padding:16px 40px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4);animation:pop .6s}
+.dark .banner{background:linear-gradient(90deg,#8a1020,#3a0a30);color:#fff}
+.banner[hidden]{display:none}
+.bw{font-size:56px;font-weight:900;letter-spacing:.1em}.bp{font-family:var(--py);font-size:28px;font-weight:700}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:45;transition:opacity .4s}
+.flash.on{opacity:1;transition:opacity .15s}
+.toast{position:fixed;left:50%;bottom:22%;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:10px 18px;border-radius:999px;font-weight:800;opacity:0;transition:opacity .3s;z-index:36;pointer-events:none}
+.toast.show{opacity:1}
+.confetti{position:fixed;width:10px;height:14px;z-index:34;pointer-events:none;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+/* 背景动画 */
+.drift{animation:drift 40s linear infinite}
+@keyframes drift{50%{transform:translateX(60px)}}
+.bob{animation:bobbg 4s ease-in-out infinite}
+@keyframes bobbg{50%{transform:translateY(-14px)}}
+.fog{animation:fog 12s ease-in-out infinite;opacity:.6}
+@keyframes fog{50%{transform:translateX(120px);opacity:.3}}
+.blinkbg{animation:blinkbg 4s infinite}
+@keyframes blinkbg{0%,40%,100%{opacity:0}45%,70%{opacity:1}72%{opacity:0}74%,80%{opacity:1}}
+.dark .stage{animation:flick 7s infinite}
+@keyframes flick{0%,92%,96%,100%{filter:none}93%,95%{filter:brightness(.5)}}
+
+/* ===== 角色骨架动画（和 js/art.js 配套）===== */
+.arm{transform:rotate(var(--a))}
+.bd{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.015,.985)}}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+@keyframes blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.mouth{transform-box:fill-box;transform-origin:center}
+.play .arm{animation:swing var(--d) ease-in-out infinite;animation-delay:calc(var(--dl,0s) - var(--ph,0s))}
+@keyframes swing{0%,100%{transform:rotate(var(--a))}50%{transform:rotate(calc(var(--a) + var(--s)))}}
+.play .bd{animation:bounce var(--b) ease-out infinite;animation-delay:calc(0s - var(--ph,0s))}
+@keyframes bounce{0%{transform:scale(1.05,.93)}35%{transform:scale(.98,1.04) translateY(-3px)}100%{transform:none}}
+.play .head,.dark .play .head{animation:bob calc(var(--b)*2) ease-in-out infinite;animation-delay:calc(0s - var(--ph,0s))}
+@keyframes bob{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.play .leg{animation:step calc(var(--b)*2) ease-in-out infinite;animation-delay:calc(0s - var(--ph,0s))}
+.play .leg.r{animation-delay:calc(var(--b)*-1 - var(--ph,0s))}
+@keyframes step{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+.play .mouth{animation:sing var(--b) ease-out infinite;animation-delay:calc(0s - var(--ph,0s))}
+@keyframes sing{0%{transform:scaleY(2.1)}60%,100%{transform:scaleY(1)}}
+.muted .arm,.muted .bd,.muted .head,.muted .leg,.muted .mouth{animation-play-state:paused}
+/* 歌手：唱到自己的拍子时跳一下、张嘴 */
+.singer.sing .bd{animation:bounce .4s ease-out}
+.singer.sing .mouth{animation:sing .4s ease-out}
+.singer.sing .cardg{animation:cardup .4s ease-out}
+@keyframes cardup{30%{transform:translateY(-6px)}}
+/* 恐怖件 */
+.dangle{animation:pend 1.7s ease-in-out infinite}
+@keyframes pend{0%,100%{transform:rotate(14deg)}50%{transform:rotate(-14deg)}}
+.beat{transform-box:fill-box;transform-origin:center;animation:pulse2 var(--b) ease-out infinite}
+@keyframes pulse2{0%{transform:scale(1.18)}50%,100%{transform:scale(1)}}
+.drip{animation:drip 2.2s ease-in infinite}
+@keyframes drip{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(22px);opacity:0}}
+.glitch{animation:glitch 1.3s steps(1) infinite}
+@keyframes glitch{0%,70%,100%{transform:none;opacity:1}72%{transform:translateX(3px);opacity:.6}76%{transform:translateX(-2px)}80%{opacity:.3}}
+.dark .head{animation:twitch 5s infinite}
+@keyframes twitch{0%,88%,100%{transform:rotate(0)}90%{transform:rotate(-9deg)}93%{transform:rotate(6deg)}}
+.float{animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-5px)}}
+@keyframes wave{50%{transform:skewY(6deg) translateY(2px)}}
+.wave{transform-box:fill-box;transform-origin:left center;animation:wave 1.6s ease-in-out infinite}
+.wiggle{animation:wiggle .9s ease-in-out infinite}
+@keyframes wiggle{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(12deg)}}
+.orbit{animation:orbit 3.3s linear infinite}
+@keyframes orbit{from{transform:rotate(0) scaleY(.5)}to{transform:rotate(360deg) scaleY(.5)}}
+.crawl{animation:crawl 4s linear infinite}
+@keyframes crawl{0%{transform:translate(52px,146px) rotate(-50deg)}48%{transform:translate(86px,108px) rotate(-50deg)}50%{transform:translate(86px,108px) rotate(130deg)}98%{transform:translate(52px,146px) rotate(130deg)}100%{transform:translate(52px,146px) rotate(-50deg)}}
+.lurk{animation:lurk 5s ease-in-out infinite}
+@keyframes lurk{0%,100%{transform:translateX(-10px);opacity:.8}50%{transform:translateX(12px);opacity:.4}}
+.spin{transform-box:fill-box;transform-origin:center;animation:spinr 8s linear infinite}
+@keyframes spinr{to{transform:rotate(360deg)}}
+.flick2{transform-box:fill-box;transform-origin:center bottom;animation:flame .5s ease-in-out infinite alternate}
+@keyframes flame{to{transform:scale(.9,1.12)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@media (max-height:560px){.ic{height:64px;width:56px}.ic svg{width:50px}.ic.ch{width:58px}.ic.ch .c{font-size:28px}}
+.slot:nth-child(2) .eye{animation-delay:-1.3s}.slot:nth-child(3) .eye{animation-delay:-2.1s}.slot:nth-child(4) .eye{animation-delay:-.6s}
+.slot:nth-child(5) .eye{animation-delay:-3s}.slot:nth-child(6) .eye{animation-delay:-1.8s}.slot:nth-child(7) .eye{animation-delay:-3.6s}

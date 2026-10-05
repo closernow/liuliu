@@ -14,8 +14,9 @@
 
 ## 常用命令
 - 生成音效：python tools/render_loops.py （需要 numpy、scipy）
-- 生成原型：python tools/build_prototype.py ，输出 build/yindou-band-v3.html
-- 本地预览：python -m http.server ，用浏览器打开
+- 生成读音：python tools/gen_voice.py （需要 edge-tts，要联网；已有的不重做），试听 build/voice-check.html
+- 生成原型：python tools/build_prototype.py ，输出 build/yindou-band-v3.html 和 build/characters-v1.html
+- 本地预览：python tools/serve.py ，浏览器打开 http://localhost:8000 （不缓存，改完刷新就行）
 
 ## 部署
 GitHub Pages，main 分支根目录。build/ 里的临时文件不提交，正式版的音频放在 audio/ 目录。

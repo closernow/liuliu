@@ -201,62 +201,122 @@ def mk(name, steps, buf, wet=0.0, rv_decay=0.35, peak=0.9):
     loops[name] = norm(buf, peak)
     onsets[name] = sorted(set(int(s) % STEPS for s in steps))
 
-# ===== Phase 1 =====
-b = np.zeros(N); s_ = [0, 8, 10, 16, 24, 26]
-for s in s_: put(b, st(s), kick() * (1 if s % 8 == 0 else .7))
-mk('kick1', s_, b)
+def pluck(m, dur=0.9):
+    """古筝一样的拨弦（Karplus-Strong）"""
+    f = mtof(m); n = int(dur * SR); L = max(2, int(SR / f))
+    buf = noise(L) * 0.8; out = np.zeros(n)
+    for k in range(n):
+        v = buf[k % L]; out[k] = v
+        buf[k % L] = 0.5 * (v + buf[(k + 1) % L]) * 0.996
+    return lp(out, 4500) * env(tt(dur), 0.001, dur * 0.5)
 
-b = np.zeros(N); s_ = list(range(32))
-for s in s_: put(b, st(s), shaker() * (1 if s % 4 == 2 else .45))
-mk('shaker1', [x for x in s_ if x % 2 == 0], b)
+def flute(m, dur):
+    t = tt(dur + 0.1); f = mtof(m)
+    vib = 1 + 0.008 * np.sin(2 * np.pi * 5 * t) * np.clip((t - 0.1) / 0.2, 0, 1)
+    ph = 2 * np.pi * np.cumsum(f * vib) / SR
+    x = np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.08 * np.sin(3 * ph) + bp(noise(len(t)), f * .8, f * 2.5) * 0.25
+    e = np.clip(t / 0.06, 0, 1) * np.clip((dur + 0.1 - t) / 0.1, 0, 1)
+    return x * e * 0.6
 
-b = np.zeros(N); s_ = [4, 12, 20, 28, 30, 31]
-for s in s_: put(b, st(s), clap() * (1 if s in (4, 12, 20, 28) else .45))
-mk('clap1', s_, b, wet=.15)
+def woodblock(f=900):
+    t = tt(0.12)
+    return (np.sin(2 * np.pi * f * t) + 0.4 * np.sin(2 * np.pi * f * 2.7 * t)) * env(t, 0.0005, 0.025)
 
-b = np.zeros(N); s_ = []
-for h, root in enumerate(P1_BASS):
-    for o, oc in ((0, 0), (3, 12), (6, 0)):
-        s = h * 8 + o; s_.append(s); put(b, st(s), pluck_bass(root + oc, .25))
-mk('bass1', s_, b)
+def waterdrop(m):
+    t = tt(0.25); f0 = mtof(m)
+    f = f0 * (1 + 0.8 * np.exp(-t / 0.02))
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * env(t, 0.001, 0.06)
 
-b = np.zeros(N); s_ = []
-for base in (12, 28):
-    for k, m in enumerate([84, 88, 91, 96, 100]):
-        put(b, st(base) + int(k * 0.045 * SR), fm_bell(m, .8, 2.0, 1.5) * .5)
-    s_.append(base)
-mk('chime1', s_, b, wet=.35)
+def snap():
+    t = tt(0.15)
+    return bp(noise(len(t)), 1800, 4500) * env(t, 0.0005, 0.012) + np.sin(2 * np.pi * 2300 * t) * env(t, 0.0005, 0.005) * 0.5
 
-swp = np.zeros(N); x = noise(N); cut = np.geomspace(250, 7000, N)
-y = np.zeros(N); zi = None
-for k in range(0, N, 256):
-    c = cut[k]; bb, aa = signal.butter(2, [c * .7 / (SR / 2), min(c * 1.3, SR / 2 * .95) / (SR / 2)], 'band')
-    if zi is None: zi = signal.lfilter_zi(bb, aa) * 0
-    y[k:k + 256], zi = signal.lfilter(bb, aa, x[k:k + 256], zi=zi)
-amp = np.clip((np.arange(N) / N - 0.45) / 0.55, 0, 1) ** 2
-swp = y * amp
-swp[:st(1)] *= np.linspace(1, 0, st(1)) + 0  # quick tail at loop start
-mk('sweep1', [0, 24, 28], swp, wet=.2)
+def drone(m, dur, dark=False):
+    t = tt(dur); f = mtof(m)
+    x = np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * f * 2.003 * t) + (0.3 * np.sin(2 * np.pi * f * 1.498 * t) if dark else 0)
+    return lp(x, 700 if dark else 1100) * np.minimum(1, t / 0.08) * np.minimum(1, (dur - t) / 0.15) * 0.35
 
-b = np.zeros(N); pat = [(2, 79), (5, 84), (7, 76), (10, 81), (13, 79), (18, 84), (21, 88), (23, 79), (26, 81), (29, 76)]
-for s, m in pat: put(b, st(s), blip(m) * .7)
-mk('blip1', [s for s, _ in pat], delay(b, 3, .35, .3))
+MEL_A = [(0, 72, 1), (1, 72, 1), (3, 79, 2), (6, 76, 2), (8, 74, 1), (9, 74, 1), (11, 72, 2), (14, 69, 2), (16, 72, 1), (17, 72, 1), (19, 79, 2), (22, 81, 2), (24, 79, 3), (28, 76, 4)]
+MEL_B = [(0, 76, 3), (3, 79, 1), (4, 81, 4), (8, 79, 2), (10, 76, 2), (12, 74, 4), (16, 72, 3), (19, 74, 1), (20, 76, 2), (22, 79, 2), (24, 76, 6), (30, 74, 2)]
+MEL_C = [(0, 79, 2), (2, 76, 2), (4, 74, 4), (8, 72, 2), (10, 74, 2), (12, 76, 4), (16, 81, 2), (18, 79, 2), (20, 76, 2), (22, 74, 2), (24, 72, 8)]
+BELL_A = [(0, 76, 2), (2, 79, 2), (4, 81, 2), (6, 79, 2), (8, 76, 4), (12, 74, 2), (14, 72, 2), (16, 72, 2), (18, 74, 2), (20, 76, 2), (22, 79, 2), (24, 74, 6), (30, 72, 2)]
+BELL_B = [(0, 84, 2), (4, 81, 2), (6, 79, 2), (8, 76, 4), (14, 79, 2), (16, 84, 4), (20, 86, 2), (22, 84, 2), (24, 81, 8)]
 
-b = np.zeros(N); mel = [(0, 76, 2), (2, 79, 2), (4, 81, 2), (6, 79, 2), (8, 76, 4), (12, 74, 2), (14, 72, 2), (16, 72, 2), (18, 74, 2), (20, 76, 2), (22, 79, 2), (24, 74, 6), (30, 72, 2)]
-for s, m, l in mel: put(b, st(s), fm_bell(m, 1.0, 3.5, 3) * .8)
-mk('bells1', [s for s, _, _ in mel], b, wet=.3)
+def bright_set(sfx, tr=0, lead_kind='square', mel=MEL_A, bell_kind='fm', bells=BELL_A, kit='pop', chords=None, bass=None):
+    """明亮风格的一整套 12 个乐器循环。sfx 是套名，tr 是整体移调（半音）。"""
+    CH = [[m + tr for m in c] for c in (chords or P1_CH)]
+    BS = [m + tr for m in (bass or P1_BASS)]
+    b = np.zeros(N); s_ = [0, 8, 10, 16, 24, 26]
+    for s in s_: put(b, st(s), (kick() if kit != 'wood' else lp(kick(110, 50, .4), 900)) * (1 if s % 8 == 0 else .7))
+    mk('kick' + sfx, s_, b, wet=.1 if kit == 'wood' else 0)
 
-b = np.zeros(N); mel = [(0, 72, 1), (1, 72, 1), (3, 79, 2), (6, 76, 2), (8, 74, 1), (9, 74, 1), (11, 72, 2), (14, 69, 2), (16, 72, 1), (17, 72, 1), (19, 79, 2), (22, 81, 2), (24, 79, 3), (28, 76, 4)]
-for s, m, l in mel: put(b, st(s), lead(m, l * S16 * .9))
-mk('lead1', [s for s, _, _ in mel], b, wet=.2)
+    b = np.zeros(N); s_ = list(range(32))
+    for s in s_: put(b, st(s), shaker(.04 if kit == 'soft' else .05) * (1 if s % 4 == 2 else .45) * (.7 if kit == 'soft' else 1))
+    mk('shaker' + sfx, [x for x in s_ if x % 2 == 0], b)
 
-b = np.zeros(N)
-for h, ch in enumerate(P1_CH): put(b, st(h * 8), pad(ch, 8 * S16))
-mk('pad1', [0, 8, 16, 24], b, wet=.3)
+    b = np.zeros(N); s_ = [4, 12, 20, 28, 30, 31]
+    for s in s_: put(b, st(s), (woodblock(1000 if s in (4, 20) else 760) if kit == 'wood' else clap()) * (1 if s in (4, 12, 20, 28) else .45))
+    mk('clap' + sfx, s_, b, wet=.15)
 
-b = np.zeros(N); top = [67, 69, 69, 67]
-for h, ch in enumerate(P1_CH): put(b, st(h * 8), choir([ch[0] - 12, top[h] - 12], 8 * S16, 'a'))
-mk('choir1', [0, 8, 16, 24], b, wet=.35)
+    b = np.zeros(N); s_ = []
+    for h, root in enumerate(BS):
+        for o, oc in ((0, 0), (3, 12), (6, 0)):
+            s = h * 8 + o; s_.append(s); put(b, st(s), pluck_bass(root + oc, .25))
+    mk('bass' + sfx, s_, b)
+
+    b = np.zeros(N); s_ = []
+    for base in (12, 28):
+        for k, m in enumerate([84, 88, 91, 96, 100]):
+            put(b, st(base) + int(k * 0.045 * SR), fm_bell(m + tr, .8, 2.0, 1.5) * .5)
+        s_.append(base)
+    mk('chime' + sfx, s_, b, wet=.35)
+
+    x = noise(N); cut = np.geomspace(250, 7000, N); y = np.zeros(N); zi = None
+    for k in range(0, N, 256):
+        c = cut[k]; bb, aa = signal.butter(2, [c * .7 / (SR / 2), min(c * 1.3, SR / 2 * .95) / (SR / 2)], 'band')
+        if zi is None: zi = signal.lfilter_zi(bb, aa) * 0
+        y[k:k + 256], zi = signal.lfilter(bb, aa, x[k:k + 256], zi=zi)
+    swp = y * np.clip((np.arange(N) / N - 0.45) / 0.55, 0, 1) ** 2
+    swp[:st(1)] *= np.linspace(1, 0, st(1))
+    mk('sweep' + sfx, [0, 24, 28], swp, wet=.2)
+
+    b = np.zeros(N); pat = [(2, 79), (5, 84), (7, 76), (10, 81), (13, 79), (18, 84), (21, 88), (23, 79), (26, 81), (29, 76)]
+    for s, m in pat: put(b, st(s), (waterdrop(m + tr) if kit == 'soft' else blip(m + tr)) * .7)
+    mk('blip' + sfx, [s for s, _ in pat], delay(b, 3, .35, .3))
+
+    b = np.zeros(N)
+    for s, m, l in bells: put(b, st(s), (musicbox(m + tr) * .7 if bell_kind == 'box' else fm_bell(m + tr, 1.0, 3.5, 3) * .8))
+    mk('bells' + sfx, [s for s, _, _ in bells], b, wet=.3)
+
+    b = np.zeros(N)
+    for s, m, l in mel:
+        if lead_kind == 'pluck': sig = pluck(m + tr, max(.5, l * S16 * 1.5))
+        elif lead_kind == 'flute': sig = flute(m + tr, l * S16 * .9)
+        else: sig = lead(m + tr, l * S16 * .9)
+        put(b, st(s), sig)
+    mk('lead' + sfx, [s for s, _, _ in mel], b, wet=.25)
+
+    b = np.zeros(N)
+    for h, c in enumerate(CH): put(b, st(h * 8), pad(c, 8 * S16))
+    mk('pad' + sfx, [0, 8, 16, 24], b, wet=.3)
+
+    b = np.zeros(N); top = [67, 69, 69, 67]
+    for h, c in enumerate(CH): put(b, st(h * 8), choir([c[0] - 12, top[h] + tr - 12], 8 * S16, 'a'))
+    mk('choir' + sfx, [0, 8, 16, 24], b, wet=.35)
+
+    b = np.zeros(N); s_ = [4, 12, 20, 28]
+    for s in s_: put(b, st(s), snap())
+    for h, m in enumerate([45, 45, 43, 48]): put(b, st(h * 8), drone(m + tr, 7.5 * S16))
+    mk('snap' + sfx, s_, b, wet=.25)
+
+# ===== Phase 1：第 1 阶段 天和地 =====
+bright_set('1')
+# 第 2 阶段 金木水火土：五声调式，古筝、木鱼、八音盒
+bright_set('wx', tr=2, lead_kind='pluck', mel=MEL_B, bell_kind='box', bells=BELL_B, kit='wood',
+           chords=[[60, 64, 67], [57, 62, 64], [55, 60, 64], [57, 60, 64]], bass=[48, 45, 43, 45])
+# 第 4 阶段 日月山川：笛子、水滴声，柔和
+bright_set('sc', tr=-3, lead_kind='flute', mel=MEL_C, kit='soft',
+           chords=[[60, 64, 67], [53, 57, 60], [57, 60, 64], [55, 59, 62]], bass=[48, 41, 45, 43])
 
 # ===== Phase 2 (spooky) =====
 b = np.zeros(N); s_ = []
@@ -315,7 +375,19 @@ b = np.zeros(N)
 for h, ch in enumerate(P2_CH): put(b, st(h * 8), choir([ch[0], ch[2]], 8 * S16, 'u', vib=3, eerie=True))
 mk('choir2', [0, 8, 16, 24], b, wet=.5, rv_decay=1.0)
 
+# ===== 影影 暗色套 =====
+b = np.zeros(N); s_ = [4, 12, 14, 20, 28]
+for s in s_: put(b, st(s), snap() * (1 if s != 14 else .5))
+for h, m in enumerate([40, 41, 40, 39]): put(b, st(h * 8), drone(m, 7.5 * S16, dark=True))
+mk('snap2', s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
+
 # ---------- export ----------
+import soundfile as sf
+INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'lead', 'pad', 'choir', 'snap']
+def SPLIT(k):
+    for i in INSTS:
+        if k.startswith(i): return i, k[len(i):]
+    raise ValueError(k)
 out = {}
 for k, v in loops.items():
     L = int(0.004 * SR)
@@ -323,7 +395,11 @@ for k, v in loops.items():
         v = v.copy(); v[:L] *= np.linspace(0, 1, L); v[-L:] *= np.linspace(1, 0, L)
     bio = io.BytesIO()
     wavfile.write(bio, SR, (v * 32767).astype(np.int16))
-    out[k] = 'data:audio/wav;base64,' + base64.b64encode(bio.getvalue()).decode()
+    if k[-1] in '12': out[k] = 'data:audio/wav;base64,' + base64.b64encode(bio.getvalue()).decode()
     wavfile.write(f'build/wav/{k}.wav', SR, (v * 32767).astype(np.int16))
-json.dump({'loops': out, 'onsets': onsets, 'bpm': BPM, 'steps': STEPS}, open('build/audio.json', 'w'))
+    inst, setname = SPLIT(k)
+    os.makedirs(f'audio/loops/{setname}', exist_ok=True)
+    sf.write(f'audio/loops/{setname}/{inst}.flac', v.astype(np.float32), SR, subtype='PCM_16')
+json.dump({'loops': out, 'onsets': {k: v for k, v in onsets.items() if k[-1] in '12'}, 'bpm': BPM, 'steps': STEPS}, open('build/audio.json', 'w'))
+json.dump({'bpm': BPM, 'steps': STEPS, 'onsets': onsets}, open('audio/loops/onsets.json', 'w'))
 print('loops', len(out), 'json MB', round(len(json.dumps(out)) / 1e6, 2))
