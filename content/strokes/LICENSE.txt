@@ -1,0 +1,4 @@
+笔画数据来自 hanzi-writer-data（https://github.com/chanind/hanzi-writer-data），
+它源自 Make Me a Hanzi（https://github.com/skishore/makemeahanzi），
+按 Arphic Public License 发布：https://github.com/skishore/makemeahanzi/blob/master/APL/LICENSE
+笔顺动画和判断用 Hanzi Writer（https://github.com/chanind/hanzi-writer，MIT 许可），文件在 js/vendor/。

@@ -21,6 +21,7 @@
     <div class="eggs" id="eggs"></div>
     <button class="tbtn rec" id="recBtn" hidden>🎤 录音室</button>
     <button class="evo" id="evoBtn" disabled>✨ 进化</button>
+    <button class="tbtn write" id="writeBtn">✍️ 写字</button>
     <button class="tbtn" id="songBtn">⏺ 录歌</button>
     <button class="tbtn" id="mySongsBtn">🎵 我的歌</button>
     <button class="tbtn" id="clearBtn" aria-label="清空舞台">🧹</button>
@@ -43,6 +44,7 @@
 <div class="overlay" id="parentLayer" hidden><div class="mapbox"><div class="maphead"><b>家长入口</b><button class="tbtn" id="parentClose">✕ 关闭</button></div><div id="parentBody"></div></div></div>
 <div class="unlockfx" id="unlockFx" hidden><div class="rays"></div><div class="ufglow"></div><div class="uftitle" id="ufTitle"></div><div class="ufcard" id="ufCard"></div><div class="ufhint">点一下继续</div></div>
 <div class="overlay" id="galLayer" hidden><div class="mapbox"><div class="maphead"><b>👥 伙伴图鉴</b><button class="tbtn" id="galClose">✕ 关闭</button></div><div id="galBody"></div></div></div>
+<div class="overlay" id="writeLayer" hidden><div class="mapbox wbox2"><div class="maphead"><b>✍️ 写字</b><span><button class="tbtn" id="wBack" hidden>◀ 字表</button> <button class="tbtn" id="wClose">✕ 关闭</button></span></div><div id="wBody"></div></div></div>
 <div class="banner" id="banner" hidden><div class="bw" id="bw"></div><div class="bp" id="bp"></div></div>
 <div class="warp" id="warp" aria-hidden="true"><div class="stars"></div><div class="ring"></div><div class="wt" id="wt">进化中</div><div class="ws" id="ws"></div></div>
 <div class="toast" id="toast"></div>
@@ -51,6 +53,7 @@
   <div class="hint">溜溜 · 一年级上册语文</div>
 </div>
 
+<script src="js/vendor/hanzi-writer.min.js"></script>
 <script type="module" src="js/main.js"></script>
 <script>
 // 离线用：只在网上版本注册（本地预览时改代码要马上看到效果，不缓存）

@@ -37,6 +37,10 @@ PROMPTS = {
     'recready': '按住大红键，开始录音，说完松开。',
     'recok': '录好啦！',
     'mixhello': '全书大混音！学过的字、音节、唱词，都拿来玩吧！',
+    'writehello': '先看一看笔顺，再描一描，最后自己写一写。',
+    'star3': '写得真棒！三颗星！',
+    'star2': '写得很好！',
+    'star1': '写完啦，再试一次能得更多星星。',
 }
 # 乐手的名字，长按乐手时读
 NAMES = {'dong': '咚咚', 'cha': '嚓嚓', 'papa': '啪啪', 'beng': '嘣嘣', 'ding': '叮叮', 'wuwu': '呜呜', 'didu': '嘀嘟',
@@ -46,7 +50,7 @@ NAMES = {'dong': '咚咚', 'cha': '嚓嚓', 'papa': '啪啪', 'beng': '嘣嘣', 
          'dada2': '嗒嗒', 'gudong': '咕咚', 'dingdang': '叮当', 'puca': '噗嚓', 'xiuxiu': '咻咻', 'wawa': '哇哇', 'kaka': '咔咔',
          'dongda': '咚哒', 'bengcha': '嘣嚓', 'tongtong': '嗵嗵', 'qiangqiang': '锵锵', 'pada': '啪嗒', 'dida': '嘀嗒', 'dongqiang': '咚锵',
          'dingdong': '叮咚', 'gulu': '咕噜', 'baba': '叭叭', 'dengdeng': '噔噔', 'bibi': '哔哔', 'pengpeng': '嘭嘭', 'heiha': '嘿哈',
-         'bobo': '啵啵', 'gege': '咯咯', 'wengwu': '嗡呜', 'dongba': '咚吧', 'guagua': '刮刮', 'miaomiao': '喵喵', 'wangwang': '汪汪'}
+         'bobo': '啵啵', 'gege': '咯咯', 'wengwu': '嗡呜', 'dongba': '咚吧', 'guagua': '刮刮', 'miaomiao': '喵喵', 'wangwang': '汪汪', 'shuashua': '刷刷'}
 PROMPTS.update({'n_' + k: v for k, v in NAMES.items()})
 
 sem = None
@@ -115,6 +119,11 @@ async def main():
         for e in stg.get('eggs', []):
             if 'kind' in e: continue
             p = f'{OUT}/w/{code(e["w"])}.mp3'; add(g, e['w'], e['p'], p, lambda w=e['w'], p=p: tts(w, p))
+    # 写字表的字
+    if os.path.exists('content/writing.json'):
+        for grp in json.load(open('content/writing.json', encoding='utf-8'))['groups']:
+            for ch, py in grp['chars']:
+                p = f'{OUT}/z/{code(ch)}.mp3'; add('写字 ' + grp['title'], ch, py, p, lambda py=py, p=p: tts(py, p))
     # 唱词
     for f, base in (('content/rap_public.json', 'audio/voice/rap'), ('private/texts.json', 'private/voice/rap')):
         if not os.path.exists(f): continue

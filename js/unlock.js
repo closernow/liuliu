@@ -15,12 +15,15 @@ export const SPECIAL = {
   heiha: { how: '在彩蛋关或序章里把整首排对', test: (s, D) => D.stages.some((st) => st.bonus && (s.found[st.id] || []).includes(2)) },
   bibi: { how: '在拼音关里一共拼对 30 个音节', test: (s) => (s.pyOK || 0) >= 30 },
   dongqiang: { how: '在第 33 关全书大混音里找到彩蛋', test: (s) => (s.found[33] || []).length > 0 },
+  shuashua: { how: '写字一共得到 30 颗星星', test: (s) => starCount(s) >= 30 },
 };
 
+// 写字的星星：每个字最多 3 颗，每攒 6 颗送一个伙伴
+export const starCount = (s) => Object.values(s.write || {}).reduce((n, v) => n + v, 0);
 export const eggCount = (s) => Object.values(s.found || {}).reduce((n, a) => n + a.length, 0);
 export function compute(s, D) {
   const out = new Set(INITIAL);
-  const n = Math.floor(eggCount(s) / 2) + (s.gifts || 0);
+  const n = Math.floor(eggCount(s) / 2) + (s.gifts || 0) + Math.floor(starCount(s) / 6);
   QUEUE.slice(0, n).forEach((id) => out.add(id));
   for (const [id, sp] of Object.entries(SPECIAL)) if (sp.test(s, D)) out.add(id);
   return out;
@@ -28,9 +31,9 @@ export function compute(s, D) {
 // 还没解锁的伙伴怎么解锁
 export function hint(id, s) {
   if (SPECIAL[id]) return SPECIAL[id].how;
-  const k = QUEUE.indexOf(id), have = Math.floor(eggCount(s) / 2) + (s.gifts || 0);
+  const k = QUEUE.indexOf(id), have = Math.floor(eggCount(s) / 2) + (s.gifts || 0) + Math.floor(starCount(s) / 6);
   const need = Math.max(1, (k + 1 - have) * 2 - (eggCount(s) % 2));
-  return `再找 ${need} 个彩蛋就能解锁（每天第一次来玩也会送一个）`;
+  return `再找 ${need} 个彩蛋就能解锁（写字攒星星、每天第一次来玩也会送）`;
 }
 // 接下来最快能解锁的几个（图标栏里放带锁的剪影吊胃口）
 export function next(s, D, n = 3) {

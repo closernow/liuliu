@@ -593,6 +593,13 @@ def more_insts(sfx, CH, BS, tr=0, dark=False):
     b = np.zeros(N); s_ = [0, 6, 12, 16, 22, 28]
     for i, s in enumerate(s_): put(b, st(s), meow((76, 79, 74, 76, 81, 79)[i] + tr - (12 if D else 0)))
     m('meow', s_, b, .2)
+    # 刷刷 爵士鼓刷：一直在"沙——沙——"地画圈，二四拍轻轻一点（写字得星星解锁的伙伴）
+    b = np.zeros(N); t = np.arange(N) / SR
+    swirl = bp(noise(N), 2500, 9000) * (0.35 + 0.25 * np.sin(2 * np.pi * t / (8 * S16)) ** 2) * 0.35
+    b += swirl
+    for s in (4, 12, 20, 28): put(b, st(s), bp(noise(st(.15)), 1500, 7000) * env(tt(.15)[:st(.15)], .002, .05) * (1.2 if not D else 1.5))
+    for s in (3, 11, 19, 27): put(b, st(s) + int(S16 * .33 * SR), bp(noise(st(.08)), 2000, 8000) * env(tt(.08)[:st(.08)], .002, .02) * .5)
+    m('brush', [4, 12, 20, 28], b, .2)
     # 汪汪 狗叫
     b = np.zeros(N); s_ = [4, 6, 12, 20, 22, 28, 30]
     for s in s_: put(b, st(s), bark(55 - (6 if D else 0)))
@@ -959,7 +966,7 @@ INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'l
          'epiano', 'cello', 'violin', 'guitar', 'saw', 'edm', 'trap', '808', 'arp', 'vox',
          'snare', 'conga', 'cowbell', 'beatbox', 'laser', 'wobble', 'scratch',
          'breaks', 'dembow', 'toms', 'ride', 'tamb', 'clave', 'gong', 'steel', 'marimba', 'brass', 'slap', 'chip', 'stomp', 'chant',
-         'bubble', 'castanet', 'reese', 'djembe', 'guiro', 'meow', 'bark']
+         'bubble', 'castanet', 'reese', 'djembe', 'guiro', 'meow', 'bark', 'brush']
 # 2026-10-05 删掉的乐手：呜呜 sweep、呼呼 pad、啦啦 choir、嘀嘟 blip、嗡嗡 cello、嘟嘟 lead（不带感、打乱节奏）
 RETIRED = {'sweep', 'pad', 'choir', 'blip', 'cello', 'lead'}
 def SPLIT(k):

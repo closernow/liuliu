@@ -9,6 +9,7 @@ import * as A from './audio.js';
 import * as store from './store.js';
 import * as Py from './pinyin.js';
 import * as Rec from './studio.js';
+import * as Wr from './writing.js';
 
 const $ = (id) => document.getElementById(id);
 const NS = 10, NEED = 3;                      // 10 个空位；找到 3 个彩蛋解锁下一关
@@ -23,7 +24,7 @@ const NAMES = { dong: '咚咚', cha: '嚓嚓', papa: '啪啪', beng: '嘣嘣', d
   dang: '当当', weng: '嗡嗡', you: '悠悠', zheng: '铮铮', zizi: '滋滋', dongci: '动次', dada: '哒哒', hong: '轰轰', jiu: '啾啾', hei: '嘿嘿',
   dada2: '嗒嗒', gudong: '咕咚', dingdang: '叮当', puca: '噗嚓', xiuxiu: '咻咻', wawa: '哇哇', kaka: '咔咔',
   dongda: '咚哒', bengcha: '嘣嚓', tongtong: '嗵嗵', qiangqiang: '锵锵', pada: '啪嗒', dida: '嘀嗒', dongqiang: '咚锵', dingdong: '叮咚', gulu: '咕噜', baba: '叭叭', dengdeng: '噔噔',
-  bibi: '哔哔', pengpeng: '嘭嘭', heiha: '嘿哈', bobo: '啵啵', gege: '咯咯', wengwu: '嗡呜', dongba: '咚吧', guagua: '刮刮', miaomiao: '喵喵', wangwang: '汪汪' };
+  bibi: '哔哔', pengpeng: '嘭嘭', heiha: '嘿哈', bobo: '啵啵', gege: '咯咯', wengwu: '嗡呜', dongba: '咚吧', guagua: '刮刮', miaomiao: '喵喵', wangwang: '汪汪', shuashua: '刷刷' };
 const TONE_PATH = ['M4 8 L36 8', 'M4 24 L36 6', 'M4 10 Q20 34 36 8', 'M4 6 L36 24'];
 
 let DATA, stage = null, selected = null, eggOrder = [];
@@ -712,6 +713,14 @@ async function openParent() {
   $('parentLayer').hidden = false;
 }
 $('parentClose').addEventListener('click', () => ($('parentLayer').hidden = true));
+
+/* ================= 写字（笔顺小游戏） ================= */
+Wr.init();
+$('writeBtn').addEventListener('click', () => Wr.open({
+  save, persist,
+  celebrate: (c, n) => { if (n >= 2) confetti(); },
+  onStars: () => refreshUnlocks(),
+}));
 
 /* ================= 录音室 ================= */
 $('recBtn').addEventListener('click', () => {

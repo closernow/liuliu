@@ -62,6 +62,7 @@ export const CH={
  guagua:{nm:'刮刮',sub:'刮葫芦',col:'#DDA15E',head:'tall',inst:'guiro',eye:'round',iris:'#3B6FD8',hat:'straw'},
  miaomiao:{nm:'喵喵',sub:'猫叫',col:'#FFAFCC',head:'round',inst:'paws',eye:'round',iris:'#2E9E6B',hat:'catears'},
  wangwang:{nm:'汪汪',sub:'狗叫',col:'#CDB4DB',head:'blob',inst:'paws',eye:'round',iris:'#C9601E',hat:'dogears'},
+ shuashua:{nm:'刷刷',sub:'鼓刷·毛笔',col:'#2F3A56',head:'round',inst:'brush',eye:'round',iris:'#C9601E',hat:'beret'},
  py:{nm:'拼音歌手',sub:'唱音节',col:'#FF8FA3',head:'bean',inst:'card',card:'bā',eye:'round',iris:'#3B6FD8',hat:'sprout',
    horror:['patchwork','bandLeg','backFeet'],hd:'补丁身体、腿缠绷带、脚长反了'},
  sz:{nm:'识字歌手',sub:'唱生字',col:'#86C5FF',head:'bean',inst:'card',card:'天',eye:'round',iris:'#2E9E6B',hat:'book',
@@ -382,6 +383,10 @@ function inst(C,h,st,c){
      o.r=stick(-70,-26,4);o.pose={l:-70,r:-70,sl:0,sr:-16,d:.5,dl:0};break;
    case 'paws':o.l=o.r=`<circle cx="0" cy="33" r="8" fill="${c}" stroke="${st}" stroke-width="3"/><circle cx="-3" cy="31" r="1.6" fill="${st}"/><circle cx="3" cy="31" r="1.6" fill="${st}"/><circle cx="0" cy="36" r="2" fill="${st}"/>`;
      o.pose={l:-120,r:120,sl:20,sr:-20,d:.5,dl:.25};break;
+   case 'brush':o.r=`<line x1="0" y1="30" x2="0" y2="62" stroke="${k('#8a5a2b')}" stroke-width="4"/><path d="M-4 62Q0 82 0 86Q0 82 4 62Z" fill="#111"/><rect x="-4" y="58" width="8" height="6" fill="${k('#c9a640')}"/>`;
+     o.front=`<rect x="34" y="150" width="60" height="22" rx="2" fill="#fffdf5" stroke="${st}" stroke-width="2"/><path class="inkstroke" d="M42 164Q60 154 86 160" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+     o.l=`<path d="M0 32l6 14M0 32l-2 15M0 32l-7 13" stroke="${k('#aaa')}" stroke-width="2"/>`;
+     o.pose={l:20,r:-30,sl:18,sr:-24,d:1,dl:.5};break;
    case 'card':{const pin=/^[a-zü]/.test(C.card);
      const L=[...(C.card||'')].length, fs=pin?(L<=3?20:L<=4?17:L<=5?14:12):(L<=1?24:L<=2?18:14);
      o.front=`<g class="cardg"><rect x="46" y="112" width="48" height="34" rx="6" fill="${h?'#d8cfc0':'#fffdf5'}" stroke="${st}" stroke-width="3"/>`+

@@ -9,7 +9,7 @@ export const GROUPS = [
   ['人声节奏', ['puca', 'ying', 'heiha', 'hei', 'miaomiao', 'wangwang']],
   ['低音', ['beng', 'hong', 'wawa', 'dengdeng', 'wengwu']],
   ['和声旋律', ['dang', 'zizi', 'zheng', 'ling', 'you', 'jiu', 'dingdong', 'gulu', 'baba', 'bibi']],
-  ['音效', ['ding', 'xiuxiu', 'kaka', 'bobo']],
+  ['音效', ['ding', 'xiuxiu', 'kaka', 'bobo', 'shuashua']],
 ];
 const INST = GROUPS.flatMap((g) => g[1]);
 
@@ -131,7 +131,7 @@ export const LOOPKEY = { dong: 'kick', cha: 'shaker', papa: 'clap', beng: 'bass'
   dada2: 'snare', gudong: 'conga', dingdang: 'cowbell', puca: 'beatbox', xiuxiu: 'laser', wawa: 'wobble', kaka: 'scratch',
   dongda: 'breaks', bengcha: 'dembow', tongtong: 'toms', qiangqiang: 'ride', pada: 'tamb', dida: 'clave', dongqiang: 'gong', dingdong: 'steel',
   gulu: 'marimba', baba: 'brass', dengdeng: 'slap', bibi: 'chip', pengpeng: 'stomp', heiha: 'chant', bobo: 'bubble', gege: 'castanet',
-  wengwu: 'reese', dongba: 'djembe', guagua: 'guiro', miaomiao: 'meow', wangwang: 'bark' };
+  wengwu: 'reese', dongba: 'djembe', guagua: 'guiro', miaomiao: 'meow', wangwang: 'bark', shuashua: 'brush' };
 export const INSTRUMENTS = INST;
 
 function hexMix(a, b, t) {
