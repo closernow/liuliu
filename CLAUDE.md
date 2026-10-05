@@ -10,10 +10,12 @@
 - 设计有变化时同步更新 docs/DESIGN.md
 - 角色和声音全部原创，不复刻 Sprunki 或任何版权角色的外形和声音
 - 内容严格跟课本：整体认读音节不拆拼，声母不含 k
-- 现代作者的儿歌课文全文不进仓库（网站公开）
+- 现代作者的儿歌课文全文不进仓库（网站公开）：只放在 private/（已 gitignore），家里电脑上用
 
 ## 常用命令
 - 生成音效：python tools/render_loops.py （需要 numpy、scipy）
+- 提取课文：python tools/extract_texts.py （需要 PyMuPDF 和 private/ 里的完整课本，输出 private/texts.json）
+- 生成关卡：python tools/build_content.py （第 5 到 33 关写进 content/stages.json）
 - 生成读音：python tools/gen_voice.py （需要 edge-tts，要联网；已有的不重做），试听 build/voice-check.html
 - 生成原型：python tools/build_prototype.py ，输出 build/yindou-band-v3.html 和 build/characters-v1.html
 - 本地预览：python tools/serve.py ，浏览器打开 http://localhost:8000 （不缓存，改完刷新就行）

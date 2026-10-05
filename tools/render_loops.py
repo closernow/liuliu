@@ -1,4 +1,4 @@
-import numpy as np, json, base64, io
+import numpy as np, json, base64, io, zlib
 from scipy import signal
 from scipy.io import wavfile
 
@@ -382,7 +382,8 @@ BELL_A = [(0, 76, 2), (2, 79, 2), (4, 81, 2), (6, 79, 2), (8, 76, 4), (12, 74, 2
 BELL_B = [(0, 84, 2), (4, 81, 2), (6, 79, 2), (8, 76, 4), (14, 79, 2), (16, 84, 4), (20, 86, 2), (22, 84, 2), (24, 81, 8)]
 
 def bright_set(sfx, tr=0, lead_kind='square', mel=MEL_A, bell_kind='fm', bells=BELL_A, kit='pop', chords=None, bass=None):
-    """明亮风格的一整套 12 个乐器循环。sfx 是套名，tr 是整体移调（半音）。"""
+    """明亮风格的一整套乐器循环。sfx 是套名，tr 是整体移调（半音）。"""
+    global rng; rng = np.random.default_rng(zlib.crc32(sfx.encode()))
     CH = [[m + tr for m in c] for c in (chords or P1_CH)]
     BS = [m + tr for m in (bass or P1_BASS)]
     b = np.zeros(N); s_ = [0, 8, 10, 16, 24, 26]
@@ -457,71 +458,148 @@ bright_set('wx', tr=2, lead_kind='pluck', mel=MEL_B, bell_kind='box', bells=BELL
 # 第 4 阶段 日月山川：笛子、水滴声，柔和
 bright_set('sc', tr=-3, lead_kind='flute', mel=MEL_C, kit='soft',
            chords=[[60, 64, 67], [53, 57, 60], [57, 60, 64], [55, 59, 62]], bass=[48, 41, 45, 43])
+# 拼音一 海底：水滴、八音盒
+bright_set('oc', tr=5, lead_kind='square', mel=MEL_B, bell_kind='box', bells=BELL_A, kit='soft')
+# 拼音二 太空：电子感
+bright_set('sp', tr=-2, lead_kind='square', mel=MEL_C, bells=BELL_B, kit='pop',
+           chords=[[57, 60, 64], [53, 57, 60], [60, 64, 67], [55, 59, 62]], bass=[45, 41, 48, 43])
+# 识字二 校园和节日
+bright_set('xy', tr=0, lead_kind='square', mel=MEL_B, kit='pop',
+           chords=[[53, 57, 60], [55, 59, 62], [52, 55, 59], [57, 60, 64]], bass=[41, 43, 40, 45])
+# 阅读一 四季和江南
+bright_set('sj', tr=2, lead_kind='flute', mel=MEL_A, bell_kind='box', bells=BELL_B, kit='wood',
+           chords=[[60, 64, 67], [53, 57, 60], [57, 60, 64], [55, 59, 62]], bass=[48, 41, 45, 43])
+# 阅读二 夜空和动物
+bright_set('ye', tr=-5, lead_kind='pluck', mel=MEL_B, bell_kind='box', kit='soft',
+           chords=[[60, 64, 67], [59, 64, 67], [57, 60, 65], [55, 59, 62]], bass=[48, 52, 53, 43])
 
-# ===== Phase 2 (spooky) =====
-b = np.zeros(N); s_ = []
-for base in (0, 8, 16, 24):
-    put(b, st(base), lp(kick(90, 38, .4), 500)); put(b, st(base) + int(.18 * SR), lp(kick(80, 36, .35), 400) * .6); s_.append(base)
-mk('kick2', s_, b, wet=.25, rv_decay=.6)
+# ===== 恐怖声音套 =====
+def groan(m, dur):
+    """僵尸低吼：o 音往下滑"""
+    t = tt(dur); f = mtof(m) * (1 - 0.25 * t / dur) * (1 + 0.03 * np.sin(2 * np.pi * 7 * t))
+    ph = 2 * np.pi * np.cumsum(f) / SR; x = sum(np.sin(k * ph) / k for k in range(1, 30))
+    F = FORMANTS['o']; y = sum(bp(x, fc * .85, fc * 1.15) * a for fc, a in zip(F, (1, .6, .2)))
+    return np.tanh(y * 3) * np.sin(np.pi * t / dur) * 0.5
 
-b = np.zeros(N); s_ = []
-for s in range(0, 32, 4):
-    put(b, st(s), bp(noise(st(.4)), 2500 if (s // 4) % 2 == 0 else 1600, 4500 if (s // 4) % 2 == 0 else 2600) * env(tt(.4)[:st(.4)], .001, .012)); s_.append(s)
-for s in (14, 30):
-    t = tt(.5); put(b, st(s), bp(noise(len(t)), 300, 900) * np.sin(np.pi * t / .5) * .25 * (1 + .5 * np.sin(2 * np.pi * 25 * t)))
-mk('shaker2', s_, b, wet=.3, rv_decay=.7)
+def siren(dur, lo=500, hi=900, rate=0.5):
+    """警报：慢慢升降"""
+    t = tt(dur); f = lo + (hi - lo) * (0.5 - 0.5 * np.cos(2 * np.pi * rate * t))
+    return square(1, t, 1) * 0 + np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.25
 
-b = np.zeros(N); s_ = [12, 28]
-for s in s_:
-    t = tt(.2); put(b, st(s), (np.sin(2 * np.pi * 820 * t) * env(t, .001, .02) + bp(noise(len(t)), 2000, 5000) * env(t, .001, .015)))
-mk('clap2', [12, 15, 28, 31], delay(b, 3, .5, .6), wet=.3, rv_decay=.8)
+def alarm(dur):
+    t = tt(dur); f = np.where((t * 4).astype(int) % 2 == 0, 880, 660)
+    return bp(np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)), 500, 3000) * 0.35
 
-b = np.zeros(N); s_ = []
-x = np.zeros(N); f = np.zeros(N)
-for h, root in enumerate(P2_BASS):
-    f[st(h * 8):st(h * 8 + 8)] = mtof(root)
-f = np.convolve(np.concatenate([f[-2000:], f]), np.ones(2000) / 2000, 'valid')[:N]
-ph = 2 * np.pi * np.cumsum(f) / SR
-for k in range(1, 15): x += np.sin(k * ph) / k
-x = lp(x, 500) * (0.7 + 0.3 * np.sin(2 * np.pi * np.arange(N) / N * 4))
-mk('bass2', [0, 8, 16, 24], x, wet=.15)
+def clang(m=60):
+    """铁皮敲击：不和谐的 FM"""
+    t = tt(0.9); f = mtof(m)
+    return np.sin(2 * np.pi * f * t + 3 * np.exp(-t / .2) * np.sin(2 * np.pi * f * 2.76 * t)) * env(t, .001, .3) * 0.6
 
-b = np.zeros(N); pat = [(3, 96, -30), (11, 99, 25), (19, 95, -40), (27, 92, 35)]
-for s, m, d in pat: put(b, st(s), musicbox(m, d) * .6)
-mk('chime2', [s for s, _, _ in pat], delay(b, 3, .5, .5), wet=.45, rv_decay=.9)
+def static_burst(dur=0.3):
+    t = tt(dur); x = noise(len(t)) * (rng.uniform(size=len(t)) > 0.7)
+    return bp(x, 1000, 5000) * np.sin(np.pi * t / dur) * 0.5
 
-t = np.arange(N) / SR
-w = lp(noise(N), 900) * (0.5 + 0.5 * np.sin(2 * np.pi * t / (N / SR) * 2 - 1))
-howl = np.sin(2 * np.pi * np.cumsum(330 + 120 * np.sin(2 * np.pi * t / (N / SR))) / SR) * 0.18 * (0.5 + 0.5 * np.sin(2 * np.pi * t / (N / SR) * 2))
-mk('sweep2', [0, 16], w + howl, wet=.3, rv_decay=.9)
+def heartbeat():
+    return lp(kick(70, 35, .25), 300) * 1.0
 
-b = np.zeros(N); pat = [(2, 60), (3, 58), (4, 56), (10, 63), (11, 63), (18, 55), (19, 54), (20, 53), (26, 66), (27, 66), (28, 66)]
-for s, m in pat: put(b, st(s), blip(m, .05, crush=True) * .6)
-mk('blip2', [s for s, _ in pat], b, wet=.2)
+def glitch(m):
+    t = tt(0.08); x = square(mtof(m), t, 8)
+    x = np.round(x * 3) / 3
+    return x * env(t, .001, .03) * 0.5
 
-b = np.zeros(N); mel = [(0, 72, 2), (2, 75, 2), (4, 79, 2), (6, 78, 2), (8, 79, 4), (12, 75, 2), (14, 74, 2), (16, 72, 2), (18, 71, 2), (20, 68, 4), (24, 67, 4), (28, 71, 4)]
-for s, m, l in mel: put(b, st(s), musicbox(m + 12, rng.uniform(-25, 25)))
-mk('bells2', [s for s, _, _ in mel], b, wet=.4, rv_decay=.8)
+def dark_set(sfx, tr=0, flavor='forest'):
+    """恐怖风格的一整套 22 个乐器。flavor：forest 黑森林、zombie 僵尸、virus 生化、ghost 鬼屋、fog 雾镇、shadow 影子、ultimate 大混合"""
+    global rng; rng = np.random.default_rng(zlib.crc32(sfx.encode()))
+    CH = [[m + tr for m in c] for c in P2_CH]; BS = [m + tr for m in P2_BASS]
+    # 鼓
+    b = np.zeros(N); s_ = []
+    for base in (0, 8, 16, 24):
+        if flavor in ('shadow', 'ghost'):
+            put(b, st(base), heartbeat()); put(b, st(base) + int(.22 * SR), heartbeat() * .6)
+        else:
+            k1 = lp(kick(90, 38, .4), 500)
+            if flavor in ('zombie', 'fog', 'ultimate'): k1 = np.tanh(k1 * 3) * .8
+            put(b, st(base), k1); put(b, st(base) + int(.18 * SR), lp(kick(80, 36, .35), 400) * .6)
+        s_.append(base)
+    mk('kick' + sfx, s_, b, wet=.25, rv_decay=.6)
+    # 沙锤
+    b = np.zeros(N); s_ = []
+    for s in range(0, 32, 4):
+        if flavor in ('fog', 'virus'): put(b, st(s), static_burst(.12) * (1 if s % 8 == 0 else .6))
+        else: put(b, st(s), bp(noise(st(.4)), 2500 if (s // 4) % 2 == 0 else 1600, 4500 if (s // 4) % 2 == 0 else 2600) * env(tt(.4)[:st(.4)], .001, .012))
+        s_.append(s)
+    for s in (14, 30):
+        t = tt(.5); put(b, st(s), bp(noise(len(t)), 300, 900) * np.sin(np.pi * t / .5) * .25 * (1 + .5 * np.sin(2 * np.pi * 25 * t)))
+    mk('shaker' + sfx, s_, b, wet=.3, rv_decay=.7)
+    # 拍手
+    b = np.zeros(N); s_ = [12, 28]
+    for s in s_:
+        if flavor in ('fog', 'ultimate'): put(b, st(s), clang(60 + tr))
+        elif flavor == 'zombie': put(b, st(s), np.tanh(woodblock(300) * 4) * .6)
+        else:
+            t = tt(.2); put(b, st(s), (np.sin(2 * np.pi * 820 * t) * env(t, .001, .02) + bp(noise(len(t)), 2000, 5000) * env(t, .001, .015)))
+    mk('clap' + sfx, [12, 15, 28, 31], delay(b, 3, .5, .6), wet=.3, rv_decay=.8)
+    # 贝斯：滑音低音
+    x = np.zeros(N); f = np.zeros(N)
+    for h, root in enumerate(BS): f[st(h * 8):st(h * 8 + 8)] = mtof(root)
+    f = np.convolve(np.concatenate([f[-2000:], f]), np.ones(2000) / 2000, 'valid')[:N]
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    for k in range(1, 15): x += np.sin(k * ph) / k
+    x = lp(x, 500) * (0.7 + 0.3 * np.sin(2 * np.pi * np.arange(N) / N * 4))
+    mk('bass' + sfx, [0, 8, 16, 24], x, wet=.15)
+    # 叮叮
+    b = np.zeros(N); pat = [(3, 96, -30), (11, 99, 25), (19, 95, -40), (27, 92, 35)]
+    for s, m, d in pat: put(b, st(s), musicbox(m + tr, d) * .6 if flavor != 'virus' else glitch(m + tr - 12))
+    mk('chime' + sfx, [s for s, _, _ in pat], delay(b, 3, .5, .5), wet=.45, rv_decay=.9)
+    # 呜呜：每个主题的招牌声音
+    t = np.arange(N) / SR
+    if flavor == 'zombie':
+        b = np.zeros(N)
+        for s, m in ((0, 50), (16, 47)): put(b, st(s), groan(m + tr, 7 * S16))
+        w = b + lp(noise(N), 600) * .15
+    elif flavor == 'virus': w = alarm(N / SR) * (0.5 + 0.5 * np.sin(2 * np.pi * t / (N / SR)))
+    elif flavor in ('fog', 'ultimate'): w = siren(N / SR, 400, 800, 1 / (N / SR)) * .6 + lp(noise(N), 500) * .2
+    elif flavor == 'shadow':
+        w = lp(noise(N), 1200) * (t / (N / SR)) ** 3       # 越来越响的倒放感
+    else:
+        w = lp(noise(N), 900) * (0.5 + 0.5 * np.sin(2 * np.pi * t / (N / SR) * 2 - 1))
+        w = w + np.sin(2 * np.pi * np.cumsum(330 + 120 * np.sin(2 * np.pi * t / (N / SR))) / SR) * 0.18 * (0.5 + 0.5 * np.sin(2 * np.pi * t / (N / SR) * 2))
+    mk('sweep' + sfx, [0, 16], w, wet=.3, rv_decay=.9)
+    # 嘀嘟
+    b = np.zeros(N); pat = [(2, 60), (3, 58), (4, 56), (10, 63), (11, 63), (18, 55), (19, 54), (20, 53), (26, 66), (27, 66), (28, 66)]
+    for s, m in pat: put(b, st(s), (glitch(m + tr + 12) if flavor in ('virus', 'ultimate') else blip(m + tr, .05, crush=True)) * .6)
+    mk('blip' + sfx, [s for s, _ in pat], b, wet=.2)
+    # 铃铃：八音盒
+    b = np.zeros(N); mel = [(0, 72, 2), (2, 75, 2), (4, 79, 2), (6, 78, 2), (8, 79, 4), (12, 75, 2), (14, 74, 2), (16, 72, 2), (18, 71, 2), (20, 68, 4), (24, 67, 4), (28, 71, 4)]
+    for s, m, l in mel: put(b, st(s), musicbox(m + 12 + tr, rng.uniform(-25, 25) * (2 if flavor == 'ghost' else 1)))
+    mk('bells' + sfx, [s for s, _, _ in mel], b, wet=.4 if flavor != 'ghost' else .6, rv_decay=.8)
+    # 嘟嘟：特雷门琴
+    b = np.zeros(N); mel = [(0, 72, 75, 8), (8, 75, 72, 8), (16, 68, 71, 8), (24, 71, 67, 8)]
+    up = 12 if flavor == 'ghost' else -12 if flavor == 'zombie' else 0
+    for s, a_, b_, l in mel: put(b, st(s), theremin(a_ + tr + up, b_ + tr + up, l * S16 * .95))
+    mk('lead' + sfx, [0, 8, 16, 24], b, wet=.4, rv_decay=.9)
+    # 呼呼：风琴
+    b = np.zeros(N)
+    for h, c in enumerate(CH): put(b, st(h * 8), organ([m - 12 for m in c], 8 * S16) if flavor != 'virus' else supersaw([m - 12 for m in c], 8 * S16, 900) * 1.5)
+    mk('pad' + sfx, [0, 8, 16, 24], b, wet=.35, rv_decay=.9)
+    # 啦啦：阴森合唱
+    b = np.zeros(N)
+    for h, c in enumerate(CH): put(b, st(h * 8), choir([c[0] + (12 if flavor == 'ghost' else 0), c[2]], 8 * S16, 'u' if flavor != 'zombie' else 'o', vib=3, eerie=True))
+    mk('choir' + sfx, [0, 8, 16, 24], b, wet=.5, rv_decay=1.0)
+    # 影影
+    b = np.zeros(N); s_ = [4, 12, 14, 20, 28]
+    for s in s_: put(b, st(s), snap() * (1 if s != 14 else .5))
+    for h, m in enumerate([40, 41, 40, 39]): put(b, st(h * 8), drone(m + tr, 7.5 * S16, dark=True))
+    mk('snap' + sfx, s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
+    new_insts(sfx, CH, BS, tr, dark=True)
 
-b = np.zeros(N); mel = [(0, 72, 75, 8), (8, 75, 72, 8), (16, 68, 71, 8), (24, 71, 67, 8)]
-for s, a_, b_, l in mel: put(b, st(s), theremin(a_, b_, l * S16 * .95))
-mk('lead2', [0, 8, 16, 24], b, wet=.4, rv_decay=.9)
-
-b = np.zeros(N)
-for h, ch in enumerate(P2_CH): put(b, st(h * 8), organ([m - 12 for m in ch], 8 * S16))
-mk('pad2', [0, 8, 16, 24], b, wet=.35, rv_decay=.9)
-
-b = np.zeros(N)
-for h, ch in enumerate(P2_CH): put(b, st(h * 8), choir([ch[0], ch[2]], 8 * S16, 'u', vib=3, eerie=True))
-mk('choir2', [0, 8, 16, 24], b, wet=.5, rv_decay=1.0)
-
-new_insts('2', P2_CH, P2_BASS, 0, dark=True)
-
-# ===== 影影 暗色套 =====
-b = np.zeros(N); s_ = [4, 12, 14, 20, 28]
-for s in s_: put(b, st(s), snap() * (1 if s != 14 else .5))
-for h, m in enumerate([40, 41, 40, 39]): put(b, st(h * 8), drone(m, 7.5 * S16, dark=True))
-mk('snap2', s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
+dark_set('2', 0, 'forest')        # 第 3 关 黑森林
+dark_set('zb', -2, 'zombie')      # 第 8 关 僵尸
+dark_set('vr', 1, 'virus')        # 第 12 关 生化
+dark_set('gh', 3, 'ghost')        # 第 16 关 鬼屋
+dark_set('fg', -4, 'fog')         # 第 21 关 雾镇
+dark_set('sd', -1, 'shadow')      # 第 28 关 影子
+dark_set('ul', 0, 'ultimate')     # 第 33 关 大混合
 
 # ---------- export ----------
 import soundfile as sf
@@ -538,11 +616,11 @@ for k, v in loops.items():
         v = v.copy(); v[:L] *= np.linspace(0, 1, L); v[-L:] *= np.linspace(1, 0, L)
     bio = io.BytesIO()
     wavfile.write(bio, SR, (v * 32767).astype(np.int16))
-    if k[-1] in '12': out[k] = 'data:audio/wav;base64,' + base64.b64encode(bio.getvalue()).decode()
+    if SPLIT(k)[1] in ('1', '2'): out[k] = 'data:audio/wav;base64,' + base64.b64encode(bio.getvalue()).decode()
     wavfile.write(f'build/wav/{k}.wav', SR, (v * 32767).astype(np.int16))
     inst, setname = SPLIT(k)
     os.makedirs(f'audio/loops/{setname}', exist_ok=True)
     sf.write(f'audio/loops/{setname}/{inst}.flac', v.astype(np.float32), SR, subtype='PCM_16')
-json.dump({'loops': out, 'onsets': {k: v for k, v in onsets.items() if k[-1] in '12'}, 'bpm': BPM, 'steps': STEPS}, open('build/audio.json', 'w'))
+json.dump({'loops': out, 'onsets': {k: v for k, v in onsets.items() if SPLIT(k)[1] in ('1', '2')}, 'bpm': BPM, 'steps': STEPS}, open('build/audio.json', 'w'))
 json.dump({'bpm': BPM, 'steps': STEPS, 'onsets': onsets}, open('audio/loops/onsets.json', 'w'))
 print('loops', len(out), 'json MB', round(len(json.dumps(out)) / 1e6, 2))

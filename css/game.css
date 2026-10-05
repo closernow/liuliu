@@ -82,8 +82,19 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .dark .banner{background:linear-gradient(90deg,#8a1020,#3a0a30);color:#fff}
 .banner[hidden]{display:none}
 .bw{font-size:56px;font-weight:900;letter-spacing:.1em}.bp{font-family:var(--py);font-size:28px;font-weight:700}
-.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:45;transition:opacity .4s}
-.flash.on{opacity:1;transition:opacity .15s}
+/* 进化转场：深色星空、旋转光环，不刺眼 */
+.warp{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;transition:opacity .5s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:radial-gradient(circle at 50% 50%,#3b2d6e 0,#1d1440 45%,#0d0a1e 100%)}
+.warp.on{opacity:1;pointer-events:auto}
+.warp.h{background:radial-gradient(circle at 50% 50%,#4a1018 0,#22070c 50%,#0a0204 100%)}
+.warp .stars{position:absolute;inset:-50%;background-image:radial-gradient(2px 2px at 20% 30%,#fff8,transparent),radial-gradient(2px 2px at 70% 20%,#ffe9a8,transparent),radial-gradient(1.5px 1.5px at 40% 70%,#fff7,transparent),radial-gradient(2px 2px at 85% 65%,#a8d8ff,transparent),radial-gradient(1.5px 1.5px at 10% 80%,#ffd1e8,transparent),radial-gradient(2px 2px at 55% 45%,#fff6,transparent);background-size:300px 300px;animation:starspin 14s linear infinite}
+.warp.on .stars{animation-duration:6s}
+@keyframes starspin{to{transform:rotate(360deg)}}
+.warp .ring{width:180px;height:180px;border-radius:50%;border:6px solid transparent;border-top-color:#F5C04A;border-right-color:#FF8FA3;border-bottom-color:#86C5FF;animation:ringspin 1.2s linear infinite;filter:drop-shadow(0 0 12px rgba(245,192,74,.5))}
+.warp.h .ring{border-top-color:#ff3b3b;border-right-color:#7a1f2a;border-bottom-color:#9dff6b}
+@keyframes ringspin{to{transform:rotate(360deg)}}
+.warp .wt{position:relative;font-size:34px;font-weight:900;color:#fff;letter-spacing:.2em}
+.warp .ws{position:relative;font-size:22px;font-weight:800;color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:22%;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:10px 18px;border-radius:999px;font-weight:800;opacity:0;transition:opacity .3s;z-index:36;pointer-events:none}
 .toast.show{opacity:1}
 .confetti{position:fixed;width:10px;height:14px;z-index:34;pointer-events:none;animation:fall 1.8s ease-in forwards}
@@ -161,3 +172,88 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @keyframes cell{0%,24%{opacity:1}25%,100%{opacity:.25}}
 .glow{animation:glowp 1.1s ease-in-out infinite alternate}
 @keyframes glowp{from{opacity:.55}to{opacity:1}}
+/* 新背景和挂件的动画 */
+.swim{animation:swim 14s linear infinite}
+@keyframes swim{0%{transform:translateX(-200px)}100%{transform:translateX(300px)}}
+.bubble2{animation:bub2 6s linear infinite}
+@keyframes bub2{to{transform:translateY(-700px);opacity:0}}
+.bubble{animation:bub 2.4s linear infinite}
+@keyframes bub{to{transform:translateY(-30px);opacity:0}}
+.sway,.sway2{transform-box:fill-box;transform-origin:center bottom;animation:sway 3s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(8deg)}}
+.twinkle{animation:twinkle 2.4s ease-in-out infinite}
+@keyframes twinkle{50%{opacity:.2}}
+.flagwave{transform-box:fill-box;transform-origin:left center;animation:wave 1.4s ease-in-out infinite}
+.leaffall{animation:leaffall 9s linear infinite}
+@keyframes leaffall{to{transform:translate(-120px,900px) rotate(540deg)}}
+.firefly{animation:firefly 4s ease-in-out infinite}
+@keyframes firefly{50%{transform:translate(30px,-20px);opacity:.3}}
+.zhand{animation:zhand 4s ease-in-out infinite}
+@keyframes zhand{0%,100%{transform:translateY(40px)}40%,60%{transform:translateY(0)}}
+.goobub{animation:goobub 3s ease-in-out infinite}
+@keyframes goobub{50%{opacity:.25}}
+.alarmlight{animation:alarm 1s steps(1) infinite}
+@keyframes alarm{50%{opacity:.15}}
+.winflick{animation:winflick 3.5s steps(1) infinite}
+@keyframes winflick{0%,70%,100%{opacity:1}72%,80%{opacity:.1}}
+.haunt{animation:haunt 7s ease-in-out infinite}
+@keyframes haunt{0%,100%{transform:translate(0,0);opacity:.2}50%{transform:translate(80px,-40px);opacity:.9}}
+.lampflick{animation:winflick 2.2s steps(1) infinite}
+.ashfall{animation:ashfall 8s linear infinite}
+@keyframes ashfall{to{transform:translate(-60px,900px)}}
+.ashf{animation:ashf 3s linear infinite}
+@keyframes ashf{to{transform:translate(-10px,196px)}}
+.lurk2{animation:lurk 6s ease-in-out infinite}
+.ghosty{opacity:.72;animation:ghostf 3s ease-in-out infinite}
+@keyframes ghostf{50%{transform:translateY(-8px)}}
+
+/* ===== 拼音、唱词图标 ===== */
+.ic.pt{width:50px;height:50px;font-family:var(--py);font-size:22px;font-weight:700;color:#fff}
+.ic.sm{background:#3d6fd8}.ic.ym{background:#e0566a}.ic.wh{background:#8a5ad8;font-size:18px}.ic.tn{background:#fff3d0}
+.ic.tn svg{width:38px}
+.ic.li{width:auto;min-width:76px;height:50px;padding:0 10px;gap:6px;background:#fffdf5;color:#1f1a33;font-size:18px;font-weight:800}
+.dark .ic.li{background:#d8cfc0}
+.ic .ln,.slot .lab .ln,.lline .ln{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;color:#1f1a33;font-size:14px;font-weight:900;font-family:var(--py)}
+.ic .mic{font-size:13px}
+.slot .lab .pyb{font-family:var(--py);font-size:20px;color:var(--accent)}
+.slot .lab .sm{font-family:var(--py);color:#8fb4ff}.slot .lab .ym{font-family:var(--py);color:#ff9aa8}
+.slot.rapping .fig{filter:drop-shadow(0 0 16px #fff6a0)}
+.grp.ginst .icons{max-width:690px}
+.egg.task{min-width:96px}.egg.task .w{font-size:14px}
+.tbtn.rec{background:#e5484d}
+/* ===== 歌词屏 ===== */
+.lyrics{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:3;max-width:min(920px,94%);max-height:44%;overflow:auto;background:rgba(0,0,0,.5);border-radius:18px;padding:8px 16px 10px;backdrop-filter:blur(2px)}
+.dark .lyrics{background:rgba(30,0,6,.6);box-shadow:0 0 30px rgba(255,40,40,.25)}
+.ltitle{text-align:center;font-weight:900;font-size:18px;color:var(--accent);margin-bottom:2px}
+.lline{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px 0;padding:3px 6px;border-radius:10px;opacity:.38;font-size:22px;font-weight:700;transition:opacity .3s}
+.lline.on{opacity:1}
+.lline.cur{background:rgba(255,246,160,.18)}
+.lline .ln{margin-right:8px;align-self:center}
+.lline ruby{ruby-position:over;margin:0 1px}.lline rt{font-family:var(--py);font-size:12px;color:#ffe6a0;font-weight:400}
+.lline ruby.lit{color:#fff6a0;text-shadow:0 0 10px #ffd84d}
+.lline .pu{margin-right:2px}
+.lline .who{margin-left:10px;font-size:13px;color:#cfc4ff;align-self:center;font-weight:400}
+.notext{text-align:center;font-size:20px;padding:10px}.notext small{font-size:14px;color:var(--muted)}
+/* ===== 录音室 ===== */
+.studio .sbox{background:#241c40;border-radius:22px;padding:18px 20px;max-width:760px;width:100%;text-align:center}
+.shead{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:8px}
+.sline{font-size:34px;font-weight:800;line-height:2;margin:8px 0}.sline rt{font-family:var(--py);font-size:15px;color:#ffe6a0;font-weight:400}
+.snav{display:flex;justify-content:center;align-items:center;gap:14px;margin:6px 0;color:var(--muted)}
+.scount{min-height:44px;font-size:30px;font-weight:900;color:#ff8a80}
+.sbtns{display:flex;justify-content:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+.recbig{border:none;border-radius:999px;padding:16px 34px;font-size:24px;font-weight:900;background:#e5484d;color:#fff;box-shadow:0 0 0 6px rgba(229,72,77,.3)}
+.tbtn.ok{background:#3aa55a}.tbtn.del{background:rgba(255,255,255,.08);font-size:14px}
+.stip{font-size:14px;color:var(--muted)}
+
+/* 我的声音、我的歌、家长入口 */
+.ic.clip{background:#2fa38a;font-size:20px;gap:0}.ic.clip .cn{font-size:13px}
+.ic.clipadd{background:rgba(255,255,255,.15);font-size:26px}
+#songBtn.on{background:#e5484d}
+.songrow{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.songrow span{flex:1;display:flex;flex-direction:column}.songrow small{color:var(--muted);font-size:12px}
+#songList .empty{color:var(--muted)}
+.ptable{width:100%;border-collapse:collapse;font-size:14px}.ptable td,.ptable th{padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left}
+.ptable .mis{font-family:var(--py);color:#ff9aa8}
+.pbtns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.tbtn.danger{background:#8a1f2a}
+#parentBody h3{margin:14px 0 6px}#parentBody .note{font-size:13px;color:var(--muted)}
+#parentBody select,#parentBody textarea{width:100%;margin:6px 0;font:inherit;padding:8px;border-radius:10px;border:none}

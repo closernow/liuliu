@@ -1,12 +1,14 @@
 // 声音：乐器循环、歌手唱字、语音提示、闪避。
 // 所有声音卡同一个节拍：110 拍/分钟，32 个十六分音符一个循环。
-let ctx = null, band, voice, master, t0 = 0;
+let ctx = null, band, bandOut, voice, master, recDest = null, t0 = 0;
 let BPM = 110, STEPS = 32, S16 = 60 / BPM / 4, LOOP = STEPS * S16;
 let onsets = {};
 const cache = new Map();          // url -> AudioBuffer
 const leads = new Map();          // url -> 开头静音长度（秒）
 
 export const beat = () => 60 / BPM;
+// 录音室打开时乐队几乎静音，免得录进去
+export function quiet(on) { if (bandOut) bandOut.gain.setTargetAtTime(on ? 0.05 : 1, ctx.currentTime, 0.1); }
 export const loopLen = () => LOOP;
 export const now = () => (ctx ? ctx.currentTime : 0);
 export const phase = () => (ctx ? (((ctx.currentTime - t0) % LOOP) + LOOP) % LOOP : 0);
@@ -17,7 +19,9 @@ export async function init() {
   master = ctx.createGain(); master.gain.value = 0.9;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -12; comp.ratio.value = 4;
   master.connect(comp); comp.connect(ctx.destination);
-  band = ctx.createGain(); band.gain.value = 0.75; band.connect(master);
+  if (ctx.createMediaStreamDestination) { recDest = ctx.createMediaStreamDestination(); comp.connect(recDest); }
+  band = ctx.createGain(); band.gain.value = 0.75;
+  bandOut = ctx.createGain(); band.connect(bandOut); bandOut.connect(master);
   voice = ctx.createGain(); voice.gain.value = 1; voice.connect(master);
   const info = await (await fetch('audio/loops/onsets.json')).json();
   BPM = info.bpm; STEPS = info.steps; S16 = 60 / BPM / 4; LOOP = STEPS * S16; onsets = info.onsets;
@@ -66,6 +70,11 @@ export const onsetsOf = (name) => onsets[name] || [];
 const VSLOT = [0, 4, 8, 12, 2, 6, 10, 14, 1, 9];
 const RATE = [1, 1.06, 0.95, 1.12];
 let singers = {};                  // slot -> {url, muted}
+let rapQ = [], rapPos = 0, rapRemain = 0, onRap = () => {}, rapFx = 'none';
+// entries: [{slot, url}]，按舞台从左到右；每句占一个或几个循环（看音频多长）
+export function setRap(entries, fx = 'none') { rapQ = entries; rapFx = fx; if (rapPos >= rapQ.length) rapPos = 0; if (!rapQ.length) rapRemain = 0; }
+export function onRapCallback(fn) { onRap = fn; }
+export function resetRap() { rapPos = 0; rapRemain = 0; }
 let onStep = () => {};
 export function setSinger(slot, url, muted) { if (url) singers[slot] = { url, muted }; else delete singers[slot]; }
 export function onStepCallback(fn) { onStep = fn; }
@@ -84,11 +93,45 @@ function tick() {
       if (s.muted || st % 16 !== VSLOT[slot]) continue;
       playAt(s.url, t, band, RATE[(stepIdx / 16 | 0) % RATE.length]);
     }
+    if (st === 0 && rapQ.length) {
+      if (rapRemain <= 0) {
+        const e = rapQ[rapPos % rapQ.length]; rapPos = (rapPos + 1) % rapQ.length;
+        const buf = cache.get(e.url);
+        rapRemain = 1;
+        if (buf) buf.then((b) => {
+          const n = Math.max(1, Math.ceil(b.duration / LOOP - 0.08));
+          rapRemain = n - 1;
+          playFx(b, t, rapFx, (leads.get(e.url) || 0));
+          setTimeout(() => onRap(e, t, b.duration), Math.max(0, (t - ctx.currentTime) * 1000));
+        }).catch(() => {});
+      } else rapRemain--;
+    }
     const ms = Math.max(0, (t - ctx.currentTime) * 1000);
     setTimeout(() => onStep(st), ms);
     nextStep += S16; stepIdx++;
   }
 }
+// 变声：deep 低沉阴森（恐怖）、robot 机器人（太空）、echo 回声（鬼屋）
+function playFx(buf, t, fx, off = 0) {
+  if (t < ctx.currentTime - 0.05) return;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  let node = src;
+  if (fx === 'deep') {
+    src.playbackRate.value = 0.86;
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2200; node.connect(f); node = f;
+  }
+  if (fx === 'robot') {
+    const g = ctx.createGain(); g.gain.value = 0; const o = ctx.createOscillator(); o.frequency.value = 55; o.connect(g.gain); o.start(t); o.stop(t + buf.duration + 0.5);
+    node.connect(g); node = g;
+  }
+  const out = ctx.createGain(); out.gain.value = 1.1; node.connect(out); out.connect(band);
+  if (fx === 'echo' || fx === 'deep') {
+    const d = ctx.createDelay(1); d.delayTime.value = fx === 'echo' ? 0.28 : 0.18;
+    const fb = ctx.createGain(); fb.gain.value = 0.35; out.connect(d); d.connect(fb); fb.connect(d); d.connect(band);
+  }
+  src.start(Math.max(t, ctx.currentTime), off);
+}
+
 async function playAt(url, t, dest, rate = 1) {
   const buf = await load(url);
   if (t < ctx.currentTime) return;
@@ -100,7 +143,7 @@ async function playAt(url, t, dest, rate = 1) {
 /* ---------- 语音：读的时候乐队降到两成，读完恢复 ----------
    user=true（她点了什么）：马上停掉正在读的、清空排队，只读这一次
    user=false（系统提示）：等正在读的读完再说；这期间她点了别的，这条就跳过 */
-let gen = 0, sayChain = Promise.resolve(), current = null;
+let gen = 0, sayChain = Promise.resolve(), current = null, duckUntil = 0;
 function stopCurrent() {
   if (!current) return;
   try { current.src.stop(); } catch {}
@@ -154,3 +197,18 @@ export function whoosh() {
     o.connect(og).connect(master); o.start(t + 0.9 + i * 0.08); o.stop(t + 2);
   });
 }
+
+/* ---------- 录歌：录下当前混音，最长 30 秒 ---------- */
+let songRec = null;
+export function recordingSong() { return !!songRec; }
+export function startSong(onTick, maxSec = 30) {
+  if (!recDest || songRec) return Promise.resolve(null);
+  return new Promise((res) => {
+    const mr = new MediaRecorder(recDest.stream), chunks = [], t0s = performance.now();
+    mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+    mr.onstop = () => { clearInterval(iv); songRec = null; res(new Blob(chunks, { type: mr.mimeType || 'audio/webm' })); };
+    const iv = setInterval(() => { const left = maxSec - (performance.now() - t0s) / 1000; onTick(Math.max(0, Math.ceil(left))); if (left <= 0) mr.stop(); }, 250);
+    mr.start(); songRec = mr;
+  });
+}
+export function stopSong() { if (songRec && songRec.state === 'recording') songRec.stop(); }

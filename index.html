@@ -14,19 +14,20 @@
 <div class="app" id="app">
   <header class="top">
     <button class="tbtn" id="mapBtn" aria-label="阶段地图">🗺️ 地图</button>
-    <div class="badge" id="badge"></div>
+    <div class="badge" id="badge" title="家长：长按 2 秒进入家长入口"></div>
     <div class="eggs" id="eggs"></div>
+    <button class="tbtn rec" id="recBtn" hidden>🎤 录音室</button>
     <button class="evo" id="evoBtn" disabled>✨ 进化</button>
+    <button class="tbtn" id="songBtn">⏺ 录歌</button>
+    <button class="tbtn" id="mySongsBtn">🎵 我的歌</button>
     <button class="tbtn" id="clearBtn" aria-label="清空舞台">🧹</button>
   </header>
   <main class="stage" id="stage">
     <div class="bg" id="bg"></div>
+    <div class="lyrics" id="lyrics" hidden></div>
     <div class="row" id="row"></div>
   </main>
-  <nav class="bar" id="bar">
-    <div class="grp"><div class="gl">乐手</div><div class="icons" id="gInst"></div></div>
-    <div class="grp"><div class="gl" id="charLabel">字宝宝</div><div class="icons" id="gChar"></div></div>
-  </nav>
+  <nav class="bar" id="bar"></nav>
 </div>
 
 <div class="overlay" id="mapLayer" hidden>
@@ -35,8 +36,10 @@
     <div class="tiles" id="tiles"></div>
   </div>
 </div>
+<div class="overlay" id="songsLayer" hidden><div class="mapbox"><div class="maphead"><b>🎵 我的歌</b><button class="tbtn" id="songsClose">✕ 关闭</button></div><div id="songList"></div></div></div>
+<div class="overlay" id="parentLayer" hidden><div class="mapbox"><div class="maphead"><b>家长入口</b><button class="tbtn" id="parentClose">✕ 关闭</button></div><div id="parentBody"></div></div></div>
 <div class="banner" id="banner" hidden><div class="bw" id="bw"></div><div class="bp" id="bp"></div></div>
-<div class="flash" id="flash"></div>
+<div class="warp" id="warp" aria-hidden="true"><div class="stars"></div><div class="ring"></div><div class="wt" id="wt">进化中</div><div class="ws" id="ws"></div></div>
 <div class="toast" id="toast"></div>
 <div class="overlay start" id="startLayer">
   <button class="startbtn" id="startBtn">▶ 开始</button>

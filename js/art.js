@@ -75,7 +75,7 @@ const GLOW=['#ff3b3b','#9dff6b','#ffb02e','#c56bff'];
 
 /* ===== 脸 ===== */
 function face(C,id,h,st){
-  const P=new Set(C.horror),g=GLOW[Object.keys(CH).indexOf(id)%4];
+  const P=new Set(C.horror),g=C.glow||GLOW[Object.keys(CH).indexOf(id)%4];
   let eyes='',mouth='',extra='';
   const L=[-16,0],R=[16,0];
   const one=(pos,side)=>{
@@ -84,6 +84,7 @@ function face(C,id,h,st){
       return socket(x,y)+`<g transform="translate(${x} ${y+4})"><g class="dangle"><path d="M0 0C4 12 -4 20 2 30" fill="none" stroke="#b3374a" stroke-width="3"/><circle cx="2" cy="38" r="9" fill="#f3efe6" stroke="${st}" stroke-width="2"/><circle cx="3" cy="40" r="4.5" fill="${g}"/><circle cx="3" cy="40" r="2" fill="#000"/></g></g>`}
     if(P.has('button'+side))return `<circle cx="${x}" cy="${y}" r="11" fill="#5a3b2a" stroke="${st}" stroke-width="2"/><circle cx="${x-4}" cy="${y-4}" r="2" fill="${st}"/><circle cx="${x+4}" cy="${y-4}" r="2" fill="${st}"/><circle cx="${x-4}" cy="${y+4}" r="2" fill="${st}"/><circle cx="${x+4}" cy="${y+4}" r="2" fill="${st}"/><path d="M${x-4} ${y-4}L${x+4} ${y+4}M${x+4} ${y-4}L${x-4} ${y+4}" stroke="#d9c7a0" stroke-width="1.5"/>`;
     if(P.has('patch'+side))return '';
+    if(P.has('blank'+side))return `<g class="eye"><ellipse cx="${x}" cy="${y}" rx="11" ry="13" fill="#e8f0d8" stroke="${st}" stroke-width="1.5"/></g>`;
     if(P.has('worm'+side))return socket(x,y)+`<g transform="translate(${x} ${y+2})"><g class="wiggle"><path d="M0 0C6 6 -6 12 2 18C8 22 4 28 10 30" stroke="#e98fa6" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="10" cy="30" r="1.2" fill="#000"/></g></g>`;
     if(P.has('hollow'))return `<ellipse cx="${x}" cy="${y}" rx="11" ry="14" fill="#000"/><g class="drip" style="animation-delay:${side=='L'?0:1.1}s"><path d="M${x} ${y+12}q-2 8 0 14q2 -6 0 -14" fill="#000"/></g><path d="M${x-1} ${y+12}C${x-3} ${y+22} ${x+2} ${y+28} ${x} ${y+34}" stroke="#000" stroke-width="3" fill="none" opacity=".8"/>`;
     if(P.has('sewnEyes'))return `<path d="M${x-10} ${y}Q${x} ${y+6} ${x+10} ${y}" stroke="${st}" stroke-width="3" fill="none"/>`+[-6,0,6].map(d=>`<line x1="${x+d}" y1="${y-4}" x2="${x+d}" y2="${y+8}" stroke="${st}" stroke-width="2"/>`).join('');
@@ -113,7 +114,8 @@ function face(C,id,h,st){
   }
   // 嘴
   const my=22;
-  if(P.has('zipMouth'))mouth=`<g class="mouth"><rect x="-16" y="${my-3}" width="32" height="6" rx="2" fill="#000"/>`+[...Array(8)].map((_,i)=>`<rect x="${-15+i*4}" y="${my-(i%2?3:0)}" width="2.5" height="3" fill="#cfc8b8"/>`).join('')+`</g><path d="M16 ${my}l6 0l0 8l-4 0z" fill="#cfc8b8" stroke="${st}" stroke-width="1.2"/>`;
+  if(P.has('gasMask'))mouth=`<path d="M-24 4Q0 -2 24 4L20 30Q0 40 -20 30Z" fill="#3a3f45" stroke="#000" stroke-width="2"/><circle cx="-22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><circle cx="22" cy="26" r="9" fill="#5a6068" stroke="#000" stroke-width="2"/><path d="M-26 22h8M-26 26h8M-26 30h8M18 22h8M18 26h8M18 30h8" stroke="#222" stroke-width="1.5"/><circle class="glow" cx="0" cy="22" r="4" fill="${g}"/>`;
+  else if(P.has('zipMouth'))mouth=`<g class="mouth"><rect x="-16" y="${my-3}" width="32" height="6" rx="2" fill="#000"/>`+[...Array(8)].map((_,i)=>`<rect x="${-15+i*4}" y="${my-(i%2?3:0)}" width="2.5" height="3" fill="#cfc8b8"/>`).join('')+`</g><path d="M16 ${my}l6 0l0 8l-4 0z" fill="#cfc8b8" stroke="${st}" stroke-width="1.2"/>`;
   else if(P.has('gapTeeth'))mouth=`<g class="mouth"><path d="M-20 ${my-4}Q0 ${my+16} 20 ${my-4}Q0 ${my+2} -20 ${my-4}Z" fill="#000"/><rect x="-14" y="${my-2}" width="5" height="6" fill="#efe6c8"/><rect x="-2" y="${my}" width="5" height="7" fill="#efe6c8"/><rect x="10" y="${my-2}" width="4" height="5" fill="#d8c890"/></g>`;
   else if(P.has('sewnMouth'))mouth=`<path d="M-12 ${my}Q0 ${my+4} 12 ${my}" stroke="${st}" stroke-width="3" fill="none"/>`+[-8,-3,2,7].map(d=>`<path d="M${d-2} ${my-4}L${d+2} ${my+6}M${d+2} ${my-4}L${d-2} ${my+6}" stroke="${st}" stroke-width="1.8"/>`).join('');
   else if(P.has('bigMouth'))mouth=`<g class="mouth"><path d="M-20 ${my-6}Q0 ${my-10} 20 ${my-6}Q16 ${my+16} 0 ${my+18}Q-16 ${my+16} -20 ${my-6}Z" fill="#000"/><path d="M-18 ${my-6}l4 7l4 -7l4 7l4 -7l4 7l4 -7l4 7l4 -7" fill="#f3efe6"/><path d="M-10 ${my+14}l3 -6l3 6l3 -6l3 6l3 -6l3 6" fill="#f3efe6"/></g><path d="M-4 ${my+12}q4 18 10 10q-2 -8 -4 -10z" fill="#c4384e"/>`;
@@ -123,6 +125,7 @@ function face(C,id,h,st){
   else if(h)mouth=`<g class="mouth"><path d="M-14 ${my}Q0 ${my+12} 14 ${my}Z" fill="#000"/><path d="M-11 ${my+1}l3 5l3 -4l3 5l3 -4l3 5l3 -5" fill="none" stroke="#eee" stroke-width="1.6"/></g>`;
   else mouth=`<ellipse class="mouth" cx="0" cy="${my}" rx="7" ry="${C.inst==='mic'||C.inst==='horn'?6:3.5}" fill="${st}"/>`;
   const cheeks=(h||C.eye==='cool')?'':`<ellipse cx="-30" cy="16" rx="7" ry="4" fill="#ff6b8b" opacity=".5"/><ellipse cx="30" cy="16" rx="7" ry="4" fill="#ff6b8b" opacity=".5"/>`;
+  if(P.has('drool'))extra+=`<path d="M8 ${my+4}q2 8 0 12" stroke="#8dff5a" stroke-width="3" fill="none" stroke-linecap="round"/><g class="drip"><circle cx="8" cy="${my+18}" r="2.5" fill="#8dff5a"/></g>`;
   if(P.has('longTongue'))extra+=`<g transform="translate(2 ${my+6})"><g class="dangle"><path d="M-5 0C-6 14 -4 30 0 38C4 30 6 14 5 0Z" fill="#c4384e" stroke="#000" stroke-width="1.5"/><path d="M0 4V30" stroke="#8a1f33" stroke-width="1.2"/></g></g>`;
   if(P.has('scar'))extra+=stitch(18,4,36,20,st,3)+stitch(36,4,18,20,st,3);
   if(P.has('stitchCheek'))extra+=stitch(-34,-4,-22,24,st,3)+stitch(24,-20,36,4,st,2);
@@ -143,6 +146,11 @@ function headParts(C,h,st,c){
   }
   if(P.has('patchwork'))s+=`<path d="M8 ${T+8}L34 ${T+14}L30 ${T+36}L6 ${T+30}Z" fill="${blend(c,'#5a7a3a',.5)}" stroke="${st}" stroke-width="2"/>`+stitch(8,T+8,34,T+14,st,3)+stitch(6,T+30,30,T+36,st,3)+`<path d="M-30 6L-14 4L-16 18L-32 18Z" fill="${blend(c,'#3a4a7a',.5)}" stroke="${st}" stroke-width="2"/>`;
   if(P.has('tendrils'))s+=[[-20,-1],[0,1],[22,-1]].map(([x,d],i)=>`<g class="float" style="animation-delay:${i*.5}s"><path d="M${x} ${T+8}C${x+d*14} ${T-6} ${x-d*10} ${T-18} ${x+d*6} ${T-30}" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="${x+d*6}" cy="${T-31}" r="2.4" fill="#b26bff"/></g>`).join('');
+  if(P.has('goo'))s+=`<path d="M${-W+4} ${T+18}q8 -4 16 0q2 10 -2 16q-3 -8 -6 -2q-4 6 -8 -4z" fill="#7dff3b" opacity=".85"/><path d="M8 ${T+4}q10 -2 18 4q0 8 -4 12q-2 -6 -5 0q-4 -4 -9 -6z" fill="#7dff3b" opacity=".85"/><g class="drip"><circle cx="${-W+12}" cy="${T+36}" r="3" fill="#7dff3b"/></g>`;
+  if(P.has('pustules'))s+=[[-26,-24,5],[22,-30,4],[30,-6,6],[-32,4,4],[10,-36,3.5]].map(([x,y,r],i)=>`<circle class="glow" style="animation-delay:${i*.3}s" cx="${x}" cy="${y}" r="${r}" fill="#b6ff5a" stroke="#4a8a1a" stroke-width="1.5"/>`).join('');
+  if(P.has('rust'))s+=`<path d="M${-W+8} -10q8 -6 14 2q-2 8 -10 8q-6 -2 -4 -10z" fill="#8a4a20" opacity=".7"/><path d="M14 ${T+10}q10 -2 12 6q-4 6 -10 4z" fill="#a0582a" opacity=".6"/><circle cx="26" cy="14" r="4" fill="#7a3a18" opacity=".6"/>`;
+  if(P.has('faceWrap'))s+=`<path d="M${-W} -30L${W} -24L${W} -14L${-W} -20Z M${-W} -2L${W} 4L${W} 16L${-W} 10Z M${-W} 22L${W} 26L${W*.8} 36L${-W*.8} 34Z" fill="#cfc4a8" stroke="${st}" stroke-width="1.5"/><path d="M${-W} -20L-4 -10L-4 4L${-W} -2Z" fill="#cfc4a8" stroke="${st}" stroke-width="1.5"/>`;
+  if(P.has('candle'))s+=`<rect x="-6" y="${T-22}" width="12" height="22" rx="2" fill="#f3efe0" stroke="${st}" stroke-width="2"/><path d="M-6 ${T-18}q3 6 0 10" stroke="#e8e0c8" stroke-width="3" fill="none"/><g class="flick2"><path d="M0 ${T-34}C-6 ${T-26} -4 ${T-22} 0 ${T-22}C4 ${T-22} 6 ${T-26} 0 ${T-34}Z" fill="#7fd8ff"/></g>`;
   if(P.has('nails'))s+=[[-W+6,-6,-35],[W-10,-18,30]].map(([x,y,a])=>`<g transform="translate(${x} ${y}) rotate(${a})"><rect x="-2" y="-18" width="4" height="18" fill="#9aa0a8" stroke="#000" stroke-width="1"/><rect x="-6" y="-21" width="12" height="4" rx="1" fill="#b8bec6" stroke="#000" stroke-width="1"/></g>`).join('');
   if(P.has('knife'))s+=`<g transform="translate(${W*.35} ${T+8}) rotate(25)"><path d="M-3 0L-3 -26L4 -30L3 0Z" fill="#d6dce4" stroke="#000" stroke-width="1.5"/><rect x="-5" y="-44" width="10" height="16" rx="3" fill="#6b4a2b" stroke="#000" stroke-width="1.5"/><rect x="-7" y="-30" width="14" height="4" fill="#3a2a1a"/></g>`;
   if(P.has('web'))s+=`<g opacity=".85"><path d="M${-W+2} ${T+14}L${-W+30} ${T+4}M${-W+2} ${T+14}L${-W+24} ${T+26}M${-W+2} ${T+14}L${-W+12} ${T+38}M${-W+12} ${T+10}Q${-W+12} ${T+20} ${-W+8} ${T+26}M${-W+20} ${T+7}Q${-W+18} ${T+22} ${-W+10} ${T+32}" stroke="#e8e8e8" stroke-width="1" fill="none"/></g><g class="float"><line x1="${-W+22}" y1="${T+8}" x2="${-W+22}" y2="${T+30}" stroke="#ddd" stroke-width=".8"/><circle cx="${-W+22}" cy="${T+32}" r="3.5" fill="#111"/><path d="M${-W+17} ${T+30}l-3 -3M${-W+17} ${T+33}l-4 1M${-W+27} ${T+30}l3 -3M${-W+27} ${T+33}l4 1" stroke="#111" stroke-width="1"/></g>`;
@@ -174,6 +182,36 @@ function headParts(C,h,st,c){
    shades2:(h?'':`<path d="M-40 -10H40L36 6Q20 12 4 4H-4Q-20 12 -36 6Z" fill="#111"/><path d="M-30 -6l10 0" stroke="#fff" stroke-width="2" opacity=".6"/>`),
    bulb:`<line x1="0" y1="${T}" x2="0" y2="${T-14}" stroke="${st}" stroke-width="3"/><circle cx="0" cy="${T-20}" r="8" fill="${k('#FFE07A')}" stroke="${st}" stroke-width="2" class="glow"/><path d="M-3 ${T-18}l3 -4l3 4" stroke="${st}" stroke-width="1.5" fill="none"/>`,
    spikes:[-14,0,14].map(x=>`<path d="M${x-8} ${T+6}L${x} ${T-14}L${x+8} ${T+6}Z" fill="${k('#3a2a1a')}" stroke="${st}" stroke-width="2"/>`).join(''),
+   // 海底
+   goggles:(h?'':`<rect x="-34" y="-14" width="68" height="26" rx="12" fill="#7fe0ff" fill-opacity=".35" stroke="#1d6fa8" stroke-width="4"/><line x1="0" y1="-14" x2="0" y2="12" stroke="#1d6fa8" stroke-width="3"/>`)+`<path d="M-40 -4H-34M34 -4H40" stroke="#1d6fa8" stroke-width="4"/>`,
+   seaweed:[-14,0,14].map((x,i)=>`<g class="sway" style="animation-delay:${i*.4}s"><path d="M${x} ${T+4}C${x-8} ${T-6} ${x+8} ${T-14} ${x} ${T-24}" stroke="${k('#3fae6a')}" stroke-width="5" fill="none" stroke-linecap="round"/></g>`).join(''),
+   bubbles:[[-14,0],[4,-.7],[18,-1.4]].map(([x,d])=>`<circle class="bubble" style="animation-delay:${d}s" cx="${x}" cy="${T-4}" r="5" fill="none" stroke="${k('#aee9ff')}" stroke-width="2"/>`).join(''),
+   starfish:`<path d="M22 ${T}l4 9 10 1 -7 7 2 10 -9 -5 -9 5 2 -10 -7 -7 10 -1z" fill="${k('#FF8A4C')}" stroke="${st}" stroke-width="2"/><circle cx="22" cy="${T+12}" r="1.5" fill="#fff"/>`,
+   shell:`<path d="M-18 ${T+6}Q0 ${T-24} 18 ${T+6}Z" fill="${k('#FFB3C7')}" stroke="${st}" stroke-width="2.5"/><path d="M0 ${T+6}V${T-14}M-9 ${T+6}L-4 ${T-12}M9 ${T+6}L4 ${T-12}" stroke="${st}" stroke-width="1.5"/>`,
+   snorkel:`<path d="M${W-4} 0V${T-10}Q${W-4} ${T-18} ${W+4} ${T-18}" stroke="${k('#FFD84D')}" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+   // 太空
+   helmet:`<circle cx="0" cy="0" r="${W+10}" fill="#bfe6ff" fill-opacity=".18" stroke="${k('#d8eaf5')}" stroke-width="3"/><path d="M${-W+2} ${-W+12}a${W} ${W} 0 0 1 20 -14" stroke="#fff" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>`,
+   antenna2:[-14,14].map(x=>`<line x1="${x}" y1="${T+2}" x2="${x*1.5}" y2="${T-20}" stroke="${st}" stroke-width="3"/><circle class="glow" cx="${x*1.5}" cy="${T-22}" r="5" fill="${k('#5CFFE4')}" stroke="${st}" stroke-width="1.5"/>`).join(''),
+   planet:`<circle cx="0" cy="${T-12}" r="11" fill="${k('#FF8A4C')}" stroke="${st}" stroke-width="2"/><ellipse cx="0" cy="${T-12}" rx="20" ry="5" fill="none" stroke="${k('#FFD84D')}" stroke-width="3" transform="rotate(-15 0 ${T-12})"/>`,
+   rocket:`<g class="float"><path d="M0 ${T-34}C8 ${T-26} 8 ${T-14} 6 ${T-6}H-6C-8 ${T-14} -8 ${T-26} 0 ${T-34}Z" fill="${k('#f4f4f4')}" stroke="${st}" stroke-width="2"/><circle cx="0" cy="${T-20}" r="3" fill="${k('#5BB8F0')}"/><path d="M-6 ${T-10}l-6 6h6zM6 ${T-10}l6 6h-6z" fill="${k('#E5484D')}"/><g class="flick2"><path d="M-3 ${T-6}L0 ${T+4}L3 ${T-6}Z" fill="#FFB347"/></g></g>`,
+   ufo:`<g class="float"><ellipse cx="0" cy="${T-18}" rx="20" ry="6" fill="${k('#9aa3b5')}" stroke="${st}" stroke-width="2"/><path d="M-9 ${T-20}a9 8 0 0 1 18 0z" fill="#bfe6ff" stroke="${st}" stroke-width="1.5"/><path d="M-8 ${T-12}L-14 ${T+2}H14L8 ${T-12}Z" fill="#fff8b0" opacity=".45"/></g>`,
+   // 校园和节日
+   gradcap:`<path d="M-26 ${T-4}L0 ${T-14}L26 ${T-4}L0 ${T+6}Z" fill="${k('#1f1a33')}" stroke="${st}" stroke-width="2"/><rect x="-14" y="${T-2}" width="28" height="10" fill="${k('#1f1a33')}"/><path d="M20 ${T-6}V${T+10}" stroke="${k('#FFD84D')}" stroke-width="2"/><circle cx="20" cy="${T+12}" r="3" fill="${k('#FFD84D')}"/>`,
+   pencil:`<g transform="rotate(30 0 ${T})"><rect x="-4" y="${T-30}" width="8" height="26" fill="${k('#FFD84D')}" stroke="${st}" stroke-width="1.5"/><path d="M-4 ${T-4}L0 ${T+4}L4 ${T-4}Z" fill="${k('#f3d8b0')}" stroke="${st}" stroke-width="1.5"/><rect x="-4" y="${T-34}" width="8" height="5" fill="${k('#FF8FA3')}"/></g>`,
+   flagclip:`<line x1="16" y1="${T+4}" x2="16" y2="${T-28}" stroke="${st}" stroke-width="2.5"/><path d="M16 ${T-28}h20v13h-20z" fill="${k('#E5302E')}"/><path d="M21 ${T-24}l1 2 2 0 -1.5 1.4 .6 2 -2 -1.2 -2 1.2 .6 -2 -1.5 -1.4 2 0z" fill="#FFD84D"/>`,
+   lantern:`<line x1="0" y1="${T}" x2="0" y2="${T-6}" stroke="${st}" stroke-width="2"/><ellipse cx="0" cy="${T-16}" rx="14" ry="11" fill="${k('#E5302E')}" stroke="${st}" stroke-width="2"/><rect x="-6" y="${T-29}" width="12" height="4" fill="${k('#FFD84D')}"/><path d="M0 ${T-5}v8" stroke="${k('#FFD84D')}" stroke-width="2"/>`,
+   redscarf:'',
+   // 四季和江南
+   maple:`<path d="M20 ${T-2}l3 -8 3 5 5 -3 -1 6 6 1 -5 4 2 5 -6 -2 -2 6 -2 -6 -6 2 2 -5 -5 -4 6 -1 -1 -6 5 3z" fill="${k('#E8553E')}" stroke="${st}" stroke-width="1.2"/>`,
+   snowflake:`<g class="spin"><path d="M0 ${T-28}V${T}M-12 ${T-21}L12 ${T-7}M12 ${T-21}L-12 ${T-7}" stroke="${k('#d8f0ff')}" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="${T-14}" r="3" fill="${k('#fff')}"/></g>`,
+   flowercrown:[-24,-12,0,12,24].map((x,i)=>`<circle cx="${x}" cy="${T+4-Math.abs(x)/6}" r="5.5" fill="${k(['#FF8FA3','#FFD166','#C3B1FF','#8EE3A8','#FFB86B'][i])}" stroke="${st}" stroke-width="1.2"/>`).join(''),
+   umbrella:`<path d="M-26 ${T-14}Q0 ${T-40} 26 ${T-14}Z" fill="${k('#5BB8F0')}" stroke="${st}" stroke-width="2"/><path d="M-26 ${T-14}q6.5 4 13 0t13 0t13 0t13 0" stroke="${st}" stroke-width="1.5" fill="none"/><line x1="0" y1="${T-14}" x2="0" y2="${T+2}" stroke="${st}" stroke-width="2"/>`,
+   lotus:`<path d="M-32 ${T+8}Q0 ${T-20} 32 ${T+8}Q0 ${T} -32 ${T+8}Z" fill="${k('#5FBF6E')}" stroke="${st}" stroke-width="2"/><path d="M0 ${T+4}V${T-10}M-14 ${T+4}L-8 ${T-8}M14 ${T+4}L8 ${T-8}" stroke="${k('#3f8f4e')}" stroke-width="1.5"/>`,
+   // 夜空和动物
+   moonboat:`<path d="M-24 ${T-8}Q0 ${T+10} 24 ${T-8}Q0 ${T} -24 ${T-8}Z" fill="${k('#FFE07A')}" stroke="${st}" stroke-width="2"/><circle cx="14" cy="${T-20}" r="2" fill="${k('#fff')}"/><circle cx="-10" cy="${T-24}" r="1.5" fill="${k('#fff')}"/>`,
+   feather:`<path d="M10 ${T+4}C4 ${T-14} 14 ${T-30} 26 ${T-34}C24 ${T-20} 18 ${T-6} 10 ${T+4}Z" fill="${k('#2a2a3a')}" stroke="${st}" stroke-width="1.5"/><path d="M10 ${T+4}L24 ${T-30}" stroke="#555" stroke-width="1"/>`,
+   rabbit:[-12,12].map(x=>`<ellipse cx="${x}" cy="${T-18}" rx="7" ry="20" fill="${k('#fff')}" stroke="${st}" stroke-width="2.5" transform="rotate(${x/2} ${x} ${T})"/><ellipse cx="${x}" cy="${T-16}" rx="3" ry="13" fill="${k('#FFB3C7')}" transform="rotate(${x/2} ${x} ${T})"/>`).join(''),
+   bear:[-26,26].map(x=>`<circle cx="${x}" cy="${T+8}" r="10" fill="${k('#9a6a40')}" stroke="${st}" stroke-width="2.5"/><circle cx="${x}" cy="${T+8}" r="4.5" fill="${k('#e8c8a0')}"/>`).join(''),
    // 第 2 阶段 金木水火土
    goldcrown:`<path d="M-20 ${T+6}L-22 ${T-14}L-10 ${T-4}L0 ${T-18}L10 ${T-4}L22 ${T-14}L20 ${T+6}Z" fill="${k('#F5C04A')}" stroke="${st}" stroke-width="2.5"/><circle cx="0" cy="${T-2}" r="3.5" fill="${k('#FF5C5C')}"/>`,
    twig:`<path d="M-4 ${T+4}C-6 ${T-10} 4 ${T-18} 2 ${T-28}" stroke="${k('#8a5a2b')}" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="-8" cy="${T-16}" rx="8" ry="4" fill="${k('#5FD3A5')}" stroke="${st}" stroke-width="1.5" transform="rotate(-30 -8 ${T-16})"/><ellipse cx="10" cy="${T-24}" rx="8" ry="4" fill="${k('#8EE3A8')}" stroke="${st}" stroke-width="1.5" transform="rotate(25 10 ${T-24})"/>`,
@@ -243,9 +281,10 @@ function inst(C,h,st,c){
    case 'megaphone':o.hd=`<path d="M10 20L40 8L46 36L14 28Z" fill="${k('#F5F5F5')}" stroke="${st}" stroke-width="2.5"/><path d="M40 8L46 36" stroke="${k('#E5484D')}" stroke-width="5"/><rect x="18" y="26" width="6" height="12" fill="${st}"/>`;
      o.pose={l:150,r:-112,sl:-30,sr:-8,d:1,dl:0};break;
    case 'card':{const pin=/^[a-zü]/.test(C.card);
+     const L=[...(C.card||'')].length, fs=pin?(L<=3?20:L<=4?17:L<=5?14:12):(L<=1?24:L<=2?18:14);
      o.front=`<g class="cardg"><rect x="46" y="112" width="48" height="34" rx="6" fill="${h?'#d8cfc0':'#fffdf5'}" stroke="${st}" stroke-width="3"/>`+
-       (pin?'':`<path d="M70 115V143M49 129H91" stroke="${h?'#7a2a2a':'#F0697A'}" stroke-width="1.2" stroke-dasharray="3 3"/>`)+
-       `<text x="70" y="${pin?136:139}" text-anchor="middle" font-size="${pin?20:24}" font-weight="700" font-family="Andika,'Segoe UI',sans-serif" fill="${h?'#3a0a10':'#1f1a33'}">${C.card}</text></g>`;
+       (pin||L>1?'':`<path d="M70 115V143M49 129H91" stroke="${h?'#7a2a2a':'#F0697A'}" stroke-width="1.2" stroke-dasharray="3 3"/>`)+
+       `<text x="70" y="${pin?136:L<=1?139:136}" text-anchor="middle" font-size="${fs}" font-weight="700" font-family="Andika,'Segoe UI',sans-serif" fill="${h?'#3a0a10':'#1f1a33'}">${C.card}</text></g>`;
      o.pose={l:11,r:-11,sl:-6,sr:6,d:1,dl:0};break}
   }
   return o;
@@ -255,10 +294,11 @@ function inst(C,h,st,c){
 // look: {dark:是否恐怖, hat:挂件, parts:[恐怖件], card:手里卡片的字, col:换颜色}
 export function charSVG(id,look={}){
   const h=!!look.dark;
-  const C={...CH[id],hat:look.hat!==undefined?look.hat:CH[id].hat,horror:look.parts||[],card:look.card||CH[id].card,col:look.col||CH[id].col};
-  const st=C.rim||(h?'#050208':'#2A2145'),c=h?horrorCol(C.col):C.col,P=new Set(C.horror);
+  const C={...CH[id],hat:look.hat!==undefined?look.hat:CH[id].hat,horror:look.parts||[],card:look.card!==undefined?look.card:CH[id].card,col:look.col||CH[id].col,glow:look.glow};
+  const st=look.stroke||C.rim||(h?'#050208':'#2A2145'),c=look.colFinal||(h?horrorCol(C.col):C.col),P=new Set(C.horror);
   const I=inst(C,h,st,c),pz=I.pose,belly=C.rim?'#2a2436':h?blend(c,'#000',.25):blend(c,'#fff',.35);
   const leg=(x,cls)=>{const band=P.has('bandLeg')&&cls=='l',back=P.has('backFeet');
+    if(P.has('wisp'))return cls=='l'?`<g class="float"><path d="M50 144Q70 150 90 144Q92 160 80 166Q84 178 70 184Q74 172 62 170Q50 166 50 144Z" fill="${c}" stroke="${st}" stroke-width="3" opacity=".9"/></g>`:'';
     if(P.has('pegLeg')&&cls=='r')return `<g transform="translate(${x} 148)"><g class="leg ${cls}"><rect x="-6" y="-2" width="12" height="10" rx="5" fill="${c}" stroke="${st}" stroke-width="3"/><rect x="-3" y="6" width="6" height="26" fill="#8a5a2b" stroke="#000" stroke-width="1.5"/></g></g>`;
     const chain=P.has('chain')&&cls=='l'?`<rect x="-8" y="16" width="16" height="5" rx="2" fill="#7a8088" stroke="#000"/><path d="M-6 20q-6 4 -10 2q-4 4 -8 2" stroke="#7a8088" stroke-width="3" fill="none"/><circle cx="-26" cy="26" r="7" fill="#2a2a2e" stroke="#000"/>`:'';
     return `<g transform="translate(${x} 148)"><g class="leg ${cls}"><rect x="-6" y="-2" width="12" height="28" rx="6" fill="${c}" stroke="${st}" stroke-width="3"/>`+
@@ -267,6 +307,7 @@ export function charSVG(id,look={}){
   const arm=(x,side)=>{
     const a=side=='l'?pz.l:pz.r,s=side=='l'?pz.sl:pz.sr,dl=side=='l'?0:pz.dl;
     const bone=P.has('boneL')&&side=='l';
+    if(P.has('armOffL')&&side=='l')return `<g transform="translate(${x} 110)"><path d="M0 0L-2 10" stroke="${st}" stroke-width="13" stroke-linecap="round"/><path d="M0 0L-2 10" stroke="${c}" stroke-width="8" stroke-linecap="round"/><circle cx="-2" cy="13" r="3" fill="#e9e2d0"/><path d="M-7 8l10 -2" stroke="#d9ceb4" stroke-width="3"/></g>`;
     let body=bone?`<path d="M0 0L0 30" stroke="#e9e2d0" stroke-width="5"/><circle cx="-3" cy="2" r="4" fill="#e9e2d0"/><circle cx="3" cy="2" r="4" fill="#e9e2d0"/><circle cx="-3" cy="28" r="4" fill="#e9e2d0"/><circle cx="3" cy="28" r="4" fill="#e9e2d0"/><path d="M-6 32l-3 8M0 34v9M6 32l3 8" stroke="#e9e2d0" stroke-width="3" stroke-linecap="round"/>`
       :`<path d="M0 0L0 30" stroke="${st}" stroke-width="13" stroke-linecap="round"/><path d="M0 0L0 30" stroke="${c}" stroke-width="8" stroke-linecap="round"/><circle cx="0" cy="32" r="7" fill="${c}" stroke="${st}" stroke-width="3"/>`;
     if(P.has('wristR')&&side=='r')body+=stitch(-7,25,7,25,st,2);
@@ -276,6 +317,14 @@ export function charSVG(id,look={}){
     return `<g transform="translate(${x} 110)"><g class="arm" style="--a:${a}deg;--s:${s}deg;--d:calc(var(--b)*${pz.d});--dl:calc(var(--b)*${dl})">${body}${side=='l'?I.l:I.r}</g></g>`};
   let bodyX='';
   if(P.has('heart'))bodyX+=`<path d="M58 104Q70 100 82 104L80 124Q70 130 60 124Z" fill="#1a0006" stroke="${st}" stroke-width="2"/><path d="M61 108h18M61 114h18M62 120h16" stroke="#e9e2d0" stroke-width="2" opacity=".7"/><g class="beat"><path d="M70 124C60 116 60 107 66 107C69 107 70 110 70 111C70 110 71 107 74 107C80 107 80 116 70 124Z" fill="#b0102a" stroke="#000" stroke-width="1.5"/></g>`;
+  if(P.has('rags'))bodyX+=`<path d="M45 142L50 152L55 144L61 153L67 145L73 153L79 144L85 152L91 145L95 150V142Z" fill="${blend(c,'#000',.35)}" stroke="${st}" stroke-width="2"/><path d="M58 112l6 4l-4 5z M80 126l5 3l-4 4z" fill="#000" opacity=".6"/>`;
+  if(P.has('hazmat'))bodyX+=`<path d="M52 100Q49 100 48 108L45 142Q45 152 55 152H85Q95 152 95 142L92 108Q91 100 88 100Z" fill="#f2c230" stroke="#000" stroke-width="2.5"/><circle cx="70" cy="126" r="9" fill="#111"/><g fill="#f2c230"><circle cx="70" cy="120" r="3"/><circle cx="65" cy="129" r="3"/><circle cx="75" cy="129" r="3"/></g><circle cx="70" cy="126" r="2" fill="#111"/>`;
+  if(P.has('glowVeins'))bodyX+=`<path class="glow" d="M54 110q6 6 2 12q-4 6 2 12M86 108q-6 8 -2 14q4 8 -2 14M66 104q2 6 -2 10" stroke="#7dff3b" stroke-width="2" fill="none"/>`;
+  if(P.has('chains'))bodyX+=`<path d="M46 108L94 140M94 108L46 140" stroke="#8a9098" stroke-width="4" stroke-dasharray="6 3"/><circle cx="70" cy="124" r="5" fill="#5a6068" stroke="#000"/>`;
+  if(P.has('barbed'))bodyX+=`<path d="M44 118Q70 126 96 118M44 134Q70 142 96 134" stroke="#6a6a6a" stroke-width="2" fill="none"/>`+[50,60,70,80,90].map(x=>`<path d="M${x-3} ${120+(x%20?1:2)}l6 -4M${x-3} ${116}l6 6M${x-3} ${136}l6 -4M${x-3} ${132}l6 6" stroke="#6a6a6a" stroke-width="1.5"/>`).join('');
+  if(P.has('radio'))bodyX+=`<rect x="58" y="114" width="24" height="16" rx="3" fill="#4a3a2a" stroke="#000" stroke-width="1.5"/><circle cx="64" cy="122" r="4" fill="#222"/><line x1="72" y1="118" x2="79" y2="118" stroke="#ffb02e" stroke-width="1.5"/><line x1="72" y1="122" x2="79" y2="122" stroke="#ffb02e" stroke-width="1.5"/><g class="glitch"><path d="M80 112l4 -6l-2 6l4 -3" stroke="#ffb02e" stroke-width="1.5" fill="none"/></g>`;
+  if(P.has('moss'))bodyX+=`<path d="M48 120q4 -4 8 0q2 4 -2 6q-6 0 -6 -6z M84 138q4 -3 8 1q0 4 -4 5q-4 -1 -4 -6z" fill="#4a7a2a" opacity=".8"/>`;
+  if(P.has('smoky'))bodyX+=[48,92].map((x,i)=>`<g class="float" style="animation-delay:${i*.8}s"><path d="M${x} 140C${x-8} 128 ${x+6} 120 ${x-2} 106C${x-8} 98 ${x+2} 92 ${x-4} 84" stroke="#000" stroke-width="6" fill="none" stroke-linecap="round" opacity=".7"/></g>`).join('');
   if(P.has('ribs'))bodyX+=`<path d="M56 108Q70 102 84 108L82 140Q70 146 58 140Z" fill="#14060a" stroke="${st}" stroke-width="2"/><path d="M70 108V140" stroke="#e9e2d0" stroke-width="3"/>`+[114,121,128,135].map(y=>`<path d="M70 ${y}Q62 ${y-3} 59 ${y+2}M70 ${y}Q78 ${y-3} 81 ${y+2}" stroke="#e9e2d0" stroke-width="2.5" fill="none"/>`).join('');
   if(P.has('hole'))bodyX+=`<path d="M62 120l4 -6l6 3l5 -4l4 7l-2 6l3 6l-6 4l-5 -2l-6 3l-4 -6l2 -5z" fill="#2a0d14" stroke="#000" stroke-width="2"/>`;
   if(P.has('woundEye'))bodyX+=`<path d="M57 136Q66 128 76 134Q66 142 57 136Z" fill="#3a0010" stroke="#000" stroke-width="1.5"/><g class="eye" style="animation-delay:.8s"><circle cx="66" cy="135" r="3.5" fill="#f3efe6"/><circle cx="66.5" cy="135" r="1.6" fill="#000"/></g>`;
@@ -289,12 +338,15 @@ export function charSVG(id,look={}){
   if(C.hat==='scarf'){const sc=h?'#4a1020':'#6b5cff';bodyX+=`<path d="M50 100Q70 110 90 100L90 108Q70 118 50 108Z" fill="${sc}" stroke="${st}" stroke-width="2"/><g class="wave"><path d="M86 104C100 104 108 98 122 102L120 112C108 108 100 114 86 112Z" fill="${sc}" stroke="${st}" stroke-width="2"/>${h?'<path d="M114 108l4 8l3 -7" fill="#4a1020" stroke="#000" stroke-width="1.5"/>':''}</g>`}
   if(P.has('bodyEyes'))bodyX+=[[60,126,3.5],[80,134,3],[66,142,2.5]].map(([x,y,r],i)=>eyeH(x,y,'#b26bff',r).replace('class="eye"',`class="eye" style="animation-delay:${i*1.1}s"`)).join('');
   if(P.has('shadowDrip'))bodyX+=`<path d="M48 146q2 14 6 3q3 18 7 0M84 148q3 12 6 1" fill="#000" stroke="#000" stroke-width="2"/><g class="drip"><circle cx="54" cy="160" r="2.5" fill="#000"/></g>`;
+  if(C.hat==='redscarf')bodyX+=`<path d="M52 101Q70 112 88 101L84 108Q70 116 56 108Z" fill="${h?'#6a1018':'#E5302E'}" stroke="${st}" stroke-width="1.5"/><path d="M66 108L70 126L76 108Z" fill="${h?'#6a1018':'#E5302E'}" stroke="${st}" stroke-width="1.5"/>`;
   if(C.hat==='flowercollar')bodyX+=[52,61,70,79,88].map(x=>`<circle cx="${x}" cy="${104+Math.abs(x-70)/4}" r="5" fill="${h?horrorCol('#FF8FA3'):'#FF8FA3'}" stroke="${st}" stroke-width="1.5"/>`).join('');
   if(C.hat==='sunband'&&!h)bodyX+=`<circle cx="70" cy="126" r="6" fill="#FFD84D" stroke="${st}" stroke-width="1.5"/>`;
   const H=HEAD[C.head];
   const shadow=P.has('shadow')?`<g class="lurk"><path d="M70 30C40 30 34 70 40 110L36 180H104L100 110C106 70 100 30 70 30Z" fill="#000" opacity=".55"/><circle cx="58" cy="62" r="3.5" fill="#ff2e2e"/><circle cx="82" cy="62" r="3.5" fill="#ff2e2e"/></g>`:'';
   const extra=P.has('extraArm')?`<g transform="translate(92 128)"><g class="arm" style="--a:-60deg;--s:-30deg;--d:calc(var(--b)*1);--dl:0s"><path d="M0 0L0 24" stroke="${st}" stroke-width="11" stroke-linecap="round"/><path d="M0 0L0 24" stroke="${c}" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="26" r="5.5" fill="${c}" stroke="${st}" stroke-width="2.5"/></g></g>`:'';
-  return `<svg viewBox="0 0 140 196" xmlns="http://www.w3.org/2000/svg"><ellipse cx="70" cy="184" rx="34" ry="5" fill="#000" opacity=".15"/>${shadow}
+  const longSh=P.has('longShadow')?`<path d="M40 184Q100 176 170 190Q110 196 40 188Z" fill="#000" opacity=".55"/>`:'';
+  const ash=P.has('ash')?[0,1,2,3,4].map(i=>`<circle class="ashf" style="animation-delay:${-i*.9}s" cx="${20+i*26}" cy="0" r="1.8" fill="#bbb"/>`).join(''):'';
+  return `<svg viewBox="0 0 140 196" xmlns="http://www.w3.org/2000/svg"${P.has('ghostly')?' class="ghosty"':''}><ellipse cx="70" cy="184" rx="34" ry="5" fill="#000" opacity=".15"/>${longSh}${shadow}
   <g transform="translate(70 184)"><g class="bd"><g transform="translate(-70 -184)">
    ${leg(61,'l')}${leg(79,'r')}
    <path d="M52 100Q49 100 48 108L45 142Q45 152 55 152H85Q95 152 95 142L92 108Q91 100 88 100Z" fill="${c}" stroke="${st}" stroke-width="3"/>
@@ -304,6 +356,10 @@ export function charSVG(id,look={}){
      <path d="${H.d}" fill="${c}" stroke="${st}" stroke-width="3"/>${face(C,id,h,st)}${headParts(C,h,st,c)}${I.hd}
    </g></g></g>
    ${extra}${arm(50,'l')}${arm(90,'r')}
-  </g></g></g></svg>`;
+  </g></g></g>${ash}${P.has('sheet')?sheetSVG(st):''}</svg>`;
+}
+// 白布鬼：整块白布从头罩下来，只露两个黑洞
+function sheetSVG(st){
+  return `<g class="float"><path d="M70 6C38 6 26 40 28 80L22 150Q34 144 42 152Q52 144 60 152Q70 144 80 152Q90 144 98 152Q108 144 118 150L112 80C114 40 102 6 70 6Z" fill="#f4f7ff" stroke="${st}" stroke-width="2.5" opacity=".95"/><ellipse cx="56" cy="62" rx="7" ry="10" fill="#111"/><ellipse cx="84" cy="62" rx="7" ry="10" fill="#111"/><ellipse cx="70" cy="88" rx="6" ry="8" fill="#111"/></g>`;
 }
 

@@ -1,19 +1,2529 @@
 {
-  "note": "阶段内容，严格按课本。chars 是这一关图标栏里的字（课文生字，第 2 关另加课文里的金木水火土），eggs 是彩蛋词语。读音来自课本识字表（PDF 第 105 页起）。",
-  "stages": [
-    {"id": 1, "lesson": "天地人", "unit": "第一单元·识字 1", "type": "shizi", "style": "sky",
-     "chars": [["天", "tiān"], ["地", "dì"], ["人", "rén"], ["你", "nǐ"], ["我", "wǒ"], ["他", "tā"]],
-     "eggs": [{"w": "天地", "p": "tiān dì"}, {"w": "你我", "p": "nǐ wǒ"}, {"w": "他人", "p": "tā rén"}, {"w": "天地人", "p": "tiān dì rén"}]},
-    {"id": 2, "lesson": "金木水火土", "unit": "第一单元·识字 2", "type": "shizi", "style": "wuxing",
-     "chars": [["一", "yī"], ["二", "èr"], ["三", "sān"], ["四", "sì"], ["五", "wǔ"], ["上", "shàng"], ["下", "xià"],
-               ["金", "jīn"], ["木", "mù"], ["水", "shuǐ"], ["火", "huǒ"], ["土", "tǔ"]],
-     "eggs": [{"w": "上下", "p": "shàng xià"}, {"w": "一二三", "p": "yī èr sān"}, {"w": "三四五", "p": "sān sì wǔ"}, {"w": "金木水火土", "p": "jīn mù shuǐ huǒ tǔ"}]},
-    {"id": 3, "lesson": "口耳目手足", "unit": "第一单元·识字 3", "type": "shizi", "style": "horror1",
-     "chars": [["口", "kǒu"], ["耳", "ěr"], ["目", "mù"], ["手", "shǒu"], ["足", "zú"], ["站", "zhàn"], ["坐", "zuò"]],
-     "eggs": [{"w": "耳目", "p": "ěr mù"}, {"w": "手足", "p": "shǒu zú"}, {"w": "口耳目", "p": "kǒu ěr mù"}, {"w": "口耳目手足", "p": "kǒu ěr mù shǒu zú"}]},
-    {"id": 4, "lesson": "日月山川", "unit": "第一单元·识字 4", "type": "shizi", "style": "shanchuan",
-     "chars": [["日", "rì"], ["月", "yuè"], ["山", "shān"], ["川", "chuān"], ["水", "shuǐ"], ["火", "huǒ"], ["田", "tián"], ["禾", "hé"]],
-     "eggs": [{"w": "日月", "p": "rì yuè"}, {"w": "山川", "p": "shān chuān"}, {"w": "山水", "p": "shān shuǐ"}, {"w": "火山", "p": "huǒ shān"}]}
-  ],
-  "map": ["天地人", "金木水火土", "口耳目手足", "日月山川", "a o e", "i u ü", "b p m f", "d t n l", "g h", "j q x", "z c s", "zh ch sh r", "y w", "ai ei ui", "ao ou iu", "ie üe er", "an en in un ün", "ang eng ing ong", "秋天", "江南", "雪地里的小画家", "四季", "对韵歌", "日月明", "小书包", "升国旗", "小小的船", "影子", "两件宝", "比尾巴", "乌鸦喝水", "雨点儿", "全书大混音"]
+ "note": "阶段内容，严格按课本。chars 是这一关图标栏里的字（课文生字，第 2 关另加课文里的金木水火土），eggs 是彩蛋词语。读音来自课本识字表（PDF 第 105 页起）。",
+ "stages": [
+  {
+   "id": 1,
+   "lesson": "天地人",
+   "unit": "第一单元·识字 1",
+   "type": "shizi",
+   "style": "sky",
+   "chars": [
+    [
+     "天",
+     "tiān"
+    ],
+    [
+     "地",
+     "dì"
+    ],
+    [
+     "人",
+     "rén"
+    ],
+    [
+     "你",
+     "nǐ"
+    ],
+    [
+     "我",
+     "wǒ"
+    ],
+    [
+     "他",
+     "tā"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "天地",
+     "p": "tiān dì"
+    },
+    {
+     "w": "你我",
+     "p": "nǐ wǒ"
+    },
+    {
+     "w": "他人",
+     "p": "tā rén"
+    },
+    {
+     "w": "天地人",
+     "p": "tiān dì rén"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "lesson": "金木水火土",
+   "unit": "第一单元·识字 2",
+   "type": "shizi",
+   "style": "wuxing",
+   "chars": [
+    [
+     "一",
+     "yī"
+    ],
+    [
+     "二",
+     "èr"
+    ],
+    [
+     "三",
+     "sān"
+    ],
+    [
+     "四",
+     "sì"
+    ],
+    [
+     "五",
+     "wǔ"
+    ],
+    [
+     "上",
+     "shàng"
+    ],
+    [
+     "下",
+     "xià"
+    ],
+    [
+     "金",
+     "jīn"
+    ],
+    [
+     "木",
+     "mù"
+    ],
+    [
+     "水",
+     "shuǐ"
+    ],
+    [
+     "火",
+     "huǒ"
+    ],
+    [
+     "土",
+     "tǔ"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "上下",
+     "p": "shàng xià"
+    },
+    {
+     "w": "一二三",
+     "p": "yī èr sān"
+    },
+    {
+     "w": "三四五",
+     "p": "sān sì wǔ"
+    },
+    {
+     "w": "金木水火土",
+     "p": "jīn mù shuǐ huǒ tǔ"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "lesson": "口耳目手足",
+   "unit": "第一单元·识字 3",
+   "type": "shizi",
+   "style": "horror1",
+   "chars": [
+    [
+     "口",
+     "kǒu"
+    ],
+    [
+     "耳",
+     "ěr"
+    ],
+    [
+     "目",
+     "mù"
+    ],
+    [
+     "手",
+     "shǒu"
+    ],
+    [
+     "足",
+     "zú"
+    ],
+    [
+     "站",
+     "zhàn"
+    ],
+    [
+     "坐",
+     "zuò"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "耳目",
+     "p": "ěr mù"
+    },
+    {
+     "w": "手足",
+     "p": "shǒu zú"
+    },
+    {
+     "w": "口耳目",
+     "p": "kǒu ěr mù"
+    },
+    {
+     "w": "口耳目手足",
+     "p": "kǒu ěr mù shǒu zú"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "lesson": "日月山川",
+   "unit": "第一单元·识字 4",
+   "type": "shizi",
+   "style": "shanchuan",
+   "chars": [
+    [
+     "日",
+     "rì"
+    ],
+    [
+     "月",
+     "yuè"
+    ],
+    [
+     "山",
+     "shān"
+    ],
+    [
+     "川",
+     "chuān"
+    ],
+    [
+     "水",
+     "shuǐ"
+    ],
+    [
+     "火",
+     "huǒ"
+    ],
+    [
+     "田",
+     "tián"
+    ],
+    [
+     "禾",
+     "hé"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "日月",
+     "p": "rì yuè"
+    },
+    {
+     "w": "山川",
+     "p": "shān chuān"
+    },
+    {
+     "w": "山水",
+     "p": "shān shuǐ"
+    },
+    {
+     "w": "火山",
+     "p": "huǒ shān"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "lesson": "a o e",
+   "unit": "汉语拼音 1",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [],
+   "yun": [
+    "a",
+    "o",
+    "e"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "e",
+    "o"
+   ],
+   "eggs": [
+    {
+     "w": "鹅",
+     "p": "é",
+     "syl": [
+      [
+       "e",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "饿",
+     "p": "è",
+     "syl": [
+      [
+       "e",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "啊",
+     "p": "ā",
+     "syl": [
+      [
+       "a",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "哦",
+     "p": "ó",
+     "syl": [
+      [
+       "o",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "lesson": "i u ü",
+   "unit": "汉语拼音 2",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [],
+   "yun": [
+    "i",
+    "u",
+    "ü"
+   ],
+   "whole": [],
+   "valid": [
+    "i",
+    "u",
+    "ü"
+   ],
+   "eggs": [
+    {
+     "w": "衣",
+     "p": "ī",
+     "syl": [
+      [
+       "i",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "五",
+     "p": "ǔ",
+     "syl": [
+      [
+       "u",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "鱼",
+     "p": "ǘ",
+     "syl": [
+      [
+       "ü",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "雨",
+     "p": "ǚ",
+     "syl": [
+      [
+       "ü",
+       3
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "lesson": "b p m f",
+   "unit": "汉语拼音 3",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [
+    "b",
+    "p",
+    "m",
+    "f"
+   ],
+   "yun": [
+    "a",
+    "o",
+    "i",
+    "u"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "ba",
+    "bi",
+    "bo",
+    "bu",
+    "fa",
+    "fo",
+    "fu",
+    "ma",
+    "mi",
+    "mo",
+    "mu",
+    "o",
+    "pa",
+    "pi",
+    "po",
+    "pu"
+   ],
+   "eggs": [
+    {
+     "w": "爸爸",
+     "p": "bà ba",
+     "syl": [
+      [
+       "ba",
+       4
+      ],
+      [
+       "ba",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "妈妈",
+     "p": "mā ma",
+     "syl": [
+      [
+       "ma",
+       1
+      ],
+      [
+       "ma",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "爬坡",
+     "p": "pá pō",
+     "syl": [
+      [
+       "pa",
+       2
+      ],
+      [
+       "po",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "木马",
+     "p": "mù mǎ",
+     "syl": [
+      [
+       "mu",
+       4
+      ],
+      [
+       "ma",
+       3
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "lesson": "d t n l",
+   "unit": "汉语拼音 4",
+   "type": "pinyin",
+   "style": "zombie",
+   "sheng": [
+    "m",
+    "d",
+    "t",
+    "n",
+    "l"
+   ],
+   "yun": [
+    "a",
+    "e",
+    "i",
+    "u",
+    "ü"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "da",
+    "de",
+    "di",
+    "du",
+    "e",
+    "la",
+    "le",
+    "li",
+    "lia",
+    "lu",
+    "lü",
+    "ma",
+    "me",
+    "mi",
+    "mu",
+    "na",
+    "ne",
+    "ni",
+    "nu",
+    "nü",
+    "ta",
+    "te",
+    "ti",
+    "tu"
+   ],
+   "eggs": [
+    {
+     "w": "大地",
+     "p": "dà dì",
+     "syl": [
+      [
+       "da",
+       4
+      ],
+      [
+       "di",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "马路",
+     "p": "mǎ lù",
+     "syl": [
+      [
+       "ma",
+       3
+      ],
+      [
+       "lu",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "泥土",
+     "p": "ní tǔ",
+     "syl": [
+      [
+       "ni",
+       2
+      ],
+      [
+       "tu",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "弟弟",
+     "p": "dì di",
+     "syl": [
+      [
+       "di",
+       4
+      ],
+      [
+       "di",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "lesson": "g h",
+   "unit": "汉语拼音 5",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [
+    "d",
+    "g",
+    "h"
+   ],
+   "yun": [
+    "a",
+    "o",
+    "e",
+    "i",
+    "u"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "da",
+    "de",
+    "di",
+    "du",
+    "duo",
+    "e",
+    "ga",
+    "ge",
+    "gu",
+    "gua",
+    "guo",
+    "ha",
+    "he",
+    "hu",
+    "hua",
+    "huo",
+    "o"
+   ],
+   "eggs": [
+    {
+     "w": "哥哥",
+     "p": "gē ge",
+     "syl": [
+      [
+       "ge",
+       1
+      ],
+      [
+       "ge",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "弟弟",
+     "p": "dì di",
+     "syl": [
+      [
+       "di",
+       4
+      ],
+      [
+       "di",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "画画",
+     "p": "huà huà",
+     "syl": [
+      [
+       "hua",
+       4
+      ],
+      [
+       "hua",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "荷花",
+     "p": "hé huā",
+     "syl": [
+      [
+       "he",
+       2
+      ],
+      [
+       "hua",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "lesson": "j q x",
+   "unit": "汉语拼音 6",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [
+    "m",
+    "d",
+    "g",
+    "j",
+    "q",
+    "x"
+   ],
+   "yun": [
+    "a",
+    "i",
+    "u",
+    "ü"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "da",
+    "di",
+    "du",
+    "ga",
+    "gu",
+    "gua",
+    "ji",
+    "jia",
+    "jü",
+    "ma",
+    "mi",
+    "mu",
+    "qi",
+    "qia",
+    "qü",
+    "xi",
+    "xia",
+    "xü"
+   ],
+   "eggs": [
+    {
+     "w": "打鼓",
+     "p": "dǎ gǔ",
+     "syl": [
+      [
+       "da",
+       3
+      ],
+      [
+       "gu",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "下棋",
+     "p": "xià qí",
+     "syl": [
+      [
+       "xia",
+       4
+      ],
+      [
+       "qi",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "搭积木",
+     "p": "dā jī mù",
+     "syl": [
+      [
+       "da",
+       1
+      ],
+      [
+       "ji",
+       1
+      ],
+      [
+       "mu",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "西瓜",
+     "p": "xī guā",
+     "syl": [
+      [
+       "xi",
+       1
+      ],
+      [
+       "gua",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "lesson": "z c s",
+   "unit": "汉语拼音 7",
+   "type": "pinyin",
+   "style": "ocean",
+   "sheng": [
+    "j",
+    "z",
+    "c",
+    "s"
+   ],
+   "yun": [
+    "a",
+    "o",
+    "e",
+    "u",
+    "ü"
+   ],
+   "whole": [
+    "zi",
+    "ci",
+    "si"
+   ],
+   "valid": [
+    "a",
+    "ca",
+    "ce",
+    "ci",
+    "cu",
+    "cuo",
+    "e",
+    "jü",
+    "o",
+    "sa",
+    "se",
+    "si",
+    "su",
+    "suo",
+    "za",
+    "ze",
+    "zi",
+    "zu",
+    "zuo"
+   ],
+   "eggs": [
+    {
+     "w": "字",
+     "p": "zì",
+     "syl": [
+      [
+       "zi",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "词",
+     "p": "cí",
+     "syl": [
+      [
+       "ci",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "句子",
+     "p": "jù zi",
+     "syl": [
+      [
+       "jü",
+       4
+      ],
+      [
+       "zi",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "四",
+     "p": "sì",
+     "syl": [
+      [
+       "si",
+       4
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "lesson": "zh ch sh r",
+   "unit": "汉语拼音 8",
+   "type": "pinyin",
+   "style": "virus",
+   "sheng": [
+    "d",
+    "zh",
+    "ch",
+    "sh",
+    "r",
+    "c"
+   ],
+   "yun": [
+    "a",
+    "o",
+    "e",
+    "u"
+   ],
+   "whole": [
+    "zhi",
+    "chi",
+    "shi",
+    "ri",
+    "zi"
+   ],
+   "valid": [
+    "a",
+    "ca",
+    "ce",
+    "cha",
+    "che",
+    "chi",
+    "chu",
+    "chua",
+    "chuo",
+    "cu",
+    "cuo",
+    "da",
+    "de",
+    "du",
+    "duo",
+    "e",
+    "o",
+    "re",
+    "ri",
+    "ru",
+    "ruo",
+    "sha",
+    "she",
+    "shi",
+    "shu",
+    "shua",
+    "shuo",
+    "zha",
+    "zhe",
+    "zhi",
+    "zhu",
+    "zhua",
+    "zhuo",
+    "zi"
+   ],
+   "eggs": [
+    {
+     "w": "擦桌子",
+     "p": "cā zhuō zi",
+     "syl": [
+      [
+       "ca",
+       1
+      ],
+      [
+       "zhuo",
+       1
+      ],
+      [
+       "zi",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "折纸",
+     "p": "zhé zhǐ",
+     "syl": [
+      [
+       "zhe",
+       2
+      ],
+      [
+       "zhi",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "读书",
+     "p": "dú shū",
+     "syl": [
+      [
+       "du",
+       2
+      ],
+      [
+       "shu",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "吃",
+     "p": "chī",
+     "syl": [
+      [
+       "chi",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "lesson": "y w",
+   "unit": "汉语拼音 9",
+   "type": "pinyin",
+   "style": "space",
+   "sheng": [
+    "m",
+    "y",
+    "w"
+   ],
+   "yun": [
+    "a",
+    "o"
+   ],
+   "whole": [
+    "zi",
+    "yi",
+    "wu",
+    "yu"
+   ],
+   "valid": [
+    "a",
+    "ma",
+    "mo",
+    "o",
+    "wa",
+    "wo",
+    "wu",
+    "ya",
+    "yi",
+    "yo",
+    "yu",
+    "zi"
+   ],
+   "eggs": [
+    {
+     "w": "鱼",
+     "p": "yú",
+     "syl": [
+      [
+       "yu",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "鸭子",
+     "p": "yā zi",
+     "syl": [
+      [
+       "ya",
+       1
+      ],
+      [
+       "zi",
+       0
+      ]
+     ]
+    },
+    {
+     "w": "乌鸦",
+     "p": "wū yā",
+     "syl": [
+      [
+       "wu",
+       1
+      ],
+      [
+       "ya",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "蚂蚁",
+     "p": "mǎ yǐ",
+     "syl": [
+      [
+       "ma",
+       3
+      ],
+      [
+       "yi",
+       3
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "lesson": "ai ei ui",
+   "unit": "汉语拼音 10",
+   "type": "pinyin",
+   "style": "space",
+   "sheng": [
+    "b",
+    "p",
+    "f",
+    "d",
+    "t",
+    "l",
+    "g",
+    "h",
+    "x",
+    "ch",
+    "sh",
+    "c",
+    "w"
+   ],
+   "yun": [
+    "a",
+    "o",
+    "i",
+    "u",
+    "ai",
+    "ei",
+    "ui"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "ai",
+    "ba",
+    "bai",
+    "bei",
+    "bi",
+    "bo",
+    "bu",
+    "ca",
+    "cai",
+    "cha",
+    "chai",
+    "chu",
+    "chua",
+    "chuai",
+    "chui",
+    "chuo",
+    "cu",
+    "cui",
+    "cuo",
+    "da",
+    "dai",
+    "dei",
+    "di",
+    "du",
+    "dui",
+    "duo",
+    "ei",
+    "fa",
+    "fei",
+    "fo",
+    "fu",
+    "ga",
+    "gai",
+    "gei",
+    "gu",
+    "gua",
+    "guai",
+    "gui",
+    "guo",
+    "ha",
+    "hai",
+    "hei",
+    "hu",
+    "hua",
+    "huai",
+    "hui",
+    "huo",
+    "la",
+    "lai",
+    "lei",
+    "li",
+    "lia",
+    "lu",
+    "luo",
+    "o",
+    "pa",
+    "pai",
+    "pei",
+    "pi",
+    "po",
+    "pu",
+    "sha",
+    "shai",
+    "shei",
+    "shu",
+    "shua",
+    "shuai",
+    "shui",
+    "shuo",
+    "ta",
+    "tai",
+    "ti",
+    "tu",
+    "tui",
+    "tuo",
+    "wa",
+    "wai",
+    "wei",
+    "wo",
+    "xi",
+    "xia"
+   ],
+   "eggs": [
+    {
+     "w": "白菜",
+     "p": "bái cài",
+     "syl": [
+      [
+       "bai",
+       2
+      ],
+      [
+       "cai",
+       4
+      ]
+     ]
+    },
+    {
+     "w": "西瓜",
+     "p": "xī guā",
+     "syl": [
+      [
+       "xi",
+       1
+      ],
+      [
+       "gua",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "水果",
+     "p": "shuǐ guǒ",
+     "syl": [
+      [
+       "shui",
+       3
+      ],
+      [
+       "guo",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "萝卜",
+     "p": "luó bo",
+     "syl": [
+      [
+       "luo",
+       2
+      ],
+      [
+       "bo",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "lesson": "ao ou iu",
+   "unit": "汉语拼音 11",
+   "type": "pinyin",
+   "style": "space",
+   "sheng": [
+    "d",
+    "t",
+    "n",
+    "l",
+    "h",
+    "j",
+    "q",
+    "x",
+    "ch",
+    "sh",
+    "r",
+    "z",
+    "y"
+   ],
+   "yun": [
+    "a",
+    "i",
+    "u",
+    "ui",
+    "ao",
+    "ou",
+    "iu"
+   ],
+   "whole": [],
+   "valid": [
+    "a",
+    "ao",
+    "cha",
+    "chao",
+    "chou",
+    "chu",
+    "chua",
+    "chui",
+    "da",
+    "dao",
+    "di",
+    "diao",
+    "diu",
+    "dou",
+    "du",
+    "dui",
+    "ha",
+    "hao",
+    "hou",
+    "hu",
+    "hua",
+    "hui",
+    "ji",
+    "jia",
+    "jiao",
+    "jiu",
+    "la",
+    "lao",
+    "li",
+    "lia",
+    "liao",
+    "liu",
+    "lou",
+    "lu",
+    "na",
+    "nao",
+    "ni",
+    "niao",
+    "niu",
+    "nou",
+    "nu",
+    "ou",
+    "qi",
+    "qia",
+    "qiao",
+    "qiu",
+    "rao",
+    "rou",
+    "ru",
+    "rui",
+    "sha",
+    "shao",
+    "shou",
+    "shu",
+    "shua",
+    "shui",
+    "ta",
+    "tao",
+    "ti",
+    "tiao",
+    "tou",
+    "tu",
+    "tui",
+    "xi",
+    "xia",
+    "xiao",
+    "xiu",
+    "ya",
+    "yao",
+    "you",
+    "za",
+    "zao",
+    "zou",
+    "zu",
+    "zui"
+   ],
+   "eggs": [
+    {
+     "w": "小桥",
+     "p": "xiǎo qiáo",
+     "syl": [
+      [
+       "xiao",
+       3
+      ],
+      [
+       "qiao",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "流水",
+     "p": "liú shuǐ",
+     "syl": [
+      [
+       "liu",
+       2
+      ],
+      [
+       "shui",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "垂柳",
+     "p": "chuí liǔ",
+     "syl": [
+      [
+       "chui",
+       2
+      ],
+      [
+       "liu",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "桃花",
+     "p": "táo huā",
+     "syl": [
+      [
+       "tao",
+       2
+      ],
+      [
+       "hua",
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "lesson": "ie üe er",
+   "unit": "汉语拼音 12",
+   "type": "pinyin",
+   "style": "ghost",
+   "sheng": [
+    "b",
+    "p",
+    "m",
+    "d",
+    "h",
+    "j",
+    "q",
+    "x",
+    "s"
+   ],
+   "yun": [
+    "a",
+    "e",
+    "i",
+    "u",
+    "ei",
+    "ao",
+    "ie",
+    "üe",
+    "er"
+   ],
+   "whole": [
+    "ye",
+    "yue"
+   ],
+   "valid": [
+    "a",
+    "ao",
+    "ba",
+    "bao",
+    "bei",
+    "bi",
+    "biao",
+    "bie",
+    "bu",
+    "da",
+    "dao",
+    "de",
+    "dei",
+    "di",
+    "diao",
+    "die",
+    "du",
+    "e",
+    "ei",
+    "er",
+    "ha",
+    "hao",
+    "he",
+    "hei",
+    "hu",
+    "hua",
+    "ji",
+    "jia",
+    "jiao",
+    "jie",
+    "jüe",
+    "ma",
+    "mao",
+    "me",
+    "mei",
+    "mi",
+    "miao",
+    "mie",
+    "mu",
+    "pa",
+    "pao",
+    "pei",
+    "pi",
+    "piao",
+    "pie",
+    "pu",
+    "qi",
+    "qia",
+    "qiao",
+    "qie",
+    "qüe",
+    "sa",
+    "sao",
+    "se",
+    "su",
+    "xi",
+    "xia",
+    "xiao",
+    "xie",
+    "xüe",
+    "ye",
+    "yue"
+   ],
+   "eggs": [
+    {
+     "w": "雪花飘",
+     "p": "xuě huā piāo",
+     "syl": [
+      [
+       "xüe",
+       3
+      ],
+      [
+       "hua",
+       1
+      ],
+      [
+       "piao",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "夜色美",
+     "p": "yè sè měi",
+     "syl": [
+      [
+       "ye",
+       4
+      ],
+      [
+       "se",
+       4
+      ],
+      [
+       "mei",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "学",
+     "p": "xué",
+     "syl": [
+      [
+       "xüe",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "姐姐",
+     "p": "jiě jie",
+     "syl": [
+      [
+       "jie",
+       3
+      ],
+      [
+       "jie",
+       0
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "lesson": "an en in un ün",
+   "unit": "汉语拼音 13",
+   "type": "pinyin",
+   "style": "space",
+   "sheng": [
+    "b",
+    "t",
+    "l",
+    "g",
+    "j",
+    "c",
+    "s"
+   ],
+   "yun": [
+    "i",
+    "u",
+    "ü",
+    "ai",
+    "ao",
+    "an",
+    "en",
+    "in",
+    "un",
+    "ün"
+   ],
+   "whole": [
+    "yuan",
+    "yin",
+    "yun"
+   ],
+   "valid": [
+    "ai",
+    "an",
+    "ao",
+    "bai",
+    "ban",
+    "bao",
+    "ben",
+    "bi",
+    "bian",
+    "biao",
+    "bin",
+    "bu",
+    "cai",
+    "can",
+    "cao",
+    "cen",
+    "cu",
+    "cuan",
+    "cun",
+    "en",
+    "gai",
+    "gan",
+    "gao",
+    "gen",
+    "gu",
+    "guai",
+    "guan",
+    "gun",
+    "ji",
+    "jian",
+    "jiao",
+    "jin",
+    "jü",
+    "jüan",
+    "jün",
+    "lai",
+    "lan",
+    "lao",
+    "li",
+    "lian",
+    "liao",
+    "lin",
+    "lu",
+    "luan",
+    "lun",
+    "lü",
+    "sai",
+    "san",
+    "sao",
+    "sen",
+    "su",
+    "suan",
+    "sun",
+    "tai",
+    "tan",
+    "tao",
+    "ti",
+    "tian",
+    "tiao",
+    "tu",
+    "tuan",
+    "tun",
+    "yin",
+    "yuan",
+    "yun"
+   ],
+   "eggs": [
+    {
+     "w": "蓝天",
+     "p": "lán tiān",
+     "syl": [
+      [
+       "lan",
+       2
+      ],
+      [
+       "tian",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "白云",
+     "p": "bái yún",
+     "syl": [
+      [
+       "bai",
+       2
+      ],
+      [
+       "yun",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "草原",
+     "p": "cǎo yuán",
+     "syl": [
+      [
+       "cao",
+       3
+      ],
+      [
+       "yuan",
+       2
+      ]
+     ]
+    },
+    {
+     "w": "森林",
+     "p": "sēn lín",
+     "syl": [
+      [
+       "sen",
+       1
+      ],
+      [
+       "lin",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "lesson": "ang eng ing ong",
+   "unit": "汉语拼音 14",
+   "type": "pinyin",
+   "style": "space",
+   "sheng": [
+    "b",
+    "p",
+    "d",
+    "h",
+    "q",
+    "x",
+    "ch",
+    "y"
+   ],
+   "yun": [
+    "a",
+    "e",
+    "i",
+    "u",
+    "ou",
+    "iu",
+    "ang",
+    "eng",
+    "ing",
+    "ong"
+   ],
+   "whole": [
+    "zi",
+    "ying"
+   ],
+   "valid": [
+    "a",
+    "ang",
+    "ba",
+    "bang",
+    "beng",
+    "bi",
+    "bing",
+    "bu",
+    "cha",
+    "chang",
+    "che",
+    "cheng",
+    "chong",
+    "chou",
+    "chu",
+    "chua",
+    "chuang",
+    "da",
+    "dang",
+    "de",
+    "deng",
+    "di",
+    "ding",
+    "diu",
+    "dong",
+    "dou",
+    "du",
+    "e",
+    "eng",
+    "ha",
+    "hang",
+    "he",
+    "heng",
+    "hong",
+    "hou",
+    "hu",
+    "hua",
+    "huang",
+    "ou",
+    "pa",
+    "pang",
+    "peng",
+    "pi",
+    "ping",
+    "pou",
+    "pu",
+    "qi",
+    "qia",
+    "qiang",
+    "qing",
+    "qiong",
+    "qiu",
+    "xi",
+    "xia",
+    "xiang",
+    "xing",
+    "xiong",
+    "xiu",
+    "ya",
+    "yang",
+    "ying",
+    "yong",
+    "you",
+    "zi"
+   ],
+   "eggs": [
+    {
+     "w": "游泳",
+     "p": "yóu yǒng",
+     "syl": [
+      [
+       "you",
+       2
+      ],
+      [
+       "yong",
+       3
+      ]
+     ]
+    },
+    {
+     "w": "滑冰",
+     "p": "huá bīng",
+     "syl": [
+      [
+       "hua",
+       2
+      ],
+      [
+       "bing",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "骑自行车",
+     "p": "qí zì xíng chē",
+     "syl": [
+      [
+       "qi",
+       2
+      ],
+      [
+       "zi",
+       4
+      ],
+      [
+       "xing",
+       2
+      ],
+      [
+       "che",
+       1
+      ]
+     ]
+    },
+    {
+     "w": "打乒乓球",
+     "p": "dǎ pīng pāng qiú",
+     "syl": [
+      [
+       "da",
+       3
+      ],
+      [
+       "ping",
+       1
+      ],
+      [
+       "pang",
+       1
+      ],
+      [
+       "qiu",
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "lesson": "秋天",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "season",
+   "text": "qiutian",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "lesson": "江南",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "season",
+   "text": "jiangnan",
+   "public": true,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "lesson": "雪地里的小画家",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "fog",
+   "text": "xuedi",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "lesson": "四季",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "season",
+   "text": "siji",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "lesson": "对韵歌",
+   "unit": "第六单元·识字 5",
+   "type": "shizi",
+   "style": "campus",
+   "chars": [
+    [
+     "对",
+     "duì"
+    ],
+    [
+     "歌",
+     "gē"
+    ],
+    [
+     "雨",
+     "yǔ"
+    ],
+    [
+     "风",
+     "fēng"
+    ],
+    [
+     "虫",
+     "chóng"
+    ],
+    [
+     "清",
+     "qīng"
+    ],
+    [
+     "绿",
+     "lǜ"
+    ],
+    [
+     "桃",
+     "táo"
+    ],
+    [
+     "红",
+     "hóng"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "风雨",
+     "p": "fēng yǔ"
+    },
+    {
+     "w": "清风",
+     "p": "qīng fēng"
+    },
+    {
+     "w": "桃红",
+     "p": "táo hóng"
+    },
+    {
+     "w": "对歌",
+     "p": "duì gē"
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "lesson": "日月明",
+   "unit": "第六单元·识字 6",
+   "type": "shizi",
+   "style": "campus",
+   "chars": [
+    [
+     "力",
+     "lì"
+    ],
+    [
+     "尖",
+     "jiān"
+    ],
+    [
+     "尘",
+     "chén"
+    ],
+    [
+     "众",
+     "zhòng"
+    ],
+    [
+     "双",
+     "shuāng"
+    ],
+    [
+     "林",
+     "lín"
+    ],
+    [
+     "森",
+     "sēn"
+    ],
+    [
+     "不",
+     "bù"
+    ],
+    [
+     "条",
+     "tiáo"
+    ],
+    [
+     "心",
+     "xīn"
+    ],
+    [
+     "金",
+     "jīn"
+    ],
+    [
+     "日",
+     "rì"
+    ],
+    [
+     "月",
+     "yuè"
+    ],
+    [
+     "明",
+     "míng"
+    ],
+    [
+     "木",
+     "mù"
+    ],
+    [
+     "人",
+     "rén"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "日月明",
+     "p": "rì yuè míng"
+    },
+    {
+     "w": "双木林",
+     "p": "shuāng mù lín"
+    },
+    {
+     "w": "众人",
+     "p": "zhòng rén"
+    },
+    {
+     "w": "森林",
+     "p": "sēn lín"
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "lesson": "小书包",
+   "unit": "第六单元·识字 7",
+   "type": "shizi",
+   "style": "campus",
+   "chars": [
+    [
+     "包",
+     "bāo"
+    ],
+    [
+     "尺",
+     "chǐ"
+    ],
+    [
+     "作",
+     "zuò"
+    ],
+    [
+     "业",
+     "yè"
+    ],
+    [
+     "笔",
+     "bǐ"
+    ],
+    [
+     "刀",
+     "dāo"
+    ],
+    [
+     "宝",
+     "bǎo"
+    ],
+    [
+     "贝",
+     "bèi"
+    ],
+    [
+     "少",
+     "shǎo"
+    ],
+    [
+     "课",
+     "kè"
+    ],
+    [
+     "早",
+     "zǎo"
+    ],
+    [
+     "小",
+     "xiǎo"
+    ],
+    [
+     "书",
+     "shū"
+    ],
+    [
+     "本",
+     "běn"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "作业",
+     "p": "zuò yè"
+    },
+    {
+     "w": "宝贝",
+     "p": "bǎo bèi"
+    },
+    {
+     "w": "书包",
+     "p": "shū bāo"
+    },
+    {
+     "w": "课本",
+     "p": "kè běn"
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "lesson": "升国旗",
+   "unit": "第六单元·识字 8",
+   "type": "shizi",
+   "style": "campus",
+   "chars": [
+    [
+     "升",
+     "shēng"
+    ],
+    [
+     "国",
+     "guó"
+    ],
+    [
+     "旗",
+     "qí"
+    ],
+    [
+     "中",
+     "zhōng"
+    ],
+    [
+     "们",
+     "men"
+    ],
+    [
+     "声",
+     "shēng"
+    ],
+    [
+     "起",
+     "qǐ"
+    ],
+    [
+     "多",
+     "duō"
+    ],
+    [
+     "么",
+     "me"
+    ],
+    [
+     "向",
+     "xiàng"
+    ],
+    [
+     "立",
+     "lì"
+    ]
+   ],
+   "eggs": [
+    {
+     "w": "国旗",
+     "p": "guó qí"
+    },
+    {
+     "w": "升旗",
+     "p": "shēng qí"
+    },
+    {
+     "w": "中国",
+     "p": "zhōng guó"
+    },
+    {
+     "w": "多么",
+     "p": "duō me"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "lesson": "小小的船",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "night",
+   "text": "xiaoxiaodechuan",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "lesson": "影子",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "shadow",
+   "text": "yingzi",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "lesson": "两件宝",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "night",
+   "text": "liangjianbao",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "lesson": "比尾巴",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "night",
+   "text": "biweiba",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "lesson": "乌鸦喝水",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "night",
+   "text": "wuyaheshui",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "lesson": "雨点儿",
+   "unit": "阅读",
+   "type": "rap",
+   "style": "night",
+   "text": "yudianer",
+   "public": false,
+   "eggs": [
+    {
+     "w": "前两句排对",
+     "kind": "first2"
+    },
+    {
+     "w": "前一半排对",
+     "kind": "half"
+    },
+    {
+     "w": "整首排对",
+     "kind": "all"
+    },
+    {
+     "w": "录一句自己的声音",
+     "kind": "rec"
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "lesson": "全书大混音",
+   "unit": "综合",
+   "type": "mix",
+   "style": "ultimate"
+  }
+ ],
+ "map": [
+  "天地人",
+  "金木水火土",
+  "口耳目手足",
+  "日月山川",
+  "a o e",
+  "i u ü",
+  "b p m f",
+  "d t n l",
+  "g h",
+  "j q x",
+  "z c s",
+  "zh ch sh r",
+  "y w",
+  "ai ei ui",
+  "ao ou iu",
+  "ie üe er",
+  "an en in un ün",
+  "ang eng ing ong",
+  "秋天",
+  "江南",
+  "雪地里的小画家",
+  "四季",
+  "对韵歌",
+  "日月明",
+  "小书包",
+  "升国旗",
+  "小小的船",
+  "影子",
+  "两件宝",
+  "比尾巴",
+  "乌鸦喝水",
+  "雨点儿",
+  "全书大混音"
+ ]
 }
