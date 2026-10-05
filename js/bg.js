@@ -1,3 +1,4 @@
+import { flagSVG } from './art.js';
 // 舞台背景：每种风格一张 SVG，铺满舞台。
 const wrap = (inner, defs = '') => `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${inner}</svg>`;
 const cloud = (x, y, s, fill = '#fff', cls = 'drift') => `<g class="${cls}" style="animation-delay:${-x / 40}s"><g transform="translate(${x} ${y}) scale(${s})"><path d="M0 40C-30 40 -30 0 0 4C6 -20 50 -24 58 0C80 -10 100 20 80 40Z" fill="${fill}"/></g></g>`;
@@ -68,8 +69,8 @@ export const BG = {
     <rect x="980" y="300" width="460" height="420" fill="#f6d7a7"/><path d="M960 310L1210 200L1460 310Z" fill="#e5484d"/>
     ${[1030, 1130, 1230, 1330].map((x) => `<rect x="${x}" y="380" width="60" height="70" fill="#9fd3ff" stroke="#fff" stroke-width="4"/><rect x="${x}" y="500" width="60" height="70" fill="#9fd3ff" stroke="#fff" stroke-width="4"/>`).join('')}
     <rect x="1180" y="600" width="70" height="120" fill="#8a5a2b"/>
-    <line x1="560" y1="720" x2="560" y2="300" stroke="#ccc" stroke-width="10"/><g class="flagwave"><path d="M565 305h150v100h-150z" fill="#E5302E"/><path d="M590 330l6 12 13 1 -10 8 4 13 -13 -7 -13 7 4 -13 -10 -8 13 -1z" fill="#FFD84D"/></g>
-    ${[120, 260, 400].map((x, i) => `<g transform="translate(${x} 430)"><line x1="0" y1="0" x2="0" y2="-40" stroke="#555" stroke-width="2"/><ellipse cx="0" cy="-60" rx="26" ry="22" fill="#E5302E"/><rect x="-12" y="-86" width="24" height="6" fill="#FFD84D"/></g>`).join('')}
+    <line x1="560" y1="720" x2="560" y2="410" stroke="#ccc" stroke-width="10"/><circle cx="560" cy="406" r="8" fill="#F5C04A"/>${flagSVG(565, 415, 150, 'flagwave')}
+    ${[120, 260, 400].map((x, i) => `<g transform="translate(${x} 500)"><line x1="0" y1="0" x2="0" y2="-40" stroke="#555" stroke-width="2"/><ellipse cx="0" cy="-60" rx="26" ry="22" fill="#E5302E"/><rect x="-12" y="-86" width="24" height="6" fill="#FFD84D"/></g>`).join('')}
     <path d="M0 720H1600V900H0Z" fill="#7cc46a"/><path d="M0 720H1600V740H0Z" fill="#a7d98c"/>`),
 
   season: () => wrap(`

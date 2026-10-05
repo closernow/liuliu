@@ -388,14 +388,36 @@ function refreshUnlocks(first = false) {
   if (!first || save.seenUnlock) showUnlock(fresh);
   save.seenUnlock = 1; persist();
 }
+// 解锁动画：全屏放射光芒，中间一张放大的角色卡片弹出来，再飞进下面角色栏里它的位置，落地后发光
+let unlockBusy = Promise.resolve();
 function showUnlock(ids) {
-  const box = $('unlockBody');
-  box.innerHTML = `<div class="ut">🎉 新伙伴${ids.length > 1 ? ` × ${ids.length}` : ''}！</div><div class="ugrid">` +
-    ids.map((id) => `<div class="ucard play" style="--ph:0s">${charSVG(id, {})}<b>${NAMES[id]}</b><small>${CH[id].sub}</small></div>`).join('') + '</div>';
-  $('unlockLayer').hidden = false;
-  A.say(ids.slice(0, 3).map((id) => uiUrl('n_' + id)), { user: false });
+  unlockBusy = unlockBusy.then(async () => {
+    const fx = $('unlockFx'), card = $('ufCard');
+    if (ids.length > 1) { $('ufTitle').textContent = `🎉 ${ids.length} 个新伙伴！`; }
+    for (const [n, id] of ids.entries()) {
+      $('ufTitle').textContent = ids.length > 1 ? `🎉 新伙伴 ${n + 1} / ${ids.length}` : '🎉 新伙伴！';
+      card.innerHTML = `${charSVG(id, {})}<b>${NAMES[id]}</b><small>${CH[id].sub}</small>`;
+      card.className = 'ufcard play'; card.style.cssText = '--ph:0s';
+      fx.hidden = false; void fx.offsetWidth; fx.classList.add('on');
+      A.say(uiUrl('n_' + id), { user: false });
+      // 停一会儿，点一下可以跳过
+      await new Promise((r) => { const t = setTimeout(r, ids.length > 3 ? 900 : 1500); fx.onclick = () => { clearTimeout(t); r(); }; });
+      const target = document.querySelector(`.ginst .ic[data-id="${id}"]`);
+      if (target) {
+        target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        const a = card.getBoundingClientRect(), b = target.getBoundingClientRect();
+        const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2), sc = b.width / a.width;
+        fx.classList.remove('on');
+        await card.animate([{ transform: 'translate(0,0) scale(1)' }, { transform: `translate(${dx}px,${dy - 40}px) scale(${sc * 1.4})`, offset: 0.7 }, { transform: `translate(${dx}px,${dy}px) scale(${sc})`, opacity: 0.6 }],
+          { duration: 750, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'forwards' }).finished;
+        target.classList.remove('newpop'); void target.offsetWidth; target.classList.add('newpop');
+        setTimeout(() => target.classList.remove('newpop'), 4000);
+      } else fx.classList.remove('on');
+      card.className = 'ufcard'; card.getAnimations().forEach((x) => x.cancel());
+      fx.hidden = true;
+    }
+  });
 }
-$('unlockOk').addEventListener('click', () => ($('unlockLayer').hidden = true));
 function openGallery() {
   const box = $('galBody');
   box.innerHTML = `<p class="note">已经有 ${unlocked.size} 个伙伴，一共 ${INSTRUMENTS.length} 个。找彩蛋、每天来玩、完成特殊任务都能解锁新伙伴。</p>` + GROUPS.map(([name, ids]) =>

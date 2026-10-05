@@ -92,6 +92,13 @@ const HEAD={
  bean:{d:'M-34 40C-50 32 -50 -6 -38 -26C-26 -44 -12 -48 0 -48C12 -48 26 -44 38 -26C50 -6 50 32 34 40C20 46 -20 46 -34 40Z',top:-48,w:42}
 };
 
+/* ===== 五星红旗（按国旗制法：旗面 30×20 格，大星在左上，四颗小星各有一个角对准大星中心） ===== */
+function star(cx,cy,r,ang){let d='';for(let i=0;i<10;i++){const rr=i%2?r*.382:r,a=ang+i*Math.PI/5;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2)}return d+'Z'}
+export function flagSVG(x,y,w,cls=''){
+  const u=w/30,S=(gx,gy,r)=>{const ang=gx===5?-Math.PI/2:Math.atan2(5-gy,5-gx);return star(x+gx*u,y+gy*u,r*u,ang)};
+  return `<g class="${cls}"><rect x="${x}" y="${y}" width="${w}" height="${w*2/3}" fill="#DE2910"/><path d="${S(5,5,3)}${S(10,2,1)}${S(12,4,1)}${S(12,7,1)}${S(10,9,1)}" fill="#FFDE00"/></g>`;
+}
+
 /* ===== 小零件 ===== */
 const stitch=(x1,y1,x2,y2,st,n=4)=>{let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${st}" stroke-width="2"/>`;
   const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),nx=-dy/L*5,ny=dx/L*5;
@@ -226,7 +233,7 @@ function headParts(C,h,st,c){
    // 校园和节日
    gradcap:`<path d="M-26 ${T-4}L0 ${T-14}L26 ${T-4}L0 ${T+6}Z" fill="${k('#1f1a33')}" stroke="${st}" stroke-width="2"/><rect x="-14" y="${T-2}" width="28" height="10" fill="${k('#1f1a33')}"/><path d="M20 ${T-6}V${T+10}" stroke="${k('#FFD84D')}" stroke-width="2"/><circle cx="20" cy="${T+12}" r="3" fill="${k('#FFD84D')}"/>`,
    pencil:`<g transform="rotate(30 0 ${T})"><rect x="-4" y="${T-30}" width="8" height="26" fill="${k('#FFD84D')}" stroke="${st}" stroke-width="1.5"/><path d="M-4 ${T-4}L0 ${T+4}L4 ${T-4}Z" fill="${k('#f3d8b0')}" stroke="${st}" stroke-width="1.5"/><rect x="-4" y="${T-34}" width="8" height="5" fill="${k('#FF8FA3')}"/></g>`,
-   flagclip:`<line x1="16" y1="${T+4}" x2="16" y2="${T-28}" stroke="${st}" stroke-width="2.5"/><path d="M16 ${T-28}h20v13h-20z" fill="${k('#E5302E')}"/><path d="M21 ${T-24}l1 2 2 0 -1.5 1.4 .6 2 -2 -1.2 -2 1.2 .6 -2 -1.5 -1.4 2 0z" fill="#FFD84D"/>`,
+   flagclip:`<line x1="16" y1="${T+4}" x2="16" y2="${T-28}" stroke="${st}" stroke-width="2.5"/>`+flagSVG(17,T-28,24),
    lantern:`<line x1="0" y1="${T}" x2="0" y2="${T-6}" stroke="${st}" stroke-width="2"/><ellipse cx="0" cy="${T-16}" rx="14" ry="11" fill="${k('#E5302E')}" stroke="${st}" stroke-width="2"/><rect x="-6" y="${T-29}" width="12" height="4" fill="${k('#FFD84D')}"/><path d="M0 ${T-5}v8" stroke="${k('#FFD84D')}" stroke-width="2"/>`,
    redscarf:'',
    // 四季和江南
