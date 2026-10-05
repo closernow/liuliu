@@ -63,7 +63,7 @@ export function muteLoop(slot, muted) {
 export const onsetsOf = (name) => onsets[name] || [];
 
 /* ---------- 歌手：每个位置在自己的拍子上唱 ---------- */
-const VSLOT = [0, 4, 8, 12, 2, 6, 10];
+const VSLOT = [0, 4, 8, 12, 2, 6, 10, 14, 1, 9];
 const RATE = [1, 1.06, 0.95, 1.12];
 let singers = {};                  // slot -> {url, muted}
 let onStep = () => {};
@@ -97,20 +97,37 @@ async function playAt(url, t, dest, rate = 1) {
   src.connect(g).connect(dest); src.start(t, leads.get(url) || 0);
 }
 
-/* ---------- 语音：读的时候乐队降到两成，读完恢复 ---------- */
-let duckUntil = 0, sayChain = Promise.resolve();
-export function say(urls) {
+/* ---------- 语音：读的时候乐队降到两成，读完恢复 ----------
+   user=true（她点了什么）：马上停掉正在读的、清空排队，只读这一次
+   user=false（系统提示）：等正在读的读完再说；这期间她点了别的，这条就跳过 */
+let gen = 0, sayChain = Promise.resolve(), current = null;
+function stopCurrent() {
+  if (!current) return;
+  try { current.src.stop(); } catch {}
+  current.done(); current = null;
+  duck(ctx.currentTime, ctx.currentTime + 0.05);
+}
+export function say(urls, { user = true } = {}) {
   if (!ctx) return Promise.resolve();
   const list = Array.isArray(urls) ? urls : [urls];
-  sayChain = sayChain.then(async () => {
+  if (user) { gen++; stopCurrent(); }
+  const my = gen;
+  const run = async () => {
     for (const url of list) {
+      if (my !== gen) return;
       let buf; try { buf = await Promise.race([load(url), new Promise((_, rej) => setTimeout(rej, 3000))]); } catch { continue; }
-      const at = ctx.currentTime + 0.05, off = leads.get(url) || 0, dur = buf.duration - off;
+      if (my !== gen) return;
+      const at = ctx.currentTime + 0.03, off = leads.get(url) || 0, dur = buf.duration - off;
       duck(at, at + dur + 0.15);
       const src = ctx.createBufferSource(); src.buffer = buf; src.connect(voice); src.start(at, off);
-      await new Promise((r) => setTimeout(r, (dur + 0.1) * 1000));
+      await new Promise((r) => {
+        const t = setTimeout(r, (dur + 0.1) * 1000);
+        current = { src, done: () => { clearTimeout(t); r(); } };
+      });
+      current = null;
     }
-  });
+  };
+  sayChain = user ? run() : sayChain.then(run);
   return sayChain;
 }
 function duck(from, to) {

@@ -236,6 +236,145 @@ def drone(m, dur, dark=False):
     x = np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * f * 2.003 * t) + (0.3 * np.sin(2 * np.pi * f * 1.498 * t) if dark else 0)
     return lp(x, 700 if dark else 1100) * np.minimum(1, t / 0.08) * np.minimum(1, (dur - t) / 0.15) * 0.35
 
+# ===== 新乐手的音色（电音和管弦） =====
+def epiano(m, dur=0.6, dark=False):
+    """电钢琴：FM 合成，带一点颤音"""
+    t = tt(dur + 0.3); f = mtof(m) * (2 ** (rng.uniform(-12, 12) / 1200) if dark else 1)
+    I = 1.6 * np.exp(-t / 0.18)
+    x = np.sin(2 * np.pi * f * t + I * np.sin(2 * np.pi * f * t)) + 0.15 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t / 0.03)
+    return x * env(t, 0.002, dur * 0.7) * (1 + 0.25 * np.sin(2 * np.pi * (4 if dark else 5.5) * t)) * 0.35
+
+def bowed(m, dur, bright=1400, vib=5.0, att=0.08, trem=0.0):
+    """弓弦乐器：大提琴、小提琴"""
+    t = tt(dur + 0.15); f = mtof(m)
+    ph = 2 * np.pi * np.cumsum(f * (1 + 0.006 * np.sin(2 * np.pi * vib * t) * np.clip((t - 0.15) / 0.2, 0, 1))) / SR
+    x = np.zeros_like(t)
+    for k in range(1, 30):
+        if f * k > SR / 2 * 0.9: break
+        x += np.sin(k * ph) / k
+    x = lp(x, bright) + bp(noise(len(t)), f, f * 6) * 0.04
+    e = np.clip(t / att, 0, 1) * np.clip((dur + 0.15 - t) / 0.15, 0, 1)
+    if trem: e = e * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * trem * t)))
+    return x * e * 0.5
+
+def screech(m0, m1, dur):
+    """恐怖片里的尖叫小提琴：滑音"""
+    t = tt(dur); f = mtof(m0) * (mtof(m1) / mtof(m0)) ** (t / dur)
+    ph = 2 * np.pi * np.cumsum(f * (1 + 0.02 * np.sin(2 * np.pi * 9 * t))) / SR
+    x = sum(np.sin(k * ph) / k for k in range(1, 12))
+    return lp(x, 5000) * np.clip(t / 0.05, 0, 1) * np.clip((dur - t) / 0.1, 0, 1) * 0.35
+
+def guitar(ms, dur=0.25, drive=4.0):
+    """电吉他强力和弦：拨弦再过失真"""
+    x = sum(pluck(m, dur + 0.1) for m in ms)
+    return np.tanh(x * drive) * 0.5
+
+def supersaw(notes, dur, cut=3000):
+    t = tt(dur); x = np.zeros_like(t)
+    for m in notes:
+        for d in (-18, -11, -5, 0, 5, 11, 18):
+            x += saw(mtof(m) * 2 ** (d / 1200), t, 24) * (0.6 if d else 1)
+    return lp(x, cut) * 0.08
+
+def sidechain(x, depth=0.8):
+    """每拍压一下音量，电音里那种一呼一吸的感觉"""
+    beat_len = st(4); y = x.copy()
+    for k in range(0, N, beat_len):
+        n = min(beat_len, N - k); r = np.arange(n) / SR
+        y[k:k + n] *= 1 - depth * np.exp(-r / 0.09)
+    return y
+
+def openhat():
+    t = tt(0.25)
+    return hp(noise(len(t)), 6000) * env(t, 0.001, 0.09)
+
+def sub808(m, dur, glide=0.0, drive=1.6):
+    t = tt(dur); f = mtof(m) * (1 + glide * np.exp(-t / 0.06))
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR)
+    return np.tanh(x * drive) * env(t, 0.003, dur * 0.6) * 0.8
+
+def chop(m, vowel='a', dur=0.18):
+    """人声切片：短短一声 a / o / u"""
+    t = tt(dur); f = mtof(m)
+    ph = 2 * np.pi * f * t; x = sum(np.sin(k * ph) / k for k in range(1, 25) if f * k < SR / 2 * 0.9)
+    F = FORMANTS[vowel]; y = sum(bp(x, fc * 0.85, fc * 1.15) * a for fc, a in zip(F, (1, .7, .25)))
+    return y * np.clip(t / 0.01, 0, 1) * np.clip((dur - t) / 0.04, 0, 1) * 1.4
+
+def hey():
+    t = tt(0.22)
+    x = bp(noise(len(t)), 600, 2600) * 0.6 + chop(64, 'a', 0.22) * 0.8
+    return x * np.exp(-t / 0.12)
+
+def new_insts(sfx, CH, BS, tr=0, dark=False):
+    """新加的 10 个乐手：当当 嗡嗡 悠悠 铮铮 滋滋 动次 哒哒 轰轰 啾啾 嘿嘿"""
+    # 当当 电钢琴：切分节奏弹和弦
+    b = np.zeros(N); s_ = [0, 3, 6, 10, 12, 16, 19, 22, 26, 28]
+    for s in s_:
+        c = CH[s // 8]
+        for m in c: put(b, st(s), epiano(m + 12, .45 if s % 4 else .7, dark))
+    mk('epiano' + sfx, s_, b, wet=.25 if not dark else .5, rv_decay=.5 if not dark else .9)
+    # 嗡嗡 大提琴：每小节两个长音
+    b = np.zeros(N); s_ = []
+    for h, root in enumerate(BS):
+        for o, oc in ((0, 12), (4, 19)):
+            s = h * 8 + o; s_.append(s)
+            put(b, st(s), bowed(root + oc, 4 * S16 * .95, 1200 if not dark else 800, trem=12 if dark else 0))
+    mk('cello' + sfx, s_, b, wet=.3 if not dark else .5, rv_decay=.6)
+    # 悠悠 小提琴：高声部的对位旋律；恐怖时是尖叫滑音
+    b = np.zeros(N)
+    if not dark:
+        mel = [(0, 84, 4), (4, 83, 2), (6, 81, 2), (8, 79, 6), (14, 81, 2), (16, 84, 3), (19, 86, 1), (20, 88, 4), (24, 86, 4), (28, 84, 4)]
+        for s, m, l in mel: put(b, st(s), bowed(m + tr, l * S16 * .95, 4000, vib=6, att=.04))
+        s_ = [s for s, _, _ in mel]
+    else:
+        s_ = [0, 12, 20]
+        for s, (a, z) in zip(s_, [(88, 96), (95, 84), (90, 100)]): put(b, st(s), screech(a, z, 3 * S16))
+    mk('violin' + sfx, s_, b, wet=.35 if not dark else .55, rv_decay=.6 if not dark else 1.0)
+    # 铮铮 电吉他：强力和弦八分音符
+    b = np.zeros(N); s_ = [0, 2, 3, 6, 8, 10, 11, 14, 16, 18, 19, 22, 24, 26, 27, 30]
+    for s in s_:
+        r = BS[s // 8] + 12 + (-12 if dark else 0)
+        put(b, st(s), guitar([r, r + 7, r + 12], .14 if s % 2 else .22, 6 if dark else 4))
+    mk('guitar' + sfx, s_, b, wet=.15)
+    # 滋滋 合成器：超级锯齿波长和弦，每拍被压一下
+    b = np.zeros(N)
+    for h, c in enumerate(CH): put(b, st(h * 8), supersaw([m + 12 for m in c], 8 * S16, 2400 if dark else 3500))
+    mk('saw' + sfx, [0, 4, 8, 12, 16, 20, 24, 28], sidechain(b, .85), wet=.2)
+    # 动次 打碟：四拍底鼓加反拍开镲（动次打次）
+    b = np.zeros(N); s_ = [0, 4, 8, 12, 16, 20, 24, 28]
+    for s in s_:
+        put(b, st(s), np.tanh(kick(170, 48, .28) * (3 if dark else 1.4)) * .9)
+        put(b, st(s + 2), openhat() * .5)
+    mk('edm' + sfx, s_, b, wet=.1 if not dark else .3, rv_decay=.7)
+    # 哒哒 踩镲：十六分音符，小节末尾有连打
+    b = np.zeros(N); s_ = []
+    for s in range(32):
+        if dark and s % 2: continue
+        put(b, st(s), hat(.03, 8000) * (1 if s % 4 == 0 else .5)); s_.append(s)
+    for s in (14, 30):
+        for k in range(6): put(b, st(s) + int(k * S16 / 3 * SR), hat(.02, 9000) * (.3 + k * .1))
+    mk('trap' + sfx, [x for x in s_ if x % 2 == 0], b, wet=.05 if not dark else .4, rv_decay=.8)
+    # 轰轰 808 低音
+    b = np.zeros(N); s_ = []
+    for h, root in enumerate(BS):
+        for o, l in ((0, 5), (6, 2)):
+            s = h * 8 + o; s_.append(s)
+            put(b, st(s), sub808(root - 12 if not dark else root - 14, l * S16 * .95, glide=.6 if o == 0 else 0))
+    mk('808' + sfx, s_, b)
+    # 啾啾 琶音：十六分音符上下跑和弦
+    b = np.zeros(N); s_ = list(range(32))
+    for s in s_:
+        c = CH[s // 8]; seq = [c[0], c[1], c[2], c[0] + 12, c[2], c[1]]
+        m = seq[s % len(seq)] + 12 + (1 if dark and s % 5 == 0 else 0)
+        put(b, st(s), blip(m, .07) * .45 if not dark else musicbox(m + 12, rng.uniform(-30, 30)) * .4)
+    mk('arp' + sfx, [x for x in s_ if x % 4 == 0], delay(b, 3, .35, .35), wet=.25 if not dark else .5, rv_decay=.8)
+    # 嘿嘿 人声切片
+    b = np.zeros(N); pat = [(0, 0, 'a'), (3, 1, 'o'), (6, 2, 'a'), (10, 1, 'u'), (16, 0, 'a'), (19, 2, 'o'), (22, 1, 'a')]
+    for s, k, v in pat:
+        c = CH[s // 8]; put(b, st(s), chop(c[k] + 12 - (12 if dark else 0), v) * .7)
+    for s in (12, 28): put(b, st(s), hey() * (.9 if not dark else .5))
+    mk('vox' + sfx, [s for s, _, _ in pat] + [12, 28], delay(b, 3, .3, .3) if not dark else delay(b, 3, .6, .6), wet=.2 if not dark else .6, rv_decay=.9)
+
 MEL_A = [(0, 72, 1), (1, 72, 1), (3, 79, 2), (6, 76, 2), (8, 74, 1), (9, 74, 1), (11, 72, 2), (14, 69, 2), (16, 72, 1), (17, 72, 1), (19, 79, 2), (22, 81, 2), (24, 79, 3), (28, 76, 4)]
 MEL_B = [(0, 76, 3), (3, 79, 1), (4, 81, 4), (8, 79, 2), (10, 76, 2), (12, 74, 4), (16, 72, 3), (19, 74, 1), (20, 76, 2), (22, 79, 2), (24, 76, 6), (30, 74, 2)]
 MEL_C = [(0, 79, 2), (2, 76, 2), (4, 74, 4), (8, 72, 2), (10, 74, 2), (12, 76, 4), (16, 81, 2), (18, 79, 2), (20, 76, 2), (22, 74, 2), (24, 72, 8)]
@@ -308,6 +447,7 @@ def bright_set(sfx, tr=0, lead_kind='square', mel=MEL_A, bell_kind='fm', bells=B
     for s in s_: put(b, st(s), snap())
     for h, m in enumerate([45, 45, 43, 48]): put(b, st(h * 8), drone(m + tr, 7.5 * S16))
     mk('snap' + sfx, s_, b, wet=.25)
+    new_insts(sfx, CH, BS, tr)
 
 # ===== Phase 1：第 1 阶段 天和地 =====
 bright_set('1')
@@ -375,6 +515,8 @@ b = np.zeros(N)
 for h, ch in enumerate(P2_CH): put(b, st(h * 8), choir([ch[0], ch[2]], 8 * S16, 'u', vib=3, eerie=True))
 mk('choir2', [0, 8, 16, 24], b, wet=.5, rv_decay=1.0)
 
+new_insts('2', P2_CH, P2_BASS, 0, dark=True)
+
 # ===== 影影 暗色套 =====
 b = np.zeros(N); s_ = [4, 12, 14, 20, 28]
 for s in s_: put(b, st(s), snap() * (1 if s != 14 else .5))
@@ -383,7 +525,8 @@ mk('snap2', s_, delay(b, 3, .45, .4), wet=.45, rv_decay=.9)
 
 # ---------- export ----------
 import soundfile as sf
-INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'lead', 'pad', 'choir', 'snap']
+INSTS = ['kick', 'shaker', 'clap', 'bass', 'chime', 'sweep', 'blip', 'bells', 'lead', 'pad', 'choir', 'snap',
+         'epiano', 'cello', 'violin', 'guitar', 'saw', 'edm', 'trap', '808', 'arp', 'vox']
 def SPLIT(k):
     for i in INSTS:
         if k.startswith(i): return i, k[len(i):]

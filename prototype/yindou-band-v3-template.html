@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>音豆乐队 · 样稿3</title>
+<title>溜溜乐队 · 样稿3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
@@ -115,7 +115,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <body>
 <div class="app">
   <div class="top">
-    <span class="brand">🫘 音豆乐队</span>
+    <span class="brand">🫘 溜溜乐队</span>
     <span class="phase" id="phaseTag">第一阶段</span>
     <div class="combos" id="combos"></div>
     <button class="tbtn" id="recBtn">⏺ 录歌</button>
@@ -137,7 +137,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
       <div class="grp"><span class="gl" style="color:var(--sheng)">声母</span><span id="gS" style="display:flex;gap:5px"></span></div>
       <div class="grp"><span class="gl" style="color:var(--yun)">韵母</span><span id="gY" style="display:flex;gap:5px;flex-wrap:wrap"></span></div>
     </div>
-    <p class="note">拖图标到音豆身上。点一下音豆让它休息或回来；长按唱歌的音豆听标准读音。样稿：人声是合成音，正式版换真人录音；第二阶段为了展示暗夜风格，正式版会按课本顺序排。</p>
+    <p class="note">拖图标到溜溜身上。点一下溜溜让它休息或回来；长按唱歌的溜溜听标准读音。样稿：人声是合成音，正式版换真人录音；第二阶段为了展示暗夜风格，正式版会按课本顺序排。</p>
   </div>
 </div>
 
@@ -148,7 +148,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <div class="spot" id="spot"></div>
 <div class="songs" id="songs"><h3>🎵 我的歌</h3><div id="songList"><div class="empty">还没有录歌。点“录歌”，混一段音乐录下来吧。</div></div></div>
 <div class="overlay" id="startOv"><div class="panel">
-  <h1>🫘 音豆乐队</h1>
+  <h1>🫘 溜溜乐队</h1>
   <p id="loadTxt">正在准备乐器……</p>
   <button class="go-btn" id="startBtn" hidden>开演！</button>
 </div></div>
@@ -338,7 +338,7 @@ function apply(i,{kind,val}){
   let s=slots[i];
   if(kind==='inst'){stopSlot(i);slots[i]={type:'i',key:val,muted:false};startSlot(i);render();tutorialStep('inst');return}
   if(kind==='tone'){
-    if(s.type!=='v'||!s.formed){toast('先让音豆学会一个音');return}
+    if(s.type!=='v'||!s.formed){toast('先让溜溜学会一个音');return}
     s.tone=+val;render();const c=charOf(s);c?say(c):toast('这个声调没有常用字');checkCombos();return;
   }
   if(s.type!=='v'){stopSlot(i);s=slots[i]={type:'v',sheng:null,yun:null,tone:1,formed:false,muted:false}}
@@ -385,7 +385,7 @@ function handPath(fromEl,toEl,loop=true){
 }
 function stopHand(){cancelAnimationFrame(handAnim);$('hand').style.display='none';$('spot').style.display='none'}
 function tutorialStep(ev){
-  if(tut===1&&ev==='inst'){tut=2;setTimeout(()=>{say('真棒！再试试把一个声母和一个韵母，送给同一个音豆');const s=[...document.querySelectorAll('#gS .ic')][0];handPath(s,$('row').children[3])},1400)}
+  if(tut===1&&ev==='inst'){tut=2;setTimeout(()=>{say('真棒！再试试把一个声母和一个韵母，送给同一个溜溜');const s=[...document.querySelectorAll('#gS .ic')][0];handPath(s,$('row').children[3])},1400)}
   else if(tut<3&&ev==='vocal'){tut=3;stopHand();setTimeout(()=>say('它会唱歌啦！点上面的小喇叭，听听要做出什么词'),1600)}
 }
 function guideEvolve(){
@@ -394,7 +394,7 @@ function guideEvolve(){
     const b=$('evoBtn'),{r}=center(b),sp=$('spot');
     sp.style.display='block';sp.style.left=(r.left-10)+'px';sp.style.top=(r.top-10)+'px';sp.style.width=(r.width+20)+'px';sp.style.height=(r.height+20)+'px';
     const h=$('hand');h.style.display='block';h.style.left=(r.left+r.width/2)+'px';h.style.top=(r.bottom+4)+'px';
-    say('三个彩蛋都找到了！点这个发光的按钮，让音豆们进化');
+    say('三个彩蛋都找到了！点这个发光的按钮，让溜溜们进化');
     const close=()=>{stopHand();document.removeEventListener('pointerdown',close,true)};
     setTimeout(()=>document.addEventListener('pointerdown',close,true),400);
   },2900);
@@ -525,7 +525,7 @@ function draw(now){
 /* ================= boot ================= */
 resize();requestAnimationFrame(draw);render();renderBar(false);renderCombos();
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
-$('loadTxt').innerHTML='11 个乐手、两个阶段的音效已准备好。<br>找到 3 个词语彩蛋，音豆们就会进化。<br>请横屏，并打开声音。';
+$('loadTxt').innerHTML='11 个乐手、两个阶段的音效已准备好。<br>找到 3 个词语彩蛋，溜溜们就会进化。<br>请横屏，并打开声音。';
 $('startBtn').hidden=false;
 $('startBtn').addEventListener('click',async()=>{
   $('startBtn').disabled=true;$('loadTxt').textContent='乐器调音中……';
@@ -533,7 +533,7 @@ $('startBtn').addEventListener('click',async()=>{
   pickVoice();say(' ');
   t0=ctx.currentTime+.1;nextStep=t0;stepIdx=0;setInterval(sched,25);
   $('startOv').hidden=true;resize();
-  tut=1;setTimeout(()=>{say('把下面的小图标，拖到音豆身上');handPath(document.querySelector('#gB .ic'),$('row').children[1])},400);
+  tut=1;setTimeout(()=>{say('把下面的小图标，拖到溜溜身上');handPath(document.querySelector('#gB .ic'),$('row').children[1])},400);
 });
 </script>
 </body>

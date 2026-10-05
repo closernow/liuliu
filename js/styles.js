@@ -1,6 +1,7 @@
 // 每个阶段的风格：用哪套乐器声音、背景、角色挂件和恐怖件。
 // 设计依据见 docs/DESIGN.md 第 4、7 节。
-const INST = ['dong', 'cha', 'papa', 'beng', 'ding', 'wuwu', 'didu', 'ling', 'dudu', 'huhu', 'lala', 'ying'];
+const INST = ['dong', 'cha', 'papa', 'beng', 'ding', 'wuwu', 'didu', 'ling', 'dudu', 'huhu', 'lala', 'ying',
+  'dang', 'weng', 'you', 'zheng', 'zizi', 'dongci', 'dada', 'hong', 'jiu', 'hei'];
 const cycle = (list) => Object.fromEntries(INST.map((id, i) => [id, id === 'ying' ? 'scarf' : list[i % list.length]]));
 
 export const STYLES = {
@@ -31,6 +32,16 @@ export const STYLES = {
       huhu: ['bellyMouth', 'sewnEyes', 'lid', 'bugs'],
       lala: ['bigMouth', 'stitchCheek', 'claws', 'ribs', 'flies'],
       ying: ['coolGlow', 'grin', 'tendrils', 'bodyEyes', 'shadowDrip', 'shadow'],
+      dang: ['zipMouth', 'ribs', 'nails', 'flies', 'scar'],
+      weng: ['hollow', 'longTongue', 'web', 'chain', 'cracksBody'],
+      you: ['buttonR', 'sewnMouth', 'bandArm', 'knife', 'bugs'],
+      zheng: ['dangleL', 'teeth', 'cracksBody', 'claws', 'shadow'],
+      zizi: ['cyclops', 'veins', 'wires', 'zipBody'],
+      dongci: ['multi', 'gapTeeth', 'lid', 'extraArm'],
+      dada: ['wormR', 'scar', 'pegLeg', 'bodyStitch', 'flies'],
+      hong: ['bigMouth', 'multiSmall', 'crack', 'chain'],
+      jiu: ['sewnEyes', 'longTongue', 'nails', 'bugs', 'web'],
+      hei: ['dangleR', 'stitchCheek', 'claws', 'shadow', 'bandHead'],
     },
     // 识字歌手每个位置一套不同的恐怖件
     singerParts: [
@@ -51,10 +62,11 @@ export const STYLES = {
   },
 };
 
-export const SINGER_COLORS = ['#86C5FF', '#FF8FA3', '#FFD166', '#8EE3A8', '#C3B1FF', '#FFB86B', '#7FDBFF'];
+export const SINGER_COLORS = ['#86C5FF', '#FF8FA3', '#FFD166', '#8EE3A8', '#C3B1FF', '#FFB86B', '#7FDBFF', '#F7A1E0', '#B8E986', '#FFC2A8'];
 
 // 乐器角色对应的循环名
-export const LOOPKEY = { dong: 'kick', cha: 'shaker', papa: 'clap', beng: 'bass', ding: 'chime', wuwu: 'sweep', didu: 'blip', ling: 'bells', dudu: 'lead', huhu: 'pad', lala: 'choir', ying: 'snap' };
+export const LOOPKEY = { dong: 'kick', cha: 'shaker', papa: 'clap', beng: 'bass', ding: 'chime', wuwu: 'sweep', didu: 'blip', ling: 'bells', dudu: 'lead', huhu: 'pad', lala: 'choir', ying: 'snap',
+  dang: 'epiano', weng: 'cello', you: 'violin', zheng: 'guitar', zizi: 'saw', dongci: 'edm', dada: 'trap', hong: '808', jiu: 'arp', hei: 'vox' };
 export const INSTRUMENTS = INST;
 
 export function lookFor(style, id) {

@@ -1,4 +1,4 @@
-// 音豆角色美术：代码画 SVG，骨架固定，零件可换。全部原创。
+// 溜溜角色美术：代码画 SVG，骨架固定，零件可换。全部原创。
 export const CH={
  dong:{nm:'咚咚',sub:'鼓',col:'#FF7A59',head:'round',inst:'drum',eye:'round',iris:'#3B6FD8',hat:'cloud',
    horror:['heart','bodyStitch','crack'],hd:'心脏外露、身上缝线、头裂开'},
@@ -24,6 +24,16 @@ export const CH={
    horror:['bigMouth','stitchCheek'],hd:'大嘴尖牙吐舌头、脸上缝线'},
  ying:{nm:'影影',sub:'响指',col:'#1b1724',rim:'#8b7cff',head:'smoke',inst:'snap',eye:'cool',hat:'scarf',
    horror:['coolGlow','grin','tendrils','bodyEyes','shadowDrip'],hd:'眼睛发紫光、裂嘴笑、头顶黑烟触手、身上睁开眼睛、滴黑影'},
+ dang:{nm:'当当',sub:'电钢琴',col:'#FF6F91',head:'pear',inst:'epiano',eye:'round',iris:'#3B6FD8',hat:'beret'},
+ weng:{nm:'嗡嗡',sub:'大提琴',col:'#C08A5B',head:'tall',inst:'cello',eye:'round',iris:'#2E9E6B',hat:'tophat'},
+ you:{nm:'悠悠',sub:'小提琴',col:'#F7A1E0',head:'small',inst:'violin',eye:'round',iris:'#B03A7A',hat:'ribbon'},
+ zheng:{nm:'铮铮',sub:'电吉他',col:'#4F7CFF',head:'hex',inst:'guitar',eye:'round',iris:'#C9601E',hat:'mohawk'},
+ zizi:{nm:'滋滋',sub:'合成器',col:'#3DE0C8',head:'box',inst:'keytar',eye:'round',iris:'#2A2145',hat:'visor'},
+ dongci:{nm:'动次',sub:'打碟',col:'#FFB347',head:'round',inst:'dj',eye:'round',iris:'#2A2145',hat:'phones'},
+ dada:{nm:'哒哒',sub:'踩镲',col:'#9BE15D',head:'blob',inst:'hihat',eye:'round',iris:'#3B6FD8',hat:'bandana'},
+ hong:{nm:'轰轰',sub:'低音炮',col:'#6A5AE0',head:'wide',inst:'speaker',eye:'round',iris:'#C9601E',hat:'shades2'},
+ jiu:{nm:'啾啾',sub:'琶音',col:'#FFE066',head:'bean',inst:'pad',eye:'round',iris:'#2E9E6B',hat:'bulb'},
+ hei:{nm:'嘿嘿',sub:'人声',col:'#FF8C42',head:'pear',inst:'megaphone',eye:'round',iris:'#3B6FD8',hat:'spikes'},
  py:{nm:'拼音歌手',sub:'唱音节',col:'#FF8FA3',head:'bean',inst:'card',card:'bā',eye:'round',iris:'#3B6FD8',hat:'sprout',
    horror:['patchwork','bandLeg','backFeet'],hd:'补丁身体、腿缠绷带、脚长反了'},
  sz:{nm:'识字歌手',sub:'唱生字',col:'#86C5FF',head:'bean',inst:'card',card:'天',eye:'round',iris:'#2E9E6B',hat:'book',
@@ -48,6 +58,9 @@ const HEAD={
  bell:{d:'M0 -46C22 -46 30 -26 32 -4C34 18 40 30 48 38Q0 48 -48 38C-40 30 -34 18 -32 -4C-30 -26 -22 -46 0 -46Z',top:-46,w:34},
  cloud:{d:'M-30 40C-54 40 -56 12 -40 4C-48 -20 -22 -36 -8 -24C0 -50 40 -46 38 -18C58 -18 62 10 46 18C58 34 44 44 24 40Z',top:-40,w:44},
  smoke:{d:'M-40 40C-44 0 -36 -36 -6 -44C-2 -56 8 -62 18 -58C8 -54 6 -48 12 -44C34 -38 44 -8 40 40Q0 48 -40 40Z',top:-44,w:40},
+ pear:{d:'M0 -46C16 -46 22 -30 22 -18C40 -10 46 10 42 24C38 40 20 44 0 44C-20 44 -38 40 -42 24C-46 10 -40 -10 -22 -18C-22 -30 -16 -46 0 -46Z',top:-46,w:42},
+ hex:{d:'M-22 -42H22L44 0L22 42H-22L-44 0Z',top:-42,w:40},
+ blob:{d:'M-36 36C-52 20 -46 -16 -30 -32C-14 -48 18 -46 34 -30C50 -14 50 22 34 38C20 48 -22 48 -36 36Z',top:-44,w:44},
  bean:{d:'M-34 40C-50 32 -50 -6 -38 -26C-26 -44 -12 -48 0 -48C12 -48 26 -44 38 -26C50 -6 50 32 34 40C20 46 -20 46 -34 40Z',top:-48,w:42}
 };
 
@@ -151,6 +164,16 @@ function headParts(C,h,st,c){
    nightcap:`<path d="M-30 ${T+12}C-26 ${T-14} 20 ${T-24} 46 ${T-2}L36 ${T+10}Z" fill="${k('#5B6FD8')}" stroke="${st}" stroke-width="2.5"/><circle cx="46" cy="${T-2}" r="6" fill="${k('#ffffff')}" stroke="${st}" stroke-width="2"/><path d="M-6 ${T-4}a6 6 0 1 0 6 8a5 5 0 1 1 -6 -8z" fill="${k('#FFE07A')}"/>`,
    flowercollar:'',
    scarf:'',
+   beret:`<path d="M-34 ${T+10}C-40 ${T-8} 10 ${T-18} 36 ${T+4}C30 ${T+12} -20 ${T+16} -34 ${T+10}Z" fill="${k('#2A2145')}" stroke="${st}" stroke-width="2"/><circle cx="4" cy="${T-10}" r="3" fill="${k('#2A2145')}"/>`,
+   tophat:`<rect x="-18" y="${T-30}" width="36" height="30" rx="3" fill="${k('#1f1a33')}" stroke="${st}" stroke-width="2"/><rect x="-28" y="${T-2}" width="56" height="7" rx="3" fill="${k('#1f1a33')}" stroke="${st}" stroke-width="2"/><rect x="-18" y="${T-10}" width="36" height="6" fill="${k('#E5484D')}"/>`,
+   ribbon:`<path d="M10 ${T+6}L-6 ${T-8}L-6 ${T+16}ZM10 ${T+6}L26 ${T-8}L26 ${T+16}Z" fill="${k('#B03A7A')}" stroke="${st}" stroke-width="2"/><circle cx="10" cy="${T+6}" r="4" fill="${k('#FFE07A')}"/>`,
+   mohawk:[-12,-4,4,12].map((x,i)=>`<path d="M${x-6} ${T+4}L${x} ${T-22+Math.abs(i-1.5)*4}L${x+6} ${T+4}Z" fill="${k('#FF3D7F')}" stroke="${st}" stroke-width="2"/>`).join(''),
+   visor:(h?'':`<rect x="-34" y="-12" width="68" height="18" rx="9" fill="#1b1f3a" stroke="${st}" stroke-width="2"/><rect x="-28" y="-7" width="56" height="5" rx="2" fill="#5CFFE4" class="glow"/>`),
+   phones:`<path d="M-40 4C-44 ${T-10} 44 ${T-10} 40 4" stroke="${k('#2A2145')}" stroke-width="6" fill="none"/><rect x="-50" y="-8" width="14" height="24" rx="6" fill="${k('#E5484D')}" stroke="${st}" stroke-width="2"/><rect x="36" y="-8" width="14" height="24" rx="6" fill="${k('#E5484D')}" stroke="${st}" stroke-width="2"/>`,
+   bandana:`<path d="M-42 ${T+16}Q0 ${T-6} 42 ${T+16}L40 ${T+24}Q0 ${T+6} -40 ${T+24}Z" fill="${k('#E5484D')}" stroke="${st}" stroke-width="2"/><circle cx="-10" cy="${T+14}" r="2" fill="#fff"/><circle cx="10" cy="${T+14}" r="2" fill="#fff"/><path d="M40 ${T+18}l12 6l-10 4z" fill="${k('#E5484D')}" stroke="${st}" stroke-width="2"/>`,
+   shades2:(h?'':`<path d="M-40 -10H40L36 6Q20 12 4 4H-4Q-20 12 -36 6Z" fill="#111"/><path d="M-30 -6l10 0" stroke="#fff" stroke-width="2" opacity=".6"/>`),
+   bulb:`<line x1="0" y1="${T}" x2="0" y2="${T-14}" stroke="${st}" stroke-width="3"/><circle cx="0" cy="${T-20}" r="8" fill="${k('#FFE07A')}" stroke="${st}" stroke-width="2" class="glow"/><path d="M-3 ${T-18}l3 -4l3 4" stroke="${st}" stroke-width="1.5" fill="none"/>`,
+   spikes:[-14,0,14].map(x=>`<path d="M${x-8} ${T+6}L${x} ${T-14}L${x+8} ${T+6}Z" fill="${k('#3a2a1a')}" stroke="${st}" stroke-width="2"/>`).join(''),
    // 第 2 阶段 金木水火土
    goldcrown:`<path d="M-20 ${T+6}L-22 ${T-14}L-10 ${T-4}L0 ${T-18}L10 ${T-4}L22 ${T-14}L20 ${T+6}Z" fill="${k('#F5C04A')}" stroke="${st}" stroke-width="2.5"/><circle cx="0" cy="${T-2}" r="3.5" fill="${k('#FF5C5C')}"/>`,
    twig:`<path d="M-4 ${T+4}C-6 ${T-10} 4 ${T-18} 2 ${T-28}" stroke="${k('#8a5a2b')}" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="-8" cy="${T-16}" rx="8" ry="4" fill="${k('#5FD3A5')}" stroke="${st}" stroke-width="1.5" transform="rotate(-30 -8 ${T-16})"/><ellipse cx="10" cy="${T-24}" rx="8" ry="4" fill="${k('#8EE3A8')}" stroke="${st}" stroke-width="1.5" transform="rotate(25 10 ${T-24})"/>`,
@@ -199,6 +222,26 @@ function inst(C,h,st,c){
      o.pose={l:115,r:-165,sl:-30,sr:8,d:1,dl:0};break;
    case 'snap':o.r=`<circle cx="-3" cy="38" r="3" fill="${c}" stroke="${st}" stroke-width="2"/><g class="beat"><path d="M8 40l7 -3M9 46l8 1M6 51l5 5" stroke="${h?'#b26bff':'#ffe07a'}" stroke-width="2" stroke-linecap="round"/></g>`;
      o.pose={l:8,r:-150,sl:0,sr:14,d:2,dl:1};break;
+   case 'epiano':o.front=`<path d="M46 134L94 168M94 134L46 168" stroke="${st}" stroke-width="4"/><rect x="30" y="118" width="80" height="16" rx="3" fill="${k('#C0392B')}" stroke="${st}" stroke-width="2.5"/>`+[...Array(9)].map((_,i)=>`<rect x="${33+i*8.4}" y="121" width="7" height="10" fill="${k('#fff')}"/>`).join('');
+     o.pose={l:-14,r:14,sl:12,sr:-12,d:1,dl:0};break;
+   case 'cello':o.front=`<line x1="28" y1="60" x2="28" y2="132" stroke="${k('#3a2a1a')}" stroke-width="5"/><circle cx="28" cy="58" r="4" fill="${k('#3a2a1a')}"/><path d="M28 112C12 112 10 128 18 136C8 144 10 176 28 176C46 176 48 144 38 136C46 128 44 112 28 112Z" fill="${k('#A0522D')}" stroke="${st}" stroke-width="2.5"/><path d="M24 132q-2 6 0 12M32 132q2 6 0 12" stroke="${st}" stroke-width="1.5" fill="none"/><line x1="28" y1="176" x2="28" y2="184" stroke="${st}" stroke-width="3"/>`;
+     o.r=stick(45,-46,8).replace(/stroke-width="4"/,'stroke-width="2.5"').replace(/<circle[^>]*>/,'');o.pose={l:40,r:45,sl:0,sr:-22,d:2,dl:0};break;
+   case 'violin':o.front=`<g transform="rotate(-25 40 104)"><path d="M40 92C30 92 30 100 34 104C28 108 30 118 40 118C50 118 52 108 46 104C50 100 50 92 40 92Z" fill="${k('#C0602A')}" stroke="${st}" stroke-width="2"/><line x1="40" y1="92" x2="40" y2="66" stroke="${k('#3a2a1a')}" stroke-width="3"/></g>`;
+     o.r=stick(-110,-76,6).replace(/stroke-width="4"/,'stroke-width="2"').replace(/<circle[^>]*>/,'');o.pose={l:118,r:-110,sl:0,sr:18,d:1,dl:0};break;
+   case 'guitar':o.front=`<path d="M78 136L14 112" stroke="${st}" stroke-width="8" stroke-linecap="round"/><path d="M78 136L14 112" stroke="${k('#ddd')}" stroke-width="4" stroke-linecap="round"/><path d="M6 104l10 2l-2 12l-10 -4z" fill="${k('#222')}"/><path d="M70 124L96 118L88 136L100 152L74 150L64 140Z" fill="${k('#00C2FF')}" stroke="${st}" stroke-width="3"/><circle cx="80" cy="138" r="3.5" fill="${st}"/><path d="M84 128l8 -2" stroke="#fff" stroke-width="2"/>`;
+     o.pose={l:70,r:14,sl:0,sr:-30,d:.5,dl:0};break;
+   case 'keytar':o.front=`<g transform="rotate(-24 70 124)"><rect x="24" y="116" width="92" height="18" rx="6" fill="${k('#FF3D7F')}" stroke="${st}" stroke-width="2.5"/>`+[...Array(8)].map((_,i)=>`<rect x="${50+i*8}" y="119" width="6" height="12" fill="${k('#fff')}"/>`).join('')+`<rect x="28" y="120" width="16" height="10" rx="3" fill="#1b1f3a"/><circle cx="36" cy="125" r="2.5" fill="#5CFFE4" class="glow"/></g>`;
+     o.pose={l:55,r:22,sl:0,sr:-14,d:.5,dl:0};break;
+   case 'dj':o.front=`<rect x="28" y="124" width="84" height="24" rx="4" fill="${k('#2A2145')}" stroke="${st}" stroke-width="2.5"/><ellipse cx="50" cy="126" rx="15" ry="5" fill="#111" stroke="${st}" stroke-width="1.5"/><ellipse cx="90" cy="126" rx="15" ry="5" fill="#111" stroke="${st}" stroke-width="1.5"/><g class="spin"><ellipse cx="50" cy="126" rx="4" ry="1.6" fill="${k('#FFB347')}"/></g><rect x="66" y="128" width="8" height="14" rx="2" fill="#5CFFE4" class="glow"/>`;
+     o.pose={l:-28,r:-160,sl:16,sr:24,d:1,dl:.5};break;
+   case 'hihat':o.front=`<line x1="116" y1="182" x2="116" y2="112" stroke="${st}" stroke-width="3"/><path d="M104 182l12 -12l12 12" stroke="${st}" stroke-width="2.5" fill="none"/><ellipse cx="116" cy="112" rx="20" ry="4" fill="${k('#F5C04A')}" stroke="${st}" stroke-width="2"/><ellipse cx="116" cy="118" rx="20" ry="4" fill="${k('#E0A830')}" stroke="${st}" stroke-width="2"/>`;
+     o.l=stick(-62,28,-14);o.r=stick(-38,8,-22);o.pose={l:-62,r:-38,sl:-14,sr:-14,d:.25,dl:.125};break;
+   case 'speaker':o.front=`<rect x="38" y="112" width="64" height="44" rx="6" fill="${k('#22202e')}" stroke="${st}" stroke-width="3"/><circle cx="70" cy="140" r="11" fill="#444" stroke="#000" stroke-width="2"/><g class="beat"><circle cx="70" cy="140" r="7" fill="#666"/></g><circle cx="70" cy="120" r="3.5" fill="#666"/>`;
+     o.pose={l:150,r:-150,sl:-25,sr:25,d:1,dl:0};break;
+   case 'pad':o.front=`<rect x="42" y="114" width="56" height="36" rx="5" fill="${k('#1b1f3a')}" stroke="${st}" stroke-width="2.5"/>`+[...Array(12)].map((_,i)=>`<rect class="cell" style="animation-delay:${(i*7%12)*.136}s" x="${46+(i%4)*12.5}" y="${118+(i/4|0)*10.5}" width="10" height="8" rx="2" fill="${['#FF3D7F','#5CFFE4','#FFE066','#8C6CF2'][i%4]}"/>`).join('');
+     o.pose={l:-12,r:12,sl:14,sr:-14,d:.5,dl:.25};break;
+   case 'megaphone':o.hd=`<path d="M10 20L40 8L46 36L14 28Z" fill="${k('#F5F5F5')}" stroke="${st}" stroke-width="2.5"/><path d="M40 8L46 36" stroke="${k('#E5484D')}" stroke-width="5"/><rect x="18" y="26" width="6" height="12" fill="${st}"/>`;
+     o.pose={l:150,r:-112,sl:-30,sr:-8,d:1,dl:0};break;
    case 'card':{const pin=/^[a-zü]/.test(C.card);
      o.front=`<g class="cardg"><rect x="46" y="112" width="48" height="34" rx="6" fill="${h?'#d8cfc0':'#fffdf5'}" stroke="${st}" stroke-width="3"/>`+
        (pin?'':`<path d="M70 115V143M49 129H91" stroke="${h?'#7a2a2a':'#F0697A'}" stroke-width="1.2" stroke-dasharray="3 3"/>`)+

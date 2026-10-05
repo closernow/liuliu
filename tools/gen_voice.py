@@ -13,20 +13,21 @@ code = lambda w: '-'.join(f'{ord(c):x}' for c in w)
 
 # 游戏里的语音提示，key 对应 js 里的 say('key')
 PROMPTS = {
-    'hello': '把字宝宝拖到音豆身上，听它唱歌吧！',
+    'hello': '把字宝宝拖到溜溜身上，听它唱歌吧！',
     'found': '找到彩蛋啦！',
     'ready': '彩蛋找够啦！点一点进化按钮。',
     'evolve': '进化啦！',
-    'full': '台上站满啦，先点小叉叉，请一个音豆下台吧。',
     'locked': '这一关还没打开，先在上一关多找几个彩蛋吧。',
     'soon': '这一关正在做，很快就来！',
-    'dark': '天黑啦，音豆们变样子啦！别怕，它们还是会唱歌。',
+    'dark': '天黑啦，溜溜们变样子啦！别怕，它们还是会唱歌。',
     'allfound': '这一关的彩蛋全找到啦，你真棒！',
     'last': '前面的关卡正在做，先回地图玩玩别的关吧。',
 }
 # 乐手的名字，长按乐手时读
 NAMES = {'dong': '咚咚', 'cha': '嚓嚓', 'papa': '啪啪', 'beng': '嘣嘣', 'ding': '叮叮', 'wuwu': '呜呜', 'didu': '嘀嘟',
-         'ling': '铃铃', 'dudu': '嘟嘟', 'huhu': '呼呼', 'lala': '啦啦', 'ying': '影影'}
+         'ling': '铃铃', 'dudu': '嘟嘟', 'huhu': '呼呼', 'lala': '啦啦', 'ying': '影影',
+         'dang': '当当', 'weng': '嗡嗡', 'you': '悠悠', 'zheng': '铮铮', 'zizi': '滋滋', 'dongci': '动次', 'dada': '哒哒',
+         'hong': '轰轰', 'jiu': '啾啾', 'hei': '嘿嘿'}
 PROMPTS.update({'n_' + k: v for k, v in NAMES.items()})
 
 async def tts(text, path):

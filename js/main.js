@@ -6,15 +6,17 @@ import * as A from './audio.js';
 import * as store from './store.js';
 
 const $ = (id) => document.getElementById(id);
-const NS = 7, NEED = 3;                       // 7 个音豆；找到 3 个彩蛋解锁下一关
+const NS = 10, NEED = 3;                      // 10 个空位；找到 3 个彩蛋解锁下一关
 const HORROR = new Set([3, 8, 12, 16, 21, 28, 33]);
+const shuffle = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const code = (w) => [...w].map((c) => c.codePointAt(0).toString(16)).join('-');
 const zUrl = (ch) => `audio/voice/z/${code(ch)}.mp3`;
 const wUrl = (w) => `audio/voice/w/${code(w)}.mp3`;
 const uiUrl = (k) => `audio/voice/ui/${k}.mp3`;
-const NAMES = { dong: '咚咚', cha: '嚓嚓', papa: '啪啪', beng: '嘣嘣', ding: '叮叮', wuwu: '呜呜', didu: '嘀嘟', ling: '铃铃', dudu: '嘟嘟', huhu: '呼呼', lala: '啦啦', ying: '影影' };
+const NAMES = { dong: '咚咚', cha: '嚓嚓', papa: '啪啪', beng: '嘣嘣', ding: '叮叮', wuwu: '呜呜', didu: '嘀嘟', ling: '铃铃', dudu: '嘟嘟', huhu: '呼呼', lala: '啦啦', ying: '影影',
+  dang: '当当', weng: '嗡嗡', you: '悠悠', zheng: '铮铮', zizi: '滋滋', dongci: '动次', dada: '哒哒', hong: '轰轰', jiu: '啾啾', hei: '嘿嘿' };
 
-let DATA, stage = null, selected = null;
+let DATA, stage = null, selected = null, eggOrder = [];
 let slots = Array.from({ length: NS }, () => null);   // null | {kind:'inst',id} | {kind:'char',ch,py}
 let muted = Array(NS).fill(false);
 let save = { unlocked: 1, current: 1, found: {}, heard: {} };
@@ -35,13 +37,13 @@ async function enter(id, { evolve = false } = {}) {
   slots = slots.map((s) => (s && s.kind === 'inst' ? s : null));
   muted = muted.map((m, i) => (slots[i] ? m : false));
   for (let i = 0; i < NS; i++) { A.setSinger(i, null); if (!slots[i]) A.stopLoop(i); }
-  renderBar(); renderEggs(); renderSlots();
+  eggOrder = []; renderBar(); renderEggs(); renderSlots();
   A.preload([...INSTRUMENTS.map(loopUrl), ...stage.chars.map(([c]) => zUrl(c)), ...stage.eggs.map((e) => wUrl(e.w))]);
   for (let i = 0; i < NS; i++) if (slots[i]) A.startLoop(i, loopUrl(slots[i].id), muted[i]);
   if (!save.heard[id]) {
     save.heard[id] = 1; persist();
-    if (style().dark) A.say(uiUrl('dark'));
-    else if (id === 1) A.say(uiUrl('hello'));
+    if (style().dark) A.say(uiUrl('dark'), { user: false });
+    else if (id === 1) A.say(uiUrl('hello'), { user: false });
   }
   updateEvo();
 }
@@ -101,15 +103,15 @@ function apply(i, item) {
     removeSlot(i);
     slots[i] = { kind: 'char', ch: item.ch, py: item.py };
     A.setSinger(i, zUrl(item.ch), false);
-    A.say(zUrl(item.ch));
   }
-  renderSlots(); renderBarState(); checkEggs();
+  renderSlots(); renderBarState();
+  if (!checkEggs() && item.kind === 'char') A.say(zUrl(item.ch));
 }
 // 拖到台上时：放到指定位置；点图标再点"空地方"也行
 function firstEmpty() { const k = slots.findIndex((s) => !s); return k; }
 
 /* 歌手在自己的拍子上跳一下 */
-const VSLOT = [0, 4, 8, 12, 2, 6, 10];
+const VSLOT = [0, 4, 8, 12, 2, 6, 10, 14, 1, 9];
 A.onStepCallback((st) => {
   document.querySelectorAll('.slot.singer').forEach((el) => {
     const i = +el.dataset.i;
@@ -121,11 +123,11 @@ A.onStepCallback((st) => {
 /* ================= 图标栏 ================= */
 function renderBar() {
   const gi = $('gInst'), gc = $('gChar'); gi.innerHTML = ''; gc.innerHTML = '';
-  INSTRUMENTS.forEach((id) => {
+  shuffle(INSTRUMENTS).forEach((id) => {
     const b = icon({ kind: 'inst', id }, charSVG(id, lookFor(stage.style, id)), 'ic', NAMES[id]);
     gi.appendChild(b);
   });
-  stage.chars.forEach(([ch, py]) => {
+  shuffle(stage.chars).forEach(([ch, py]) => {
     const b = icon({ kind: 'char', ch, py }, `<span class="c">${ch}</span><span class="p">${py}</span>`, 'ic ch', ch);
     gc.appendChild(b);
   });
@@ -165,13 +167,13 @@ function startDrag(e, b, item) {
       if (el) apply(+el.dataset.i, item);
       clearSel(); return;
     }
-    // 点一下：选中它，再点音豆；字宝宝顺便读一遍
+    // 点一下：选中它，再点溜溜；字宝宝顺便读一遍
     const was = b.classList.contains('sel'); clearSel();
     if (item.kind === 'char') A.say(zUrl(item.ch));
     if (!was) {
       selected = item; b.classList.add('sel');
       const k = firstEmpty();
-      if (k < 0) { toast('点一个音豆，换成它'); }
+      if (k < 0) { toast('点一个溜溜，换成它'); }
     }
   };
   b.addEventListener('pointermove', move); b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
@@ -181,8 +183,8 @@ function startDrag(e, b, item) {
 const foundOf = () => (save.found[stage.id] ||= []);
 function renderEggs() {
   const box = $('eggs'); box.innerHTML = '';
-  stage.eggs.forEach((e, k) => {
-    const f = foundOf().includes(k);
+  (eggOrder.length === stage.eggs.length ? eggOrder : (eggOrder = shuffle(stage.eggs.map((_, k) => k)))).forEach((k) => {
+    const e = stage.eggs[k], f = foundOf().includes(k);
     const b = document.createElement('button');
     b.className = 'egg' + (f ? ' found' : ''); b.dataset.k = k;
     b.innerHTML = f ? `<span class="w">${e.w}</span><span class="p">${e.p}</span>` : `<span>🔊 ${'？'.repeat([...e.w].length)}</span>`;
@@ -192,15 +194,17 @@ function renderEggs() {
   });
 }
 function checkEggs() {
+  let hit = false;
   const have = {};
   slots.forEach((s) => { if (s && s.kind === 'char') have[s.ch] = (have[s.ch] || 0) + 1; });
   stage.eggs.forEach((e, k) => {
     if (foundOf().includes(k)) return;
     const need = {}; [...e.w].forEach((c) => (need[c] = (need[c] || 0) + 1));
     if (!Object.entries(need).every(([c, n]) => (have[c] || 0) >= n)) return;
-    foundOf().push(k); persist();
+    foundOf().push(k); persist(); hit = true;
     celebrate(e, k);
   });
+  return hit;
 }
 function celebrate(e, k) {
   renderEggs();
@@ -237,7 +241,7 @@ function updateEvo() {
 }
 // 刚找够彩蛋：聚光灯照着进化按钮，语音提示
 function spotlight() {
-  const btn = $('evoBtn'); btn.classList.add('spot'); A.say(uiUrl('ready'));
+  const btn = $('evoBtn'); btn.classList.add('spot'); A.say(uiUrl('ready'), { user: false });
   setTimeout(() => btn.classList.remove('spot'), 5000);
 }
 $('evoBtn').addEventListener('click', async () => {
@@ -248,7 +252,7 @@ $('evoBtn').addEventListener('click', async () => {
   await new Promise((r) => setTimeout(r, 900));
   await enter(nx.id, { evolve: true });
   $('flash').classList.remove('on');
-  if (!style().dark) A.say(uiUrl('evolve'));
+  if (!style().dark) A.say(uiUrl('evolve'), { user: false });
 });
 
 /* ================= 地图 ================= */
