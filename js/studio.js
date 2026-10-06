@@ -4,6 +4,7 @@ import * as store from './store.js';
 import * as A from './audio.js';
 
 const urls = {};                      // 'key:i' -> objectURL
+const sizes = {};                     // 'key:i' -> 录音大小，变了才重建链接
 const recKey = (key, i) => `rec:${key}:${i}`;
 
 export async function loadAll(key, n) {
@@ -12,9 +13,9 @@ export async function loadAll(key, n) {
     const blob = await store.get(recKey(key, i), null);
     const id = key + ':' + i;
     if (!blob) { if (urls[id]) { URL.revokeObjectURL(urls[id]); delete urls[id]; } continue; }
-    if (!urls[id] || urls[id].blob !== blob.size) {
+    if (!urls[id] || sizes[id] !== blob.size) {
       if (urls[id]) URL.revokeObjectURL(urls[id]);
-      urls[id] = URL.createObjectURL(blob); urls[id].blob = blob.size;
+      urls[id] = URL.createObjectURL(blob); sizes[id] = blob.size;
     }
     out[i] = urls[id];
   }
@@ -37,9 +38,9 @@ export function open(opts) {
         <button class="recbig" data-a="rec" id="sRec">● 录音</button>
         <button class="tbtn" data-a="mine" id="sMine">▶ 听我的</button>
       </div>
-      <div class="sbtns" id="sAfter" hidden><button class="tbtn ok" data-a="ok">✔ 好了</button><button class="tbtn" data-a="again">↺ 再录</button></div>
+      <div class="sbtns" id="sAfter" hidden><button class="tbtn" data-a="again">↺ 不满意，再录</button><button class="tbtn ok" data-a="ok">下一句 ▶</button></div>
       <div class="sbtns"><button class="tbtn del" data-a="del" id="sDel">🗑 删掉这句录音</button></div>
-      <div class="stip" id="sTip">点"听一遍"先听听，再点红色按钮录音。说完停一下会自动结束。</div>
+      <div class="stip" id="sTip">点"听一遍"先听听，再点红色按钮录音。说完停一下会自动结束并保存，台上的唱将马上换成你的声音。</div>
     </div></div>`);
     document.body.appendChild(box);
     box.addEventListener('click', (e) => { const a = e.target.closest('[data-a]')?.dataset.a; if (a) act(a); });
@@ -66,14 +67,10 @@ async function act(a) {
   if (a === 'next') { stopRec(); st.k = (st.k + 1) % st.lines.length; show(); return; }
   if (a === 'listen') { st.say(st.ttsUrl(st.k)); return; }
   if (a === 'mine') { const b = await store.get(recKey(st.key, st.k), null); if (b) playBlob(b); return; }
-  if (a === 'del') { await store.set(recKey(st.key, st.k), null); show(); return; }
+  if (a === 'del') { await store.set(recKey(st.key, st.k), null); show(); st.onChange(); return; }
   if (a === 'rec') { if (st.rec) stopRec(); else record(); return; }
   if (a === 'again') { record(); return; }
-  if (a === 'ok') {
-    if (st.blob) await store.set(recKey(st.key, st.k), st.blob);
-    st.blob = null; st.say(st.prompt('recok'));
-    st.k = (st.k + 1) % st.lines.length; show(); return;
-  }
+  if (a === 'ok') { st.blob = null; st.k = (st.k + 1) % st.lines.length; show(); return; }
 }
 function playBlob(b) { const u = URL.createObjectURL(b); const au = new Audio(u); au.onended = () => URL.revokeObjectURL(u); au.play(); }
 
@@ -87,11 +84,17 @@ async function record() {
   cnt.textContent = '🔴 正在录……';
   const mr = new MediaRecorder(stream), chunks = [];
   mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
-  mr.onstop = () => {
+  mr.onstop = async () => {
     stream.getTracks().forEach((t) => t.stop());
     st.blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
     st.rec = null; document.getElementById('sRec').textContent = '● 录音';
-    cnt.textContent = '听听录得怎么样'; playBlob(st.blob);
+    // 录完自动保存（不用再点"好了"），台上这一句马上换成自己的声音
+    if (st.blob.size > 2000) {
+      await store.set(recKey(st.key, st.k), st.blob);
+      cnt.textContent = '🎤 录好啦，已经保存'; playBlob(st.blob);
+      document.getElementById('sMine').hidden = false; document.getElementById('sDel').hidden = false;
+      st.onChange();
+    } else cnt.textContent = '没听到声音，再录一次吧';
     document.getElementById('sAfter').hidden = false;
   };
   // 说完停顿 1.2 秒自动结束，最长 15 秒
