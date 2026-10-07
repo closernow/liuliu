@@ -324,3 +324,16 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .wmsg{min-height:24px;color:#ffe6a0;font-weight:700;text-align:center;max-width:180px}
 .wstars{font-size:40px;color:#ffd84d;letter-spacing:4px;min-height:50px}.wstars .pop{display:inline-block;animation:pop .6s}
 #wAfter:not([hidden]){display:flex;flex-direction:column;gap:8px}
+
+/* 首页：语文 / 数学 */
+.hub{display:flex;flex-direction:column;align-items:center;gap:22px}
+.hub[hidden]{display:none}
+.hubtitle{font-size:30px;font-weight:900;color:#fff;letter-spacing:.1em}
+.hubcards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.hubcard{border:none;border-radius:28px;width:260px;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#1f1a33;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:transform .15s}
+.hubcard:hover{transform:translateY(-6px) scale(1.03)}
+.hubcard .hi{font-size:70px}.hubcard b{font-size:34px}.hubcard small{font-size:14px;opacity:.75}
+.hubcard.yuwen{background:linear-gradient(160deg,#ffd166,#ff8fa3)}
+.hubcard.shuxue{background:linear-gradient(160deg,#8ee3a8,#5bb8f0)}
+.hubcard.fruit{background:linear-gradient(160deg,#e8f6a0,#8ee3a8)}
+.hubcard.mapcard{background:linear-gradient(160deg,#ffe08a,#ffb36b)}

@@ -38,6 +38,9 @@ PROMPTS = {
     'recok': '录好啦！',
     'mixhello': '全书大混音！学过的字、音节、唱词，都拿来玩吧！',
     'writehello': '先看一看笔顺，再描一描，最后自己写一写。',
+    'f_hello': '移动鼠标对准位置，点一下放下水果。凑对了才能合成哦。',
+    'f_done': '过关啦！',
+    'f_clear': '满啦，帮你清掉一些。',
     'star3': '写得真棒！三颗星！',
     'star2': '写得很好！',
     'star1': '写完啦，再试一次能得更多星星。',
@@ -57,14 +60,14 @@ sem = None
 # 单独的 i u ü 晓晓读不出来，用同音的 yi wu yu 代替
 LONE_U = {'ǖ': 'yū', 'ǘ': 'yú', 'ǚ': 'yǔ', 'ǜ': 'yù', 'ī': 'yī', 'í': 'yí', 'ǐ': 'yǐ', 'ì': 'yì', 'ū': 'wū', 'ú': 'wú', 'ǔ': 'wǔ', 'ù': 'wù'}
 
-async def tts(text, path, voice=ADULT, rate=ADULT_RATE):
+async def tts(text, path, voice=ADULT, rate=ADULT_RATE, pitch='+0Hz'):
     if os.path.exists(path) and os.path.getsize(path) > 1000: return 0
     text = LONE_U.get(text, text)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     async with sem:
         for attempt in range(4):
             try:
-                await edge_tts.Communicate(text, voice, rate=rate).save(path)
+                await edge_tts.Communicate(text, voice, rate=rate, pitch=pitch).save(path)
                 if os.path.getsize(path) > 1000: return 1
                 os.remove(path); raise RuntimeError('empty audio')
             except Exception as e:
@@ -139,6 +142,30 @@ async def main():
         p = f'{OUT}/sm/{k}.mp3'; add('声母', k, t, p, lambda t=t, p=p: tts(t, p))
     for k, t in YM.items():
         p = f'{OUT}/ym/{k.replace("ü", "v")}.mp3'; add('韵母', k, t, p, lambda t=t, p=p: tts(t, p), False)
+    # 数学：算式读音（水果合成用）
+    for x in range(1, 20):
+        for y in range(1, 20):
+            if x + y <= 20:
+                p = f'{OUT}/eq/{x}p{y}.mp3'; add('算式', f'{x}+{y}', '', p, lambda t=f'{x}加{y}等于{x + y}', p=p: tts(t, p), False)
+            if x > y:
+                p = f'{OUT}/eq/{x}m{y}.mp3'; add('算式', f'{x}-{y}', '', p, lambda t=f'{x}减{y}等于{x - y}', p=p: tts(t, p), False)
+    # 数学闯关：content/math_voice.json 的短句 + content/math_stages.json 里所有 say，文件名用文字的 md5，清单写到 audio/voice/m/index.json
+    import hashlib
+    mtexts = list(json.load(open('content/math_voice.json', encoding='utf-8')).values())
+    def walk(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k == 'say' and isinstance(v, str): mtexts.append(v)
+                else: walk(v)
+        elif isinstance(o, list):
+            for v in o: walk(v)
+    walk(json.load(open('content/math_stages.json', encoding='utf-8')))
+    mindex = {}
+    for t in dict.fromkeys(mtexts):
+        f = hashlib.md5(t.encode('utf-8')).hexdigest()[:10] + '.mp3'; mindex[t] = f
+        p = f'{OUT}/m/{f}'; add('数学闯关', t, '', p, lambda t=t, p=p: tts(t, p, ADULT, '-20%'), False)
+    os.makedirs(f'{OUT}/m', exist_ok=True)
+    json.dump(mindex, open(f'{OUT}/m/index.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
     for k, t in PROMPTS.items():
         p = f'{OUT}/ui/{k}.mp3'; add('提示语', t, '', p, lambda t=t, p=p: tts(t, p))
     n = sum(await asyncio.gather(*jobs))

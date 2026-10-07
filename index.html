@@ -16,6 +16,7 @@
 <body>
 <div class="app" id="app">
   <header class="top">
+    <button class="tbtn" onclick="location.href='index.html'" aria-label="回首页">🏠</button>
     <button class="tbtn" id="mapBtn" aria-label="阶段地图">🗺️ 地图</button>
     <div class="badge" id="badge" title="家长：长按 2 秒进入家长入口"></div>
     <div class="eggs" id="eggs"></div>
@@ -49,12 +50,31 @@
 <div class="warp" id="warp" aria-hidden="true"><div class="stars"></div><div class="ring"></div><div class="wt" id="wt">进化中</div><div class="ws" id="ws"></div></div>
 <div class="toast" id="toast"></div>
 <div class="overlay start" id="startLayer">
-  <button class="startbtn" id="startBtn">▶ 开始</button>
-  <div class="hint">溜溜 · 一年级上册语文</div>
+  <div class="hub" id="hubMain">
+    <div class="hubtitle">溜溜 · 一年级上册</div>
+    <div class="hubcards">
+      <button class="hubcard yuwen" id="startBtn"><span class="hi">🎵</span><b>语文</b><small>溜溜乐队 · 识字 拼音 课文 写字</small></button>
+      <button class="hubcard shuxue" id="mathBtn"><span class="hi">🔢</span><b>数学</b><small>闯关地图 · 水果合成</small></button>
+    </div>
+  </div>
+  <div class="hub" id="hubMath" hidden>
+    <div class="hubtitle">数学</div>
+    <div class="hubcards">
+      <button class="hubcard mapcard" onclick="location.href='math/map.html'"><span class="hi">🗺️</span><b>数学闯关</b><small>跟着课本一关一关走</small></button>
+      <button class="hubcard fruit" onclick="location.href='math/fruit.html'"><span class="hi">🍉</span><b>水果合成</b><small>分与合 · 凑十</small></button>
+    </div>
+    <button class="tbtn" id="hubBack">◀ 返回</button>
+  </div>
 </div>
 
 <script src="js/vendor/hanzi-writer.min.js"></script>
 <script type="module" src="js/main.js"></script>
+<script>
+// 首页：语文 / 数学（数学里再选闯关地图或水果合成）
+document.getElementById('mathBtn').onclick = () => { hubMain.hidden = true; hubMath.hidden = false; };
+document.getElementById('hubBack').onclick = () => { hubMath.hidden = true; hubMain.hidden = false; };
+if (location.hash === '#math') { hubMain.hidden = true; hubMath.hidden = false; }
+</script>
 <script>
 // 离线用：只在网上版本注册（本地预览时改代码要马上看到效果，不缓存）
 if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') navigator.serviceWorker.register('sw.js');

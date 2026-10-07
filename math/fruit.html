@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>水果合成 · 溜溜数学</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+:root{--ink:#1f3a2e;--muted:#6b8a7a;--green:#0f8a5f;--card:#fff;--bg:#eefaf2;--py:'Andika','Segoe UI',sans-serif;--ui:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:linear-gradient(160deg,#f3fbf5,#e3f6ea);color:var(--ink);font-family:var(--ui);user-select:none;-webkit-user-select:none;overflow:hidden}
+button{font:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px}
+.home{border:none;border-radius:999px;background:#fff;padding:8px 14px;font-weight:800;box-shadow:0 2px 8px rgba(30,80,50,.12)}
+h1{font-size:20px;margin:0}
+.wrap{display:grid;grid-template-columns:240px 1fr 240px;gap:16px;padding:0 16px 16px;height:calc(100% - 58px)}
+.col{display:flex;flex-direction:column;gap:12px;min-height:0}
+.card{background:var(--card);border-radius:18px;padding:14px;box-shadow:0 4px 16px rgba(30,80,50,.08)}
+.card h3{margin:0 0 8px;font-size:16px}
+.big{font-size:40px;font-weight:900;color:var(--green);text-align:center}
+.lv{font-size:22px;font-weight:900}
+.unit{font-size:13px;color:var(--muted)}
+.bar{height:12px;border-radius:999px;background:#e3f2e8;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2fbf71,#0f8a5f);transition:width .3s}
+.tip{font-size:15px;line-height:1.5;color:#2c5a45;background:#effaf3;border-radius:12px;padding:10px}
+.stars{font-size:22px;color:#f5b301;letter-spacing:2px}
+.btn{border:none;border-radius:999px;padding:10px 16px;font-weight:800;background:var(--green);color:#fff}
+.btn.ghost{background:#e3f2e8;color:var(--green)}
+.box{position:relative;border-radius:22px;overflow:hidden;background:#dfeba0;box-shadow:inset 0 0 0 4px #cfdc8a,0 6px 20px rgba(30,80,50,.12);align-self:stretch;justify-self:center;width:100%;max-width:520px}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#nextC{display:block;margin:0 auto;width:140px;height:140px}
+#legendC{display:block;margin:0 auto;width:210px;height:auto;max-width:100%}
+.eq{position:absolute;left:50%;transform:translateX(-50%);top:16%;font-size:34px;font-weight:900;color:#fff;background:rgba(15,138,95,.92);padding:8px 22px;border-radius:999px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s}
+.eq.on{opacity:1}
+.eq small{display:block;font-size:16px;font-weight:700;text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(20,60,40,.35);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.overlay[hidden]{display:none}
+.panel{background:#fff;border-radius:22px;padding:18px;max-width:880px;width:100%;max-height:100%;overflow:auto}
+.panel h2{margin:0 0 10px}
+.ugrp{margin:12px 0}.ugrp b{display:block;margin-bottom:6px;color:var(--muted)}
+.lvs{display:flex;flex-wrap:wrap;gap:8px}
+.lvb{border:none;border-radius:14px;background:#effaf3;padding:10px 12px;min-width:110px;text-align:left}
+.lvb b{display:block;font-size:17px;color:var(--ink)}.lvb span{color:#f5b301}
+.lvb[disabled]{opacity:.45;cursor:not-allowed}.lvb.cur{outline:3px solid var(--green)}
+.done{text-align:center}.done .big{font-size:54px}
+.toast{position:fixed;left:50%;bottom:6%;transform:translateX(-50%);background:rgba(20,60,40,.85);color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;opacity:0;transition:opacity .3s;pointer-events:none;z-index:30}
+.toast.show{opacity:1}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.col.side{flex-direction:row;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="top">
+  <button class="home" id="backBtn" onclick="location.href='../index.html#math'">🏠 返回</button>
+  <h1>🍉 水果合成</h1>
+</div>
+<div class="wrap">
+  <div class="col side">
+    <div class="card"><div class="unit" id="unitName"></div><div class="lv" id="lvName"></div>
+      <div class="bar"><i id="prog"></i></div><div id="progTxt"></div><div class="stars" id="stars"></div></div>
+    <div class="card"><h3>怎么玩</h3><div class="tip" id="tip"></div></div>
+    <div class="card"><button class="btn" id="levelsBtn">📚 选关卡</button> <button class="btn ghost" id="restartBtn">↺ 重来</button></div>
+  </div>
+  <div class="box" id="box"><canvas id="cv"></canvas><div class="eq" id="eq"></div>
+  </div>
+  <div class="col side">
+    <div class="card"><h3>下一个</h3><canvas id="nextC" width="140" height="140"></canvas><div id="nextTxt" style="text-align:center;font-weight:800"></div></div>
+    <div class="card"><h3>已经凑成</h3><div class="big" id="score">0</div></div>
+    <div class="card"><h3>水果和数</h3><canvas id="legendC" width="210" height="190"></canvas></div>
+  </div>
+</div>
+<div class="overlay" id="levelsLayer" hidden><div class="panel"><h2>📚 选关卡</h2><div id="levelsBody"></div><button class="btn ghost" id="levelsClose">关闭</button></div></div>
+<div class="overlay" id="doneLayer" hidden><div class="panel done"><h2>🎉 过关啦！</h2><div class="big" id="doneStars"></div><p id="doneTxt"></p><button class="btn" id="nextBtn">下一关 ▶</button> <button class="btn ghost" id="againBtn">再玩一次</button></div></div>
+<div class="overlay" id="startLayer"><div class="panel done"><h2>🍉 水果合成</h2><p>两个水果加起来正好是目标数，才能合成！<br>移动鼠标对准位置，点一下放下水果</p><button class="btn" id="goBtn" style="font-size:22px;padding:14px 40px">开始</button></div></div>
+<div class="toast" id="toast"></div>
+<script src="../js/vendor/matter.min.js"></script>
+<script type="module" src="../js/fruit.js"></script>
+</body>
+</html>

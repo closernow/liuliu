@@ -690,7 +690,7 @@ async function openParent() {
   }).join('');
   const raps = DATA.stages.filter((s) => s.type === 'rap' && !s.public);
   P.innerHTML = `<h3>进度</h3><table class="ptable"><tr><th>关</th><th>课</th><th>状态</th><th>彩蛋</th><th>最近拼错的</th></tr>${rows}</table>
-    <div class="pbtns"><button class="tbtn" data-a="unlock">解锁全部关卡</button><button class="tbtn" data-a="export">导出记录</button><button class="tbtn" data-a="clips">删掉所有"我的声音"</button><button class="tbtn danger" data-a="reset">清空进度重新开始</button></div>
+    <div class="pbtns"><button class="tbtn" data-a="unlock">解锁全部关卡</button><button class="tbtn" data-a="mathall">解锁数学全部关卡</button><button class="tbtn" data-a="export">导出记录</button><button class="tbtn" data-a="clips">删掉所有"我的声音"</button><button class="tbtn danger" data-a="reset">清空进度重新开始</button></div>
     <h3>课文录入</h3><p class="note">在家里电脑上，课文已经从课本里提取好了，不用录入。网上版本没有现代作者的课文，可以在这里录入，一行一句，只存在这台设备上；没有朗读，需要孩子在录音室里自己录。</p>
     <select id="pLesson">${raps.map((s) => `<option value="${s.text}">${s.lesson}</option>`).join('')}</select>
     <textarea id="pText" rows="6" placeholder="一行一句"></textarea><button class="tbtn" data-a="savetext">保存课文</button>`;
@@ -698,6 +698,7 @@ async function openParent() {
   $('pLesson').onchange = loadTyped; loadTyped();
   P.onclick = async (e) => {
     const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+    if (a === 'mathall') { const m = await store.get('math', {}); m.all = true; await store.set('math', m); toast('数学全部关卡已解锁'); }
     if (a === 'unlock') { save.unlocked = DATA.stages.length; persist(); toast('全部关卡已解锁'); openParent(); }
     if (a === 'export') {
       const blob = new Blob([JSON.stringify(save, null, 1)], { type: 'application/json' });
