@@ -12,7 +12,7 @@ body{font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-se
   background:radial-gradient(circle at 20% 10%,#ff8ad8 0,transparent 40%),radial-gradient(circle at 85% 90%,#6ad8ff 0,transparent 45%),linear-gradient(160deg,#5a3aa8,#2a1a6a)}
 button{font:inherit;cursor:pointer}
 .top{display:flex;align-items:center;gap:12px;padding:10px 16px;height:58px}
-.home{border:none;border-radius:999px;background:rgba(255,255,255,.9);color:#3a2a6a;padding:8px 14px;font-weight:800}
+.home{white-space:nowrap;flex:none;border:none;border-radius:999px;background:rgba(255,255,255,.9);color:#3a2a6a;padding:8px 14px;font-weight:800}
 .top h1{font-size:20px;margin:0;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .wrap{display:grid;grid-template-columns:220px 1fr 220px;gap:16px;padding:0 16px 16px;height:calc(100% - 58px)}
 .side{display:flex;flex-direction:column;gap:12px;min-height:0}
@@ -50,13 +50,67 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
 .overlay[hidden]{display:none}
 .panel{background:linear-gradient(160deg,#fff,#f4ecff);color:#3a2a6a;border-radius:28px;padding:24px 30px;text-align:center;max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .panel h2{font-size:34px;margin:0 0 6px}
-.lvs{display:flex;gap:14px;justify-content:center;margin:16px 0}
-.ltabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-.ltab{border:none;border-radius:16px;background:#efe6ff;color:#5a3aa8;padding:6px 14px;font-size:13px;line-height:1.3}.ltab b{font-size:18px;font-family:"KaiTi",serif}
-.ltab.on{background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff}
-.lvb{border:none;width:110px;height:120px;border-radius:24px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
-.lvb b{font-size:48px;line-height:1}.lvb span{color:#ffe14a;font-size:20px}
-.lvb[disabled]{opacity:.45;cursor:not-allowed}
+/* 道具 */
+.tools{display:flex;gap:8px;justify-content:center}
+.tool{position:relative;border:none;width:62px;height:66px;border-radius:18px;background:linear-gradient(160deg,#fff7c8,#ffc84a);color:#5a3a10;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15);line-height:1}
+.tool span{font-size:28px}.tool em{font-style:normal;font-size:11px;font-weight:800;margin-top:2px}
+.tool b{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:11px;background:#ff4a6a;color:#fff;font-size:13px;line-height:22px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.tool.on{outline:4px solid #fff;animation:glow 1s infinite}.tool.empty{filter:grayscale(1);opacity:.55}.tool.empty b{background:#888}
+.boardWrap{position:relative}
+.toolTip{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:5;background:rgba(255,255,255,.95);color:#5a3aa8;font-weight:900;padding:6px 16px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.25);white-space:nowrap;pointer-events:none}
+.toolTip[hidden]{display:none}
+.p3{font-style:normal;font-weight:900;color:#1a9a4a;font-family:system-ui}
+.gift{display:inline-block;background:#fff3c0;border-radius:999px;padding:3px 12px;margin:3px;font-weight:800}
+/* 路线地图 */
+.map{position:fixed;inset:0;z-index:15;display:flex;flex-direction:column;background:#5cc97a}
+.map[hidden]{display:none}
+.maptop{display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(160deg,#5a3aa8,#2a1a6a);box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:2;flex-wrap:wrap}
+.maptop h1{font-size:20px;margin:0;flex:1}
+.pill{background:rgba(255,255,255,.2);border-radius:999px;padding:5px 12px;font-weight:900}
+.mitems{display:flex;gap:6px;flex-wrap:wrap}.mitems span{background:rgba(255,255,255,.2);border-radius:999px;padding:3px 9px;font-size:15px}.mitems b{font-size:12px;margin-left:2px}
+.mapScroll{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch}
+.mapInner{position:relative;width:100%}
+.mband{position:absolute;left:0;right:0}
+.mdeco{position:absolute;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 2px rgba(0,0,0,.2));pointer-events:none}
+.road{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.road path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.road .r0{stroke:rgba(60,30,80,.25);stroke-width:50;transform:translateY(5px)}
+.road .r1{stroke:#fff3dc;stroke-width:42}
+.road .r3{stroke:#ffd23a;stroke-width:42}
+.road .r2{stroke:#fff;stroke-width:9;stroke-dasharray:1 22;opacity:.9}
+.msign{position:absolute;background:linear-gradient(160deg,#c8864a,#9a5a2a);border:3px solid #6a3a14;color:#fff;border-radius:14px;padding:6px 12px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.2);line-height:1.2;max-width:150px}
+.msign small{display:block;font-size:12px;opacity:.9}.msign b{display:block;font-family:"KaiTi",serif;font-size:20px}.msign span{display:block;font-family:"KaiTi",serif;font-size:13px;opacity:.85;letter-spacing:1px;white-space:nowrap}
+.mnode{position:absolute;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;border:4px solid #fff;background:radial-gradient(circle at 35% 30%,#ffb0e0,#e04aa8);color:#fff;font-weight:900;box-shadow:0 6px 0 #a02a78,0 8px 14px rgba(0,0,0,.3);padding:0}
+.mnode b{font-size:26px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.mnode.done{background:radial-gradient(circle at 35% 30%,#a8d8ff,#3a7ae0);box-shadow:0 6px 0 #1a4aa0,0 8px 14px rgba(0,0,0,.3)}
+.mnode.lock{background:radial-gradient(circle at 35% 30%,#ddd,#9a9aa8);box-shadow:0 6px 0 #6a6a78,0 8px 14px rgba(0,0,0,.2)}
+.mnode.lock b{font-size:22px}
+.mnode.cur{width:80px;height:80px;animation:pulse 1.2s infinite}
+.mnode.cur b{font-size:32px}
+.mnode.pop{animation:pop .5s,pulse 1.2s .5s infinite}
+.mnode.nope{animation:nope .4s}
+.mst{position:absolute;left:50%;top:-20px;transform:translateX(-50%);color:#ffd23a;font-size:18px;letter-spacing:-2px;text-shadow:0 2px 0 rgba(0,0,0,.35);white-space:nowrap}
+@keyframes pulse{50%{box-shadow:0 6px 0 #a02a78,0 0 0 12px rgba(255,255,255,.45),0 8px 14px rgba(0,0,0,.3)}}
+@keyframes pop{40%{transform:translate(-50%,-50%) scale(1.35)}}
+@keyframes nope{25%{transform:translate(-58%,-50%)}75%{transform:translate(-42%,-50%)}}
+.mav{position:absolute;width:58px;height:81px;transform:translate(-50%,-128%);pointer-events:none;transition:left 1s ease-in-out,top 1s ease-in-out;z-index:3;animation:bob 1.4s ease-in-out infinite}
+.mav svg{width:100%;height:100%;filter:drop-shadow(0 4px 3px rgba(0,0,0,.3))}
+.mav.walk{animation:hop .25s ease-in-out infinite}
+@keyframes bob{50%{margin-top:-8px}}@keyframes hop{50%{margin-top:-14px}}
+.msoon{position:absolute;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.92);color:#5a3aa8;font-weight:900;padding:10px 20px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+/* 开始这一关之前 */
+.pre{position:relative;min-width:300px}
+.pre .x{position:absolute;right:12px;top:10px;border:none;background:#efe6ff;color:#5a3aa8;width:38px;height:38px;border-radius:50%;font-weight:900;font-size:18px}
+.pre .sub{font-family:"KaiTi",serif;font-size:20px;margin-bottom:10px}
+.pre h3{margin:14px 0 6px;font-size:16px}
+.pgoals{display:flex;gap:16px;justify-content:center;background:linear-gradient(160deg,#6a4ac0,#3a2a8a);border-radius:20px;padding:12px;color:#fff}
+.pm{margin:8px 0 0;font-size:18px}.pm b{font-size:24px}
+.boosts{display:flex;gap:10px;justify-content:center}
+.boost{position:relative;border:3px solid transparent;width:96px;height:86px;border-radius:20px;background:#efe6ff;color:#5a3aa8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.boost span{font-size:28px;line-height:1}.boost em{font-style:normal;font-size:12px;font-weight:800}
+.boost b{position:absolute;top:-8px;right:-8px;min-width:24px;height:24px;border-radius:12px;background:#ff4a6a;color:#fff;font-size:13px;line-height:24px}
+.boost.on{border-color:#ff8ad8;background:#fff0fa;box-shadow:0 0 0 4px rgba(255,138,216,.35)}.boost.on::after{content:'✔';position:absolute;left:6px;top:4px;color:#e04aa8;font-weight:900}
+.boost.empty{filter:grayscale(1);opacity:.5}.boost.empty b{background:#888}
 .btn{border:none;border-radius:999px;padding:12px 26px;font-weight:900;font-size:20px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;margin:6px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
 .btn.ghost{background:#efe6ff;color:#5a3aa8}
 .bigstars{font-size:60px;color:#ffc83a;letter-spacing:6px}
@@ -70,6 +124,7 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
   .movesBox b{font-size:32px}.magic p{display:none}.bottle{width:30px;height:44px}
   .lg,.gch{width:40px;height:40px;font-size:21px;border-radius:12px}.gch small,.lg small{font-size:10px}.gico{font-size:28px;line-height:40px}.goal b{font-size:18px}
   .scorebar{margin-top:14px}.scoreNum{font-size:16px}.wd{font-size:15px;padding:2px 8px}
+  .tool{width:48px;height:50px;border-radius:14px}.tool span{font-size:22px}.tool em{font-size:10px}
 }
 /* 竖着的小屏幕：卡片排成一行，棋盘在中间 */
 @media (max-width:900px) and (max-aspect-ratio:1/1){
@@ -82,12 +137,17 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
   .legend{grid-template-columns:repeat(6,auto);justify-content:center}.words{margin-top:2px}
   .lg,.gch{width:42px;height:42px;font-size:22px;border-radius:12px}.gch small,.lg small{font-size:10px}.gico{font-size:30px;line-height:42px}
   .scorebar{margin-top:16px}
+  .side:last-child .card:last-child{flex:none}.card h3 small{display:none}
+  .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+  .tools{flex-direction:column;gap:10px}.tool{width:46px;height:40px;border-radius:12px}.tool span{font-size:20px}.tool em{display:none}
 }
+@media (max-width:520px){.top h1:not(#lvName){display:none}.top{gap:8px}.mitems{display:none}.maptop h1{font-size:16px}.boost{width:82px}.mnode{width:58px;height:58px}.mnode.cur{width:70px;height:70px}}
 </style>
 </head>
 <body>
 <div class="top">
   <button class="home" onclick="location.href='index.html#yuwen'">🏠 返回</button>
+  <button class="home" id="gameMap">🗺️ 地图</button>
   <h1>🍬 溜溜消消乐</h1><h1 id="lvName" style="opacity:.85;font-size:16px"></h1>
 </div>
 <div class="wrap">
@@ -97,18 +157,25 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
     <div class="card"><h3>分数</h3><div class="scorebar"><i id="scoreBar"></i><span class="st" id="st1">⭐</span><span class="st" id="st2">⭐</span><span class="st" id="st3">⭐</span></div><div class="scoreNum" id="score">0</div></div>
     <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p>魔法瓶<br>攒满后，把能组成词语的两个字换到一起！</p></div>
   </div>
-  <div class="boardWrap" id="boardWrap"><canvas id="board"></canvas></div>
+  <div class="boardWrap" id="boardWrap"><div class="toolTip" id="toolTip" hidden></div><canvas id="board"></canvas></div>
   <div class="side">
     <div class="card"><h3>这一课的字（点一点听读音）</h3><div class="legend" id="legend"></div></div>
+    <div class="card"><h3>道具<small>（不算步数）</small></h3><div class="tools" id="tools"></div></div>
   </div>
 </div>
-<div class="overlay" id="startLayer"><div class="panel"><h2>🍬 溜溜消消乐</h2><div class="ltabs" id="lessonTabs"></div>
-  <div class="lvs" id="lvList"></div>
-  <p>交换两个方块，三个一样的连成一排就消掉！<br>连 4 个出 🚀 火箭，L 形出 💣 炸弹，连 5 个出 🌈 彩虹球，2×2 出 🐟 小鱼。</p>
-  <button class="btn ghost" id="helloBtn">🔊 听怎么玩</button></div></div>
+<div class="map" id="mapLayer">
+  <div class="maptop"><button class="home" onclick="location.href='index.html#yuwen'">🏠 返回</button><h1>🍬 溜溜消消乐</h1>
+    <span class="pill" id="mapStars">⭐ 0</span><div class="mitems" id="mapItems"></div><button class="home" id="helloBtn">🔊 怎么玩</button></div>
+  <div class="mapScroll" id="mapScroll"><div class="mapInner" id="mapInner"></div></div>
+</div>
+<div class="overlay" id="preLayer" hidden><div class="panel pre"><button class="x" id="preX">✕</button><h2 id="preTitle"></h2><div class="sub" id="preSub"></div>
+  <div class="pgoals" id="preGoals"></div><p class="pm">步数 <b id="preMoves"></b></p>
+  <h3>开局道具（点一下带上）</h3><div class="boosts" id="preBoosts"></div>
+  <button class="btn" id="preGo" style="margin-top:16px">开始 ▶</button>
+  <p style="font-size:13px;opacity:.75;margin:8px 0 0">连 4 个出 🚀 火箭，L 形出 💣 炸弹，连 5 个出 🌈 彩虹球，2×2 出 🐟 小鱼</p></div></div>
 <div class="overlay" id="moreLayer" hidden><div class="panel"><h2>步数用完啦</h2><p style="font-size:20px">没关系，送你 5 步！</p><button class="btn" id="moreBtn">+5 步，继续 ▶</button></div></div>
-<div class="overlay" id="winLayer" hidden><div class="panel"><h2>🎉 过关啦！</h2><div class="bigstars" id="winStars"></div><p style="font-size:22px">分数 <b id="winScore"></b></p>
-  <button class="btn" id="winNext">下一关 ▶</button> <button class="btn ghost" id="winAgain">再玩一次</button> <button class="btn ghost" id="winMenu">选关</button></div></div>
+<div class="overlay" id="winLayer" hidden><div class="panel"><h2>🎉 过关啦！</h2><div class="bigstars" id="winStars"></div><p style="font-size:22px;margin:4px 0">分数 <b id="winScore"></b></p><p id="winGift"></p>
+  <button class="btn" id="winNext">下一关 ▶</button> <button class="btn ghost" id="winAgain">再玩一次</button> <button class="btn ghost" id="winMenu">🗺️ 地图</button></div></div>
 <script type="module" src="js/match.js"></script>
 </body>
 </html>

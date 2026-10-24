@@ -96,3 +96,50 @@ button{font:inherit;cursor:pointer}
 .bigstars{font-size:56px;color:#f5b301;letter-spacing:4px}
 .btn{border:none;border-radius:999px;padding:12px 24px;font-weight:900;font-size:20px;background:var(--green);color:#fff;margin:6px}
 .btn.ghost{background:#e3f2e8;color:var(--green)}
+
+/* 第二单元：加减法 */
+.atitle.sub{font-size:24px}
+.merge{display:flex;gap:70px;justify-content:center;align-items:center;transition:gap .6s;margin:auto 0}
+.merge.joined{gap:0;outline:5px solid #ffc83a;border-radius:26px;background:#fffaf0}
+.grp{position:relative;display:flex;flex-wrap:wrap;gap:6px;max-width:300px;justify-content:center;font-size:52px;border:4px dashed #b8dcc6;border-radius:24px;padding:12px 16px;transition:border-color .6s}
+.merge.joined .grp{border-color:transparent}
+.grp span{position:relative;cursor:pointer}
+.gnum{position:absolute;left:-14px;top:-18px;background:#ffc83a;color:#3a2a10;border-radius:50%;width:40px;height:40px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:default}
+.grp .counted{filter:saturate(.6)}
+.eqbig{display:flex;gap:10px;align-items:flex-start;font-size:56px;font-weight:900;justify-content:center}
+.eqbig .tok{display:flex;flex-direction:column;align-items:center;min-width:44px}
+.eqbig .tok b{line-height:1.1}
+.eqbig .tok small{font-size:16px;color:var(--muted);font-weight:800;min-height:20px}
+.calcbox{margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:24px}
+.calcbox .eqbig{font-size:80px}
+.eqpic{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;max-width:620px}
+.eqpic.big{font-size:48px}
+.eqpic .gap{width:26px}
+.pdot{width:40px;height:40px;border-radius:50%;background:#e04848;display:inline-block;position:relative}
+.pdot.b{background:#2f9fef}
+.pdot.x{background:#e04848;opacity:.35}
+.pdot.x::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#333;font-weight:900;font-size:30px}
+.pobj.gone,.scene .gone{opacity:.25;position:relative;transform:scale(.85)}
+.pobj.gone::after,.scene .gone::after{content:'✕';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#d02020;font-size:.9em;font-weight:900}
+.prow .pair{background:#e4f8ec;border-radius:12px}
+.prow .extra{background:#fff3c8;border-radius:12px;outline:3px dashed #ffc83a;animation:pop .5s}
+.eqlist{display:flex;flex-direction:column;gap:6px}
+.eqlist .eqbig{font-size:40px}
+.eqlist .eqbig.focus{background:#fff8e0;border-radius:14px;padding:0 12px}
+.scene{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:54px;min-height:80px;max-width:640px}
+.scene .new{animation:pop .5s}
+.steptip{display:flex;align-items:center;gap:14px;font-size:22px;font-weight:900;color:var(--green)}
+.steptip .eqbig{font-size:40px;color:var(--ink)}
+.ttable{display:flex;flex-direction:column;gap:5px;align-items:flex-start;max-width:100%}
+.tcell b.q{color:#fff;background:#ff9a3a;border-radius:6px;padding:0 5px}
+.trow{display:flex;gap:5px}
+.tcell{border:2px solid #d8eadf;background:#fbfffc;border-radius:10px;font-size:clamp(11px,2.3vw,19px);font-weight:800;padding:5px 0;width:clamp(30px,9vw,82px);white-space:nowrap;color:var(--ink)}
+.tcell b{color:var(--green)}
+.tcell.focus{border-color:#ffc83a;background:#fff3c8;transform:scale(1.12)}
+.tcell.filled b{color:#d0402a}
+.tcell.hit{border-color:#2fbf71;background:#2fbf71;color:#fff}.tcell.hit b{color:#fff}
+.likepic{font-size:120px;line-height:1.1;margin:auto 0}.likepic b{color:#d0402a}
+.choices.digits{gap:8px}.choices.digits .cbtn{min-width:62px;width:62px;height:74px;font-size:36px;padding:0}
+.cbtn.out{opacity:.3}
+.symq.expr{font-size:80px;letter-spacing:4px}.symq b{color:#2fbf71}
+@media (max-width:560px){.top{gap:8px}.top h1{font-size:16px}#stPage{display:none}.act{padding:14px 10px}.ttable,.trow{gap:3px}.tcell{width:10.4vw;font-size:10px;letter-spacing:-.4px;padding:4px 0}.tcell b.q{padding:0 2px}.merge{gap:30px}.grp{font-size:38px}.eqbig{font-size:44px}.scene{font-size:40px}.likepic{font-size:90px}.symq.expr{font-size:52px}}

@@ -3,7 +3,10 @@
 // 特殊块：连 4 火箭、L / T 形炸弹、连 5 彩虹球、2×2 方块小鱼（游过去吃掉一格），特殊块互换有组合大招。
 // 障碍：糖霜（一到三层）、木箱、锁链、会蔓延的巧克力；玩法：收集字、运送小鸡；棋盘可以有空洞，方块会斜着滑下去补位。
 // 魔法瓶攒满后，把能组成课本词语的两个字换到一起，放"组词魔法"：这两个字全部消掉，读出词语。三个字以上的词连成一排有惊喜。
+// 道具：锤子、交换、打乱（玩的时候用，不算步数）；开局道具：彩虹球、火箭和炸弹、多 3 步。过关送道具。
+// 选关是正版那样的路线地图：一条弯弯的路从下往上走，每一课一段风景，溜溜站在现在这一关上。
 import * as store from './store.js';
+import { charSVG } from './art.js';
 
 const $ = (id) => document.getElementById(id);
 const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
@@ -17,7 +20,19 @@ const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 let data, lesson, lvIdx = 0, L, N = 8, M = 8, use = [], words = [];
 let tiles = [], hole = [], ice = [], crate = [], lock = [], mud = [];
 let moves = 0, score = 0, combo = 0, busy = false, done = false, goals = [], magic = 0, magicMax = 30, mudHit = false, mudIdle = 0;
-let save = { levels: {} };
+let save = { levels: {}, items: {} };
+let tool = null, toolSel = null;   // 正在用的道具（锤子 / 交换），交换时先点的那一块
+const ITEMS = {
+  hammer: { ic: '🔨', nm: '锤子', tip: '点一个方块，用锤子砸掉它', v: 'x_hammer' },
+  swap: { ic: '🔄', nm: '交换', tip: '点两个挨着的方块，直接换位置', v: 'x_swap' },
+  shuffle: { ic: '🔀', nm: '打乱' },
+  rainbow: { ic: '🌈', nm: '彩虹球' },
+  rb: { ic: '🚀💣', nm: '火箭和炸弹' },
+  plus3: { ic: '<i class="p3">+3</i>', nm: '多 3 步' },
+};
+const TOOLS = ['hammer', 'swap', 'shuffle'], BOOSTS = ['rainbow', 'rb', 'plus3'];
+const GIFTS = ['hammer', 'hammer', 'swap', 'shuffle', 'rainbow', 'rb', 'plus3'];   // 过关奖励从这里抽，锤子多一点
+const FIRST_ITEMS = { hammer: 3, swap: 2, shuffle: 2, rainbow: 1, rb: 1, plus3: 1 };   // 第一次玩先送一些，让她认识道具
 const COLORS = ['#ff5a6a', '#ffa63a', '#ffd23a', '#4cc96a', '#4a9aff', '#b56aff'];
 const SHAPES = ['circle', 'square', 'hex', 'diamond', 'oct', 'drop'];
 const CH = (k) => lesson.chars[use[k]];   // 第 k 种方块是哪个字 [字, 拼音]
@@ -161,7 +176,7 @@ const chicksOnBoard = () => tiles.flat().filter((t) => t && t.k === CHICK).lengt
 function randKind() { return rint(0, use.length - 1); }
 
 /* ================= 关卡 ================= */
-async function startLevel(li, i) {
+async function startLevel(li, i, boosts = []) {
   lesson = data.lessons[li]; lvIdx = i; L = lesson.levels[i]; N = L.board.length; M = L.board[0].length;
   use = L.use || [...Array(L.kinds).keys()];
   const has = (w) => [...w].every((ch) => use.some((u) => lesson.chars[u][0] === ch));
@@ -179,26 +194,46 @@ async function startLevel(li, i) {
     else { let k; do { k = randKind(); } while ((c >= 2 && tiles[r][c - 1]?.k === k && tiles[r][c - 2]?.k === k) || (r >= 2 && tiles[r - 1][c]?.k === k && tiles[r - 2][c]?.k === k)); t = newTile(k, r, c); }
     t.y = r - N - 1 - Math.random() * 2; tiles[r][c] = t;
   }
-  moves = L.moves; score = 0; combo = 0; done = false; magic = 0; mudIdle = 0; parts = []; fx = []; texts = []; dying = [];
+  moves = L.moves; score = 0; combo = 0; done = false; magic = 0; mudIdle = 0; parts = []; fx = []; texts = []; dying = []; tool = null; toolSel = null;
   goals = L.goals.map((g) => ({ ...g, left: { collect: g.n, word: g.n, drop: g.n, ice: countIce(), crate: countOf(crate), lock: countOf(lock), mud: countOf(mud) }[g.type] }));
   $('lvName').textContent = `第 ${lesson.id} 课 ${lesson.title} · 第 ${i + 1} 关`;
   $('magic').style.display = words.some((w) => w.length === 2) ? '' : 'none';   // 这一关没有两个字的词就不要魔法瓶
-  renderGoals(); renderHud(); renderLegend();
+  renderGoals(); renderHud(); renderLegend(); renderTools();
   layout();   // 左右的卡片填好了再算棋盘多大
-  busy = true; await waitSettle(); busy = false;
+  busy = true; await waitSettle();
+  if (boosts.length) await applyBoosts(boosts);
+  busy = false;
   if (!hasMove()) await shuffle();
   idleT = performance.now();
+}
+// 开局道具：方块落好以后，随机几块变成特殊块
+async function applyBoosts(bs) {
+  const free = () => tiles.flat().filter((t) => t && t.k >= 0 && !t.sp && !lock[t.r][t.c]);
+  const put = (sp) => { const t = pick(free()); if (!t) return; t.sp = sp; t.s = 1.8; tween(t, { s: 1 }, 400); fx.push({ type: 'ring', x: cx(t.c), y: cy(t.r), R: CS * 1.4, t0: performance.now() }); burstStars(cx(t.c), cy(t.r)); };
+  texts.push({ txt: '开局道具！', x: W / 2, y: H * 0.4, t0: performance.now(), col: '#ffe14a', big: 1.4 });
+  for (const b of bs) {
+    if (b === 'plus3') { moves += 3; renderHud(); texts.push({ txt: '+3 步', x: W / 2, y: H * 0.55, t0: performance.now(), col: '#7dff9a', big: 1.2 }); }
+    else if (b === 'rainbow') put('rainbow');
+    else if (b === 'rb') { put(pick(['rowRocket', 'colRocket'])); put('bomb'); }
+    sfx.special(); await sleep(400);
+  }
+  await waitSettle();
 }
 const countIce = () => ice.flat().reduce((a, b) => a + b, 0);
 const countOf = (layer) => layer.flat().filter((v) => v > 0).length;
 
 /* ---------- 界面：目标、步数、分数、魔法瓶、这一课的字 ---------- */
 const GOAL_ICON = { ice: ['🧊', '糖霜'], crate: ['📦', '木箱'], word: ['✨', '组词魔法'], lock: ['⛓️', '锁链'], mud: ['🍫', '巧克力'], drop: ['🐣', '送小鸡'] };
+const useOf = (lv) => lv.use || [...Array(lv.kinds).keys()];
+// 目标的小图标：收集的字用它方块的颜色
+function goalIcon(ls, u, g) {
+  if (g.type !== 'collect') return [`<span class="gico">${GOAL_ICON[g.type][0]}</span>`, GOAL_ICON[g.type][1]];
+  const k = u.findIndex((x) => ls.chars[x][0] === g.ch);
+  return [`<span class="gch" style="background:${COLORS[k]}"><small>${ls.chars[u[k]][1]}</small>${g.ch}</span>`, ''];
+}
 function renderGoals() {
   $('goals').innerHTML = goals.map((g, i) => {
-    let icon, label = '';
-    if (g.type === 'collect') { const k = use.findIndex((u) => lesson.chars[u][0] === g.ch); icon = `<span class="gch" style="background:${COLORS[k]}"><small>${CH(k)[1]}</small>${g.ch}</span>`; }
-    else { icon = `<span class="gico">${GOAL_ICON[g.type][0]}</span>`; label = GOAL_ICON[g.type][1]; }
+    const [icon, label] = goalIcon(lesson, use, g);
     return `<div class="goal${g.left <= 0 ? ' ok' : ''}" id="goal${i}">${icon}<b>${g.left <= 0 ? '✔' : g.left}</b><em>${label}</em></div>`;
   }).join('');
 }
@@ -293,7 +328,8 @@ async function shuffle() {
 }
 
 /* ---------- 交换 ---------- */
-async function trySwap(r1, c1, r2, c2) {
+// free：用"交换"道具换的，不算步数，换了消不掉也不换回来
+async function trySwap(r1, c1, r2, c2, free = false) {
   if (busy || done || !inside(r2, c2) || !movable(r1, c1) || !movable(r2, c2)) {
     if (!busy && inside(r1, c1) && lock[r1][c1]) { sfx.chain(); texts.push({ txt: '锁住了', x: cx(c1), y: cy(r1), t0: performance.now(), col: '#ddd', big: .6 }); }
     return;
@@ -304,12 +340,14 @@ async function trySwap(r1, c1, r2, c2) {
   const doSwap = () => { tiles[r1][c1] = b; tiles[r2][c2] = a; a.r = r2; a.c = c2; b.r = r1; b.c = c1; return Promise.all([tween(a, { x: c2, y: r2 }, 160), tween(b, { x: c1, y: r1 }, 160)]); };
   await doSwap();
   combo = 0;
+  const pay = () => { if (free) useItem('swap'); else moves--; renderHud(); };
   const w = !a.sp && !b.sp && magic >= magicMax ? wordOf(a, b) : null;
-  if (w) { moves--; renderHud(); await wordMagic(w, a, b); }
-  else if ((a.sp && b.sp) || (a.sp === 'rainbow' && b.k >= 0) || (b.sp === 'rainbow' && a.k >= 0)) { moves--; renderHud(); await specialSwap(a, b); }
-  else if (findRuns().length || findSquares(new Set()).length) { moves--; renderHud(); await resolve([[r2, c2], [r1, c1]]); }
+  if (w) { pay(); await wordMagic(w, a, b); }
+  else if ((a.sp && b.sp) || (a.sp === 'rainbow' && b.k >= 0) || (b.sp === 'rainbow' && a.k >= 0)) { pay(); await specialSwap(a, b); }
+  else if (findRuns().length || findSquares(new Set()).length) { pay(); await resolve([[r2, c2], [r1, c1]]); }
+  else if (free) pay();
   else { sfx.bad(); await doSwap(); busy = false; idleT = performance.now(); return; }
-  await afterMove();
+  await (free ? afterTool() : afterMove());
 }
 async function afterMove() {
   await waitSettle();
@@ -320,6 +358,52 @@ async function afterMove() {
   renderGoals(); renderHud();
   if (goals.every((g) => g.left <= 0)) return win();
   if (moves <= 0) { busy = true; await outOfMoves(); }
+  busy = false; idleT = performance.now();
+}
+
+/* ---------- 道具：锤子、交换、打乱（不算步数） ---------- */
+const itemCount = (k) => save.items[k] || 0;
+function useItem(k) { save.items[k] = Math.max(0, itemCount(k) - 1); store.set('xiaoxiao', save); renderTools(); }
+function renderTools() {
+  $('tools').innerHTML = TOOLS.map((k) => `<button class="tool${tool === k ? ' on' : ''}${itemCount(k) ? '' : ' empty'}" data-k="${k}"><span>${ITEMS[k].ic}</span><b>${itemCount(k)}</b><em>${ITEMS[k].nm}</em></button>`).join('');
+  $('tools').querySelectorAll('.tool').forEach((b) => (b.onclick = () => pickTool(b.dataset.k)));
+  $('toolTip').hidden = !tool; $('toolTip').textContent = tool ? `${ITEMS[tool].ic} ${ITEMS[tool].tip}（再点一下道具就不用了）` : '';
+}
+function pickTool(k) {
+  audio();
+  if (busy || done) return;
+  if (tool === k) { tool = null; toolSel = null; renderTools(); return; }
+  if (!itemCount(k)) { sfx.bad(); texts.push({ txt: '过关能得到道具哦', x: W / 2, y: H / 2, t0: performance.now(), col: '#fff', big: .9 }); return; }
+  toolSel = null; sel = null;
+  if (k === 'shuffle') { tool = null; useShuffle(); return; }
+  tool = k; sayUi(ITEMS[k].v); renderTools();
+}
+function onToolCell(r, c) {
+  if (busy || done || !inside(r, c) || hole[r][c]) return;
+  if (tool === 'hammer') { useHammer(r, c); return; }
+  if (!movable(r, c)) { if (lock[r][c]) { sfx.chain(); texts.push({ txt: '锁住了', x: cx(c), y: cy(r), t0: performance.now(), col: '#ddd', big: .6 }); } return; }
+  if (toolSel && Math.abs(toolSel.r - r) + Math.abs(toolSel.c - c) === 1) { const s = toolSel; toolSel = null; tool = null; renderTools(); trySwap(s.r, s.c, r, c, true); return; }
+  toolSel = { r, c }; const t = tiles[r][c]; t.s = 1.2; tween(t, { s: 1 }, 250); sfx.swap();
+}
+async function useHammer(r, c) {
+  const t = tiles[r][c];
+  if (!t && !crate[r][c] && !mud[r][c]) return;
+  if (t && t.k === CHICK && !lock[r][c]) { sfx.bad(); texts.push({ txt: '小鸡砸不掉哦', x: cx(c), y: cy(r), t0: performance.now(), col: '#fff', big: .7 }); return; }
+  busy = true; idleT = Infinity; hintMove = null; tool = null; useItem('hammer');
+  fx.push({ type: 'hammer', x: cx(c), y: cy(r), t0: performance.now(), dur: 420 });
+  await sleep(280); sfx.boom(); shake = 9; burstStars(cx(c), cy(r));
+  combo = 1; await blast(new Map([[key(r, c), [r, c]]])); await gravity(); await resolve();
+  await afterTool();
+}
+async function useShuffle() {
+  busy = true; idleT = Infinity; hintMove = null; useItem('shuffle'); sfx.rainbow();
+  await shuffle(); await afterTool();
+}
+async function afterTool() {
+  await waitSettle();
+  if (!hasMove()) await shuffle();
+  renderGoals(); renderHud(); renderTools();
+  if (goals.every((g) => g.left <= 0)) return win();
   busy = false; idleT = performance.now();
 }
 async function growMud() {
@@ -554,9 +638,13 @@ async function win() {
   await waitSettle();
   renderHud();
   const st = score >= L.stars[2] ? 3 : score >= L.stars[1] ? 2 : 1;
-  const id = `${lesson.id}-${lvIdx + 1}`; if ((save.levels[id] || 0) < st) save.levels[id] = st; await store.set('xiaoxiao', save);
+  const id = `${lesson.id}-${lvIdx + 1}`, first = !save.levels[id];
+  if ((save.levels[id] || 0) < st) save.levels[id] = st;
+  const gifts = Array.from({ length: first ? 2 : 1 }, () => pick(GIFTS)); gifts.forEach((k) => (save.items[k] = itemCount(k) + 1));   // 第一次过关送 2 个道具，再玩送 1 个
+  await store.set('xiaoxiao', save);
   fireworks();
   $('winStars').textContent = '★'.repeat(st) + '☆'.repeat(3 - st); $('winScore').textContent = score;
+  $('winGift').innerHTML = '🎁 得到道具：' + gifts.map((k) => `<span class="gift">${ITEMS[k].ic} ${ITEMS[k].nm}</span>`).join('');
   $('winNext').hidden = !nextLevel();
   $('winLayer').hidden = false;
 }
@@ -624,6 +712,7 @@ function draw(now) {
   for (const row of tiles) for (const t of row) if (t && t.y > -1.2) drawTile(t);
   for (const t of dying) drawTile(t);
   ctx.restore();
+  if (toolSel) { ctx.save(); ctx.strokeStyle = '#fff6a0'; ctx.lineWidth = 4; ctx.shadowColor = '#fff6a0'; ctx.shadowBlur = 14 + Math.sin(now / 120) * 6; cellPath(toolSel.r, toolSel.c, 1); ctx.stroke(); ctx.restore(); }
   // 锁链、木箱、巧克力
   for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) {
     const x = c * CS, y = r * CS;
@@ -665,6 +754,9 @@ function draw(now) {
       const R = Math.max(W, H) * 1.2 * k;
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = `hsla(${(i * 120 + now / 4) % 360},100%,75%,${1 - k})`; ctx.lineWidth = CS * 0.3; ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(1, R - i * CS * .6), 0, Math.PI * 2); ctx.stroke(); }
       ctx.fillStyle = `rgba(255,250,220,${0.25 * (1 - k)})`; ctx.fillRect(0, 0, W, H);
+    } else if (f.type === 'hammer') {   // 锤子从右上抡下来砸一下
+      const a = -1.3 + Math.min(1, k / .65) * 1.6; ctx.globalAlpha = k > .8 ? (1 - k) / .2 : 1;
+      ctx.translate(f.x + CS * .55, f.y + CS * .1); ctx.rotate(a); ctx.font = `${CS * 1.2}px "Segoe UI Emoji","Apple Color Emoji",system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🔨', -CS * .5, -CS * .35);
     } else if (f.type === 'fish') {   // 小鱼划一道弧线游过去，身后一串泡泡
       const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, x = f.x0 + (f.x1 - f.x0) * e, y = f.y0 + (f.y1 - f.y0) * e - Math.sin(k * Math.PI) * CS * 1.5;
       if (Math.random() < .5) parts.push({ x, y, vx: (Math.random() - .5), vy: -1, g: -0.02, life: .7, fade: .03, col: 'rgba(200,240,255,.9)', size: CS * .06, rot: 0, vr: 0, shape: 'sq' });
@@ -696,39 +788,132 @@ function draw(now) {
 let downCell = null, sel = null;
 const cellAt = (e) => { const r = cv.getBoundingClientRect(); return [Math.floor((e.clientY - r.top) / CS), Math.floor((e.clientX - r.left) / CS)]; };
 cv.addEventListener('pointerdown', (e) => {
-  audio(); startMusic(); const [r, c] = cellAt(e); if (!inside(r, c) || !tiles[r][c]) return;
+  audio(); startMusic(); const [r, c] = cellAt(e); if (!inside(r, c) || (!tiles[r][c] && !tool)) return;
   downCell = { r, c, x: e.clientX, y: e.clientY };
 });
 cv.addEventListener('pointermove', (e) => {
-  if (!downCell) return; const dx = e.clientX - downCell.x, dy = e.clientY - downCell.y;
+  if (!downCell || tool) return; const dx = e.clientX - downCell.x, dy = e.clientY - downCell.y;
   if (Math.max(Math.abs(dx), Math.abs(dy)) < CS * 0.35) return;
   const [dr, dc] = Math.abs(dx) > Math.abs(dy) ? [0, Math.sign(dx)] : [Math.sign(dy), 0];
   const d = downCell; downCell = null; sel = null; trySwap(d.r, d.c, d.r + dr, d.c + dc);
 });
 cv.addEventListener('pointerup', () => {
   if (!downCell) return; const d = downCell; downCell = null;
+  if (tool) { onToolCell(d.r, d.c); return; }
   if (sel && Math.abs(sel.r - d.r) + Math.abs(sel.c - d.c) === 1) { const s = sel; sel = null; trySwap(s.r, s.c, d.r, d.c); return; }
   sel = { r: d.r, c: d.c }; const t = tiles[d.r][d.c]; if (t) { t.s = 1.15; tween(t, { s: 1 }, 250); sayChar(t.k, true); }
 });
 
-/* ================= 开始：选课、选关 ================= */
-let curLesson = 0;
+/* ================= 路线地图：一条弯弯的路从下往上，每一课一段风景 ================= */
+let ALL = [];   // 全书的关按顺序排好：{ li, i, ls, lv }
 const unlocked = (li, i) => (li === 0 && i === 0) || (i > 0 ? save.levels[`${data.lessons[li].id}-${i}`] : save.levels[`${data.lessons[li - 1].id}-${data.lessons[li - 1].levels.length}`]) || save.all;
-function renderLevels() {
-  $('lessonTabs').innerHTML = data.lessons.map((ls, li) => `<button class="ltab${li === curLesson ? ' on' : ''}" data-li="${li}">第 ${ls.id} 课<br><b>${ls.title}</b></button>`).join('');
-  $('lessonTabs').querySelectorAll('.ltab').forEach((b) => (b.onclick = () => { curLesson = +b.dataset.li; renderLevels(); }));
-  const ls = data.lessons[curLesson];
-  $('lvList').innerHTML = ls.levels.map((l, i) => { const st = save.levels[`${ls.id}-${i + 1}`] || 0, open = unlocked(curLesson, i); return `<button class="lvb" data-i="${i}" ${open ? '' : 'disabled'}><b>${i + 1}</b><span>${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span>${open ? '' : '🔒'}</button>`; }).join('');
-  $('lvList').querySelectorAll('.lvb:not([disabled])').forEach((b) => (b.onclick = () => { audio(); startMusic(); $('startLayer').hidden = true; startLevel(curLesson, +b.dataset.i); }));
+const passed = (o) => !!save.levels[`${o.ls.id}-${o.i + 1}`];
+const curIndex = () => { const j = ALL.findIndex((o) => unlocked(o.li, o.i) && !passed(o)); return j < 0 ? ALL.length - 1 : j; };
+// 每一课一种风景，按顺序轮着用
+const WORLDS = [
+  { bg: ['#9be7a8', '#5cc97a'], deco: ['🌳', '🌷', '🍄', '🌼', '🐞', '🌲'] },
+  { bg: ['#ffd88a', '#ffb05a'], deco: ['🔥', '🪵', '💧', '⛰️', '🌻', '🍂'] },
+  { bg: ['#ffc2e6', '#ff8ad0'], deco: ['🍭', '🍬', '🧁', '🍩', '🍓', '🎀'] },
+  { bg: ['#a8e6ff', '#5ab8f0'], deco: ['🐟', '🐚', '🌊', '🐳', '⛵', '🦀'] },
+  { bg: ['#e6f4ff', '#b8d8f8'], deco: ['⛄', '❄️', '🌲', '🐧', '🧣', '⛸️'] },
+  { bg: ['#c8b0ff', '#8a6ae0'], deco: ['⭐', '🌙', '🪐', '✨', '🚀', '☁️'] },
+];
+const rnd = (j) => { const x = Math.sin(j * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };   // 固定的随机数，每次画出来一样
+const GAP = 130, TOP = 230, BOT = 150;
+let mapPos = [];
+function renderMap() {
+  const box = $('mapInner'), w = $('mapScroll').clientWidth, n = ALL.length, Hh = TOP + (n - 1) * GAP + BOT, amp = Math.min(w * 0.27, 230);
+  mapPos = ALL.map((_, j) => ({ x: w / 2 + Math.sin(j * 1.1) * amp, y: Hh - BOT - j * GAP }));
+  const cur = curIndex();
+  let html = '';
+  // 背景：每一课一段颜色，最上面一课一直铺到顶；路两边摆小装饰
+  data.lessons.forEach((ls, li) => {
+    const js = ALL.map((o, j) => (o.li === li ? j : -1)).filter((j) => j >= 0), wd = WORLDS[li % WORLDS.length];
+    const y1 = li === 0 ? Hh : mapPos[js[0]].y + GAP / 2, y0 = li === data.lessons.length - 1 ? 0 : mapPos[js[js.length - 1]].y - GAP / 2;
+    html += `<div class="mband" style="top:${y0}px;height:${y1 - y0}px;background:linear-gradient(0deg,${wd.bg[0]},${wd.bg[1]})"></div>`;
+    for (let q = 0; q < Math.round((y1 - y0) / 70); q++) {
+      const seed = li * 50 + q, side = rnd(seed) < 0.5, x = side ? 4 + rnd(seed + 1) * 16 : 80 + rnd(seed + 1) * 16, y = y0 + 20 + rnd(seed + 2) * (y1 - y0 - 40);
+      html += `<span class="mdeco" style="left:${x}%;top:${y}px;font-size:${26 + rnd(seed + 3) * 22}px">${wd.deco[Math.floor(rnd(seed + 4) * wd.deco.length)]}</span>`;
+    }
+    const p = mapPos[js[0]], right = p.x < w / 2;
+    html += `<div class="msign" style="top:${p.y - 34}px;${right ? 'right' : 'left'}:12px"><small>第 ${ls.id} 课</small><b>${ls.title}</b><span>${ls.chars.slice(0, 5).map((c) => c[0]).join(' ')}</span></div>`;
+  });
+  // 路：先画一条宽的底，再画走过的那一段，中间一串白点
+  const pathD = (to) => mapPos.slice(0, to + 1).map((b, j) => { if (!j) return `M${b.x} ${Hh} L${b.x} ${b.y}`; const a = mapPos[j - 1], my = (a.y + b.y) / 2; return `C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`; }).join(' ');
+  const all = pathD(n - 1);
+  html += `<svg class="road" width="${w}" height="${Hh}"><path d="${all}" class="r0"/><path d="${all}" class="r1"/><path d="${pathD(cur)}" class="r3"/><path d="${all}" class="r2"/></svg>`;
+  // 关卡圆点：过了的显示星星，现在这一关发光，没开的上锁
+  ALL.forEach((o, j) => {
+    const st = save.levels[`${o.ls.id}-${o.i + 1}`] || 0, open = unlocked(o.li, o.i), p = mapPos[j];
+    html += `<button class="mnode${st ? ' done' : ''}${j === cur ? ' cur' : ''}${open ? '' : ' lock'}" data-j="${j}" style="left:${p.x}px;top:${p.y}px">
+      <b>${open ? j + 1 : '🔒'}</b>${st ? `<span class="mst">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span>` : ''}</button>`;
+  });
+  html += `<div class="msoon" style="top:${Math.max(20, mapPos[n - 1].y - 190)}px">☁️ 后面的课文正在做，敬请期待 🚧</div>`;
+  html += `<div class="mav" id="mav">${charSVG('sz', {})}</div>`;
+  box.style.height = Hh + 'px'; box.innerHTML = html;
+  placeAvatar(cur);
+  box.querySelectorAll('.mnode').forEach((b) => (b.onclick = () => {
+    audio(); const o = ALL[+b.dataset.j];
+    if (!unlocked(o.li, o.i)) { sfx.bad(); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; }
+    sfx.swap(); openPre(o.li, o.i);
+  }));
+  $('mapStars').textContent = `⭐ ${Object.values(save.levels).reduce((a, b) => a + b, 0)}`;
+  $('mapItems').innerHTML = [...TOOLS, ...BOOSTS].map((k) => `<span title="${ITEMS[k].nm}">${ITEMS[k].ic}<b>${itemCount(k)}</b></span>`).join('');
 }
+function placeAvatar(j) { const a = $('mav'), p = mapPos[j]; if (a && p) { a.style.left = p.x + 'px'; a.style.top = p.y + 'px'; } }
+// 打开地图；from 给了就让溜溜从那一关走到现在这一关，走完再 then()
+function openMap(from = -1, then = null) {
+  $('mapLayer').hidden = false; $('preLayer').hidden = true;
+  renderMap();
+  const cur = curIndex(), sc = $('mapScroll'), show = (j) => (sc.scrollTop = mapPos[j].y - sc.clientHeight * 0.55);
+  if (from >= 0 && from !== cur) {
+    placeAvatar(from); show(from);
+    setTimeout(() => { $('mav').classList.add('walk'); placeAvatar(cur); sc.scrollTo({ top: mapPos[cur].y - sc.clientHeight * 0.55, behavior: 'smooth' }); sfx.chick(); }, 400);
+    setTimeout(() => { $('mav').classList.remove('walk'); const nd = $('mapInner').querySelector('.mnode.cur'); if (nd) nd.classList.add('pop'); if (then) then(); }, 1500);
+  } else { show(cur); if (then) then(); }
+}
+window.addEventListener('resize', () => { if (!$('mapLayer').hidden) renderMap(); });
+
+/* ---------- 开始这一关之前：看看目标，挑开局道具 ---------- */
+let preSel = new Set();
+function openPre(li, i) {
+  const ls = data.lessons[li], lv = ls.levels[i], u = useOf(lv), j = ALL.findIndex((o) => o.li === li && o.i === i);
+  preSel = new Set();
+  $('preTitle').textContent = `第 ${j + 1} 关`;
+  $('preSub').textContent = `第 ${ls.id} 课《${ls.title}》`;
+  const cnt = (ch) => [...lv.board.join('')].reduce((a, x) => a + (ch === 'iIJ' ? 'iIJ'.indexOf(x) + 1 : ch.includes(x) ? 1 : 0), 0);   // 糖霜按层数算
+  $('preGoals').innerHTML = lv.goals.map((g) => { const [icon, label] = goalIcon(ls, u, g), n = g.n || cnt({ ice: 'iIJ', crate: 'c', lock: 'L', mud: 'm' }[g.type] || ''); return `<div class="goal">${icon}<b>${n}</b><em>${label}</em></div>`; }).join('');
+  $('preMoves').textContent = lv.moves;
+  const draw = () => {
+    $('preBoosts').innerHTML = BOOSTS.map((k) => `<button class="boost${preSel.has(k) ? ' on' : ''}${itemCount(k) ? '' : ' empty'}" data-k="${k}"><span>${ITEMS[k].ic}</span><em>${ITEMS[k].nm}</em><b>${itemCount(k)}</b></button>`).join('');
+    $('preBoosts').querySelectorAll('.boost').forEach((b) => (b.onclick = () => {
+      const k = b.dataset.k; audio();
+      if (!itemCount(k)) { sfx.bad(); return; }
+      preSel.has(k) ? preSel.delete(k) : preSel.add(k); sfx.special(); draw();
+    }));
+  };
+  draw();
+  $('preGo').onclick = () => {
+    audio(); startMusic();
+    const bs = [...preSel]; bs.forEach((k) => (save.items[k] = itemCount(k) - 1)); if (bs.length) store.set('xiaoxiao', save);
+    $('preLayer').hidden = true; $('mapLayer').hidden = true; $('winLayer').hidden = true;
+    startLevel(li, i, bs);
+  };
+  $('preLayer').hidden = false;
+}
+
 (async () => {
   data = await fetch('content/match_levels.json').then((r) => r.json());
+  ALL = data.lessons.flatMap((ls, li) => ls.levels.map((lv, i) => ({ li, i, ls, lv })));
   save = await store.get('xiaoxiao', { levels: {} }); save.levels = save.levels || {};
-  renderLevels();
-  $('winNext').onclick = () => { const n = nextLevel(); $('winLayer').hidden = true; if (n) { curLesson = n[0]; startLevel(n[0], n[1]); } };
-  $('winAgain').onclick = () => { $('winLayer').hidden = true; startLevel(data.lessons.indexOf(lesson), lvIdx); };
-  $('winMenu').onclick = () => { $('winLayer').hidden = true; renderLevels(); $('startLayer').hidden = false; };
+  if (!save.items) { save.items = { ...FIRST_ITEMS }; store.set('xiaoxiao', save); }
+  $('winNext').onclick = () => { const n = nextLevel(), from = ALL.findIndex((o) => o.ls === lesson && o.i === lvIdx); $('winLayer').hidden = true; if (n) openMap(from, () => openPre(n[0], n[1])); };
+  $('winAgain').onclick = () => { $('winLayer').hidden = true; openPre(data.lessons.indexOf(lesson), lvIdx); };
+  $('winMenu').onclick = () => { $('winLayer').hidden = true; openMap(); };
+  $('gameMap').onclick = () => { if (busy && !done) return; $('winLayer').hidden = true; openMap(); };
+  $('preX').onclick = () => { $('preLayer').hidden = true; };
   $('helloBtn').onclick = () => { audio(); sayUi('x_hello'); };
+  openMap();
   requestAnimationFrame(frame);
-  if (location.search.includes('test')) window.__xxl = { get tiles() { return tiles; }, trySwap, findMove: () => findMove(), get busy() { return busy; }, get goals() { return goals; }, get moves() { return moves; }, get score() { return score; }, setMagic: (v) => (magic = v), start: (li, i) => startLevel(li, i), get lock() { return lock; }, get mud() { return mud; }, allMoves: () => { const out = []; for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) if (inside(r + dr, c + dc) && wouldMatch(r, c, r + dr, c + dc)) out.push([[r, c], [r + dr, c + dc]]); return out; } };   // 测试用
+  if (location.search.includes('test')) window.__xxl = { get tiles() { return tiles; }, trySwap, findMove: () => findMove(), get busy() { return busy; }, get goals() { return goals; }, get moves() { return moves; }, get score() { return score; }, setMagic: (v) => (magic = v), start: (li, i, bs) => startLevel(li, i, bs), get lock() { return lock; }, get mud() { return mud; }, get items() { return save.items; }, pickTool, onToolCell, openMap, openPre, allMoves: () => { const out = []; for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) if (inside(r + dr, c + dc) && wouldMatch(r, c, r + dr, c + dc)) out.push([[r, c], [r + dr, c + dc]]); return out; } };   // 测试用
 })();

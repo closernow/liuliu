@@ -216,6 +216,14 @@ export async function eatZero(box, step) {
 export async function compareSym(box, step) {
   let wrong = 0;
   for (let r = 0; r < step.rounds; r++) {
+    if (step.mode === 'expr') {   // 算式和数比：7 ○ 2 + 7
+      const e = makeEq(pick(['a+b', 'a-b']), 9, true), o = Math.max(0, Math.min(9, e.res + (r === 1 ? 0 : pick([-2, -1, 1, 2])))), ex = `${e.nums[0]} ${e.ops[0]} ${e.nums[1]}`;
+      const [ls, rs, lv, rv] = rint(0, 1) ? [ex, o, e.res, o] : [o, ex, o, e.res], ans = lv === rv ? '=' : lv > rv ? '>' : '<';
+      clear(box); title(box, '先算一算，再选符号'); box.appendChild(h(`<div class="symq big expr">${ls} ○ ${rs}</div>`)); say('q_cmp');
+      wrong += await choose(box, ['>', '=', '<'], ans, { cls: 'sym' });
+      box.querySelector('.symq').innerHTML = `${ls} <b>${ans}</b> ${rs}`; await sleep(1200);
+      continue;
+    }
     let a = rint(step.mode === 'rows' ? 1 : 0, step.max), b = rint(step.mode === 'rows' ? 1 : 0, step.max);
     if (r === 1) b = a;   // 至少有一次一样多
     const ans = a === b ? '=' : a > b ? '>' : '<';
@@ -250,6 +258,227 @@ export async function ordinal(box, step) {
       title(box, q[0]); box.insertBefore(box.lastChild, row); say(q[1]);
       wrong += await choose(box, near(q[2], 0, step.n, 4), q[2], { label: (v) => (kind === 'rank' ? `第 ${v}` : String(v)) });
     }
+  }
+  return wrong;
+}
+
+/* ================= 第二单元：0~9 的加减法 ================= */
+const OPS = { '+': 'plus', '-': 'minus' };
+const eqCols = (toks, labs) => `<div class="eqbig">${toks.map((t, i) => `<div class="tok"><b>${t}</b>${labs ? `<small>${labs[i] || ''}</small>` : ''}</div>`).join('')}</div>`;
+// 出一道题。form：'a+b' 'a-b' 'a+b+c' 'a-b-c' 'a+b-c' 'a-b+c'；带 ? 的是填空：'a+?=s' '?+b=s' 'a-?=d' '?-b=d'。每一步的结果都在 0~max
+function makeEq(form, max, zero = false) {
+  const lo = zero ? 0 : 1, ops = [...form.split('=')[0]].filter((c) => c === '+' || c === '-');
+  for (let t = 0; t < 500; t++) {
+    const nums = [0, ...ops].map(() => rint(lo, max));
+    if (ops.length > 1 && nums.some((n) => n === 0)) continue;   // 连加连减不放 0
+    let acc = nums[0], ok = true, zero0 = false; ops.forEach((o, i) => { acc = o === '+' ? acc + nums[i + 1] : acc - nums[i + 1]; if (acc < 0 || acc > max) ok = false; if (!acc) zero0 = true; });
+    if (!ok || (ops.length > 1 && zero0 && Math.random() < 0.8)) continue;   // 连减算到 0 可以有，但少一点
+    const hide = form.includes('?') ? (form[0] === '?' ? 0 : 1) : -1;
+    return { nums, ops, res: acc, hide, ans: hide < 0 ? acc : nums[hide] };
+  }
+}
+// 算式拆成一格一格：3 + 2 = □
+const eqToks = (e, show = false) => [...e.nums.flatMap((n, i) => (i ? [e.ops[i - 1], i === e.hide && !show ? '□' : n] : [i === e.hide && !show ? '□' : n])), '=', e.hide < 0 && !show ? '□' : e.res];
+// 读题："三加二等于几？" "三加几等于七？"
+const eqSay = (e) => e.hide < 0 ? [...e.nums.flatMap((n, i) => (i ? [OPS[e.ops[i - 1]], num(n)] : [num(n)])), 'eq_q'] : [e.hide === 0 ? 'q_box' : num(e.nums[0]), OPS[e.ops[0]], e.hide === 1 ? 'q_box' : num(e.nums[1]), 'eq', num(e.res)];
+const eqRead = (e) => [...e.nums.flatMap((n, i) => (i ? [OPS[e.ops[i - 1]], num(n)] : [num(n)])), 'eq', num(e.res)];
+const dots = (n, cls = '') => Array.from({ length: n }, () => `<i class="pdot ${cls}"></i>`).join('');
+// 做一道算式题：显示算式，选答案，答对了把 □ 换成答案
+async function solve(box, e, pic = false) {
+  const wrap = h('<div class="calcbox"></div>'); box.appendChild(wrap);
+  if (pic && e.nums.length === 2 && e.hide < 0) wrap.appendChild(h(`<div class="eqpic">${e.ops[0] === '+' ? dots(e.nums[0]) + '<span class="gap"></span>' + dots(e.nums[1], 'b') : dots(e.nums[0] - e.nums[1]) + dots(e.nums[1], 'x')}</div>`));
+  const eq = h(eqCols(eqToks(e))); wrap.appendChild(eq); say(...eqSay(e));
+  const w = await choose(box, near(e.ans, 0, Math.max(9, e.ans + 1), 4), e.ans);
+  eq.replaceWith(h(eqCols(eqToks(e, true)))); box.querySelector('.choices').remove();
+  return w;
+}
+
+/* ---------- 认识加法：合起来，往后数 ---------- */
+export async function addTogether(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const s = rint(step.min || 3, step.max), a = rint(Math.ceil(s / 2), s - 1), b = s - a, em = pick(step.items);
+    clear(box); title(box, '合起来，一共有多少？'); say('q_add');
+    const row = h(`<div class="merge"><div class="grp ga">${Array(a).fill(`<span>${em}</span>`).join('')}</div><div class="grp gb">${Array(b).fill(`<span>${em}</span>`).join('')}</div></div>`);
+    box.appendChild(row);
+    const go = h('<button class="nextbtn">合起来 ▶</button>'); box.appendChild(go);
+    await new Promise((res) => (go.onclick = res)); go.remove(); sfx.ok(); row.classList.add('joined'); await sleep(700);
+    // 往后数：大的那一堆已经是 a，接着点后来的那几个
+    row.querySelector('.ga').appendChild(h(`<span class="gnum">${a}</span>`));
+    const tip = h(`<div class="splitread">从 <b>${a}</b> 往后数，点一点后面的</div>`); box.appendChild(tip); say('q_from', num(a), 'q_counton');
+    let k = a;
+    await new Promise((res) => row.querySelectorAll('.gb span').forEach((el) => (el.onclick = () => { if (el.dataset.c) return; el.dataset.c = 1; k++; el.classList.add('counted'); el.appendChild(h(`<span class="badge">${k}</span>`)); sfx.tap(); say(num(k)); if (k === s) setTimeout(res, 700); })));
+    tip.remove(); title(box, '一共有几个？').classList.add('sub');
+    wrong += await choose(box, near(s, 1, 10, 4), s);
+    box.querySelector('.choices').remove();
+    box.appendChild(h(eqCols([a, '+', b, '=', s], r === 0 ? ['加数', '加号', '加数', '', '和'] : null)));
+    await say(num(a), 'plus', num(b), 'eq', num(s)); await sleep(600);
+  }
+  return wrong;
+}
+
+/* ---------- 口算：一道一道算 ---------- */
+export async function calc(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const e = makeEq(step.forms[r % step.forms.length], step.max || 9, step.zero && r % 3 === 1);
+    clear(box); title(box, e.hide < 0 ? '算一算' : '□ 里填几？');
+    wrong += await solve(box, e, step.pic);
+    await sleep(600);
+  }
+  return wrong;
+}
+
+/* ---------- 加法表、减法表：先填空，再找规律 ---------- */
+export async function table(box, step) {
+  let wrong = 0;
+  const add = step.op === 'add', max = step.max || 9, rows = [];
+  if (add) for (let b = max - 1; b >= 1; b--) rows.push(Array.from({ length: max - b }, (_, i) => ({ nums: [i + 1, b], ops: ['+'], res: i + 1 + b, hide: -1 })));
+  else for (let n = 2; n <= max; n++) rows.push(Array.from({ length: n - 1 }, (_, i) => ({ nums: [n, i + 1], ops: ['-'], res: n - i - 1, hide: -1 })));
+  const all = rows.flat(), blanks = new Set(shuffle(all).slice(0, step.blanks));
+  clear(box); title(box, add ? '加法表' : '减法表'); say(add ? 'q_table_add' : 'q_table_sub');
+  const tb = h(`<div class="ttable">${rows.map((row) => `<div class="trow">${row.map(() => '<button class="tcell"></button>').join('')}</div>`).join('')}</div>`); box.appendChild(tb);
+  const cells = [...tb.querySelectorAll('.tcell')];
+  const show = (e, i) => (cells[i].innerHTML = `${e.nums[0]}${e.ops[0]}${e.nums[1]}=${blanks.has(e) ? '<b class="q">?</b>' : `<b>${e.res}</b>`}`);
+  all.forEach(show);
+  // 1. 把空着的填上
+  for (const e of all.filter((x) => blanks.has(x))) {
+    const i = all.indexOf(e); cells[i].classList.add('focus'); say(...eqSay(e));
+    wrong += await choose(box, near(e.res, 0, max, 4), e.res);
+    box.querySelector('.choices').remove(); blanks.delete(e); show(e, i); cells[i].classList.remove('focus'); cells[i].classList.add('filled');
+  }
+  // 2. 把和（差）是几的都点出来
+  const f = step.find, want = all.filter((e) => e.res === f).length;
+  title(box, `把${add ? '和' : '差'}是 <b>${f}</b> 的算式都点出来`).classList.add('sub'); say(add ? 'q_find_sum' : 'q_find_diff', num(f), 'q_find_b');
+  let got = 0;
+  await new Promise((res) => cells.forEach((c, i) => (c.onclick = () => {
+    if (c.classList.contains('hit')) return;
+    if (all[i].res === f) { c.classList.add('hit'); sfx.ok(); if (++got === want) setTimeout(res, 600); }
+    else { wrong++; c.classList.add('wrong'); sfx.no(); say('again'); setTimeout(() => c.classList.remove('wrong'), 500); }
+  })));
+  await say(add ? 'q_rule_add' : 'q_rule_sub'); await sleep(500);
+  return wrong;
+}
+
+/* ---------- 认识减法：吃掉几个，还剩几个（倒着数） ---------- */
+export async function takeAway(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const n = rint(step.min, step.max), k = rint(1, n - 1), em = pick(step.items);
+    clear(box); title(box, `原来有 <b>${n}</b> 个，吃掉 <b>${k}</b> 个`); say('q_take_a', num(n), 'q_take_b', num(k), 'q_take_c');
+    // 第一轮边吃边倒着数（例题），后面几轮吃完自己数
+    const demo = r === 0, pl = h(`<div class="plates"><div class="pl big">${Array(n).fill(`<span class="pobj">${em}</span>`).join('')}</div></div>`), read = h(`<div class="splitread">${demo ? `${n} 倒着数：` : '&nbsp;'}</div>`); box.append(pl, read);
+    let ate = 0;
+    await new Promise((res) => pl.querySelectorAll('.pobj').forEach((o) => (o.onclick = () => {
+      if (o.classList.contains('gone') || ate >= k) return;
+      o.classList.add('gone'); ate++; sfx.tap(); if (demo) { say(num(n - ate)); read.innerHTML += `${ate > 1 ? '，' : ''}<b>${n - ate}</b>`; }
+      if (ate === k) setTimeout(res, 700);
+    })));
+    title(box, '还剩几个？').classList.add('sub'); say('q_left');
+    wrong += await choose(box, near(n - k, 0, 9, 4), n - k);
+    box.querySelector('.choices').remove();
+    box.appendChild(h(eqCols([n, '-', k, '=', n - k], r === 0 ? ['被减数', '减号', '减数', '', '差'] : null)));
+    await say(num(n), 'minus', num(k), 'eq', num(n - k)); await sleep(600);
+  }
+  return wrong;
+}
+
+/* ---------- 比多少：一个对一个，多出来的就是多几个 ---------- */
+export async function moreThan(box, step) {
+  let wrong = 0;
+  const PAIRS = [['🐶', '🐱'], ['🐰', '🥕'], ['🐵', '🍌'], ['🍎', '🍐'], ['🐔', '🐤']];
+  for (let r = 0; r < step.rounds; r++) {
+    const big = rint(4, step.max), small = rint(2, big - 1), [ea, eb] = pick(PAIRS), q = r % 2;
+    clear(box); title(box, q ? '下面比上面少几个？' : '上面比下面多几个？'); say(q ? 'q_diff_less' : 'q_diff_more');
+    const pr = h(`<div class="pairs"><div class="prow">${Array(big).fill(`<span>${ea}</span>`).join('')}</div><div class="prow">${Array(small).fill(`<span>${eb}</span>`).join('')}</div></div>`); box.appendChild(pr);
+    const go = h('<button class="nextbtn">一个对一个 ▶</button>'); box.appendChild(go);
+    await new Promise((res) => (go.onclick = res)); go.remove(); sfx.tap(); say('q_pair');
+    [...pr.children[0].children].forEach((s, i) => s.classList.add(i < small ? 'pair' : 'extra'));
+    [...pr.children[1].children].forEach((s) => s.classList.add('pair'));
+    await sleep(900);
+    wrong += await choose(box, near(big - small, 1, 9, 4), big - small);
+    box.querySelector('.choices').remove();
+    box.appendChild(h(eqCols([big, '-', small, '=', big - small])));
+    await say(num(big), 'minus', num(small), 'eq', num(big - small)); await sleep(600);
+  }
+  return wrong;
+}
+
+/* ---------- 一图四式：看一幅图，写出两道加法、两道减法 ---------- */
+export async function family(box, step) {
+  let wrong = 0;
+  const KINDS = [['🍎', '🍏'], ['🌹', '🌼'], ['🐥', '🐣'], ['🔴', '🔵'], ['🚗', '🚕']];
+  for (let r = 0; r < step.rounds; r++) {
+    const s = rint(5, step.max), a = rint(1, s - 1), b = s - a, [ea, eb] = pick(KINDS);
+    clear(box); title(box, '一幅图，四个算式'); say('q_family');
+    box.appendChild(h(`<div class="eqpic big">${Array(a).fill(`<span>${ea}</span>`).join('')}<span class="gap"></span>${Array(b).fill(`<span>${eb}</span>`).join('')}</div>`));
+    const list = h('<div class="eqlist"></div>'); box.appendChild(list);
+    for (const [x, op, y] of [[a, '+', b], [b, '+', a], [s, '-', a], [s, '-', b]]) {
+      const e = { nums: [x, y], ops: [op], res: op === '+' ? x + y : x - y, hide: -1 };
+      const line = h(eqCols(eqToks(e))); line.classList.add('focus'); list.appendChild(line); say(...eqSay(e));
+      wrong += await choose(box, near(e.res, 0, 9, 4), e.res);
+      box.querySelector('.choices').remove(); line.replaceWith(h(eqCols(eqToks(e, true)))); await sleep(300);
+    }
+    await sleep(700);
+  }
+  return wrong;
+}
+
+/* ---------- 连加、连减、加减混合：看着东西一次一次变，先算前两个，再算后面 ---------- */
+export async function chain(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const f = step.forms[r % step.forms.length], e = makeEq(`a${f[0]}b${f[1]}c`, step.max || 9), em = pick(step.items);
+    clear(box); title(box, '看一看，算一算'); say('q_look');
+    const scene = h(`<div class="scene">${Array(e.nums[0]).fill(`<span>${em}</span>`).join('')}</div>`), cap = h('<div class="splitread"></div>'); box.append(scene, cap);
+    cap.innerHTML = `原来有 <b>${e.nums[0]}</b> 个`; await sleep(1200);
+    for (let i = 0; i < 2; i++) {
+      const n = e.nums[i + 1];
+      if (e.ops[i] === '+') { for (let j = 0; j < n; j++) scene.appendChild(h(`<span class="new">${em}</span>`)); cap.innerHTML += `，又来了 <b>${n}</b> 个`; }
+      else { shuffle([...scene.querySelectorAll('span:not(.gone)')]).slice(0, n).forEach((s) => s.classList.add('gone')); cap.innerHTML += `，走了 <b>${n}</b> 个`; }
+      sfx.tap(); await sleep(1300);
+    }
+    const eq = h(eqCols(eqToks(e))); box.appendChild(eq);
+    const r1 = e.ops[0] === '+' ? e.nums[0] + e.nums[1] : e.nums[0] - e.nums[1];
+    const parts = [[{ nums: e.nums.slice(0, 2), ops: [e.ops[0]], res: r1, hide: -1 }, 'q_first', '先算'], [{ nums: [r1, e.nums[2]], ops: [e.ops[1]], res: e.res, hide: -1 }, 'q_then', '再算']];
+    for (const [part, key, txt] of parts) {
+      const line = h(`<div class="steptip"><span>${txt}</span>${eqCols(eqToks(part))}</div>`); box.appendChild(line); say(key, ...eqSay(part));
+      wrong += await choose(box, near(part.res, 0, 9, 4), part.res);
+      box.querySelector('.choices').remove(); line.lastElementChild.replaceWith(h(eqCols(eqToks(part, true))));
+    }
+    eq.replaceWith(h(eqCols(eqToks(e, true)))); await say(...eqRead(e)); await sleep(700);
+  }
+  return wrong;
+}
+
+/* ---------- 猜数字：看样子猜、按提示猜 ---------- */
+const LIKE = { 0: '🥚', 1: '✏️', 2: '🦆', 3: '👂', 4: '🚩', 5: '🪝', 8: '🥨', 9: '🥄' };
+const LIKE_TXT = { 0: '像鸡蛋', 1: '像铅笔细长条', 2: '像小鸭水上漂', 3: '像耳朵听声音', 4: '像小旗迎风飘', 5: '像衣钩挂衣帽', 8: '像麻花拧一道', 9: '像勺子能盛饭' };
+export async function guess(box, step) {
+  let wrong = 0;
+  if (step.mode === 'shape') {
+    for (const d of shuffle(Object.keys(LIKE).map(Number)).slice(0, step.rounds)) {
+      clear(box); title(box, `这个数${LIKE_TXT[d]}，猜猜是几？`);
+      const pic = h(`<div class="likepic">${LIKE[d]}</div>`); box.appendChild(pic); say('like_' + d, 'g_shape');
+      wrong += await choose(box, [...Array(10).keys()], d, { cls: 'digits' });
+      pic.innerHTML = `${LIKE[d]} <b>${d}</b>`; await sleep(800);
+    }
+    return wrong;
+  }
+  // 按提示猜：不合提示的算错；合提示但不是它，告诉她"比它大""比它小"
+  for (const cl of step.clues) {
+    const secret = rint(cl.lo, cl.hi);
+    clear(box); title(box, '猜数字'); box.appendChild(h(`<div class="clues">💭 ${cl.text || cl.say}</div>`)); say(cl.say);
+    const row = h('<div class="choices digits"></div>'), fb = h('<div class="splitread">&nbsp;</div>'); box.append(fb, row);
+    await new Promise((res) => [...Array(10).keys()].forEach((v) => {
+      const b = h(`<button class="cbtn"${v === secret ? ' data-ok="1"' : ''}>${v}</button>`); row.appendChild(b);
+      b.onclick = () => {
+        if (row.dataset.done || b.classList.contains('out')) return;
+        if (v < cl.lo || v > cl.hi) { wrong++; b.classList.add('wrong'); sfx.no(); say('again'); setTimeout(() => b.classList.remove('wrong'), 500); return; }
+        if (v === secret) { row.dataset.done = 1; b.classList.add('right'); sfx.ok(); fb.innerHTML = `猜对啦，就是 <b>${v}</b>！`; say('g_got'); setTimeout(res, 1300); return; }
+        b.classList.add('out'); sfx.tap(); fb.innerHTML = `比 ${v} <b>${secret > v ? '大' : '小'}</b>`; say(secret > v ? 'g_up' : 'g_down');
+      };
+    }));
   }
   return wrong;
 }
