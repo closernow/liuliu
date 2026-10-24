@@ -143,3 +143,26 @@ button{font:inherit;cursor:pointer}
 .cbtn.out{opacity:.3}
 .symq.expr{font-size:80px;letter-spacing:4px}.symq b{color:#2fbf71}
 @media (max-width:560px){.top{gap:8px}.top h1{font-size:16px}#stPage{display:none}.act{padding:14px 10px}.ttable,.trow{gap:3px}.tcell{width:10.4vw;font-size:10px;letter-spacing:-.4px;padding:4px 0}.tcell b.q{padding:0 2px}.merge{gap:30px}.grp{font-size:38px}.eqbig{font-size:44px}.scene{font-size:40px}.likepic{font-size:90px}.symq.expr{font-size:52px}}
+
+/* 第三单元：立体图形；前后上下左右 */
+@media (max-width:560px){.choices.shapes .shp{width:72px;height:72px}}
+.choices.shapes .cbtn{height:auto;min-width:0;padding:8px 12px;background:#fbfffc;border:3px solid #d8eadf;box-shadow:none}
+.choices.shapes .cbtn.right{background:#e4f8ec;border-color:#2fbf71}.choices.shapes .cbtn.wrong{background:#fde8e8;border-color:#f05a5a}
+.shp{display:block}
+.blabel{display:flex;align-items:center;justify-content:center;gap:4px}
+.bins:has(.bin:nth-child(4)){flex-wrap:wrap}.bins:has(.bin:nth-child(4)) .bin{flex:1 1 40%;min-height:130px}
+.phys{width:100%;max-width:640px;aspect-ratio:16/9;background:linear-gradient(#eaf6ff,#f8fcff);border-radius:18px;border:3px solid #d8eadf}
+.queue{position:relative;display:flex;align-items:flex-end;gap:10px;background:linear-gradient(#dff3ff 65%,#c8e6a0 65%);border-radius:20px;padding:20px 20px 40px;margin:auto 0}
+.bus{font-size:70px;line-height:1;display:flex;flex-direction:column;align-items:center}.bus small{font-size:14px;font-weight:800;color:var(--muted)}
+.qa,.seat{border:3px solid transparent;background:none;border-radius:16px;font-size:56px;padding:2px 6px;line-height:1.1}
+.qa.me,.seat.me{background:#fff3c8;border-color:#ffc83a}.seat.me2{background:#e0f0ff;border-color:#6ab0ff}
+.qa.right,.seat.right{border-color:#2fbf71;background:#e4f8ec}.qa.wrong,.seat.wrong{border-color:#f05a5a}
+.qarrow{position:absolute;left:110px;bottom:10px;color:var(--muted);font-weight:800}
+.shelf,.classroom{margin:auto 0;display:flex;flex-direction:column;gap:8px;align-items:center}
+.shelf .seats{display:grid;gap:0;background:#c8925a;padding:10px;border-radius:14px}
+.shelf .seat{border-radius:8px;border-bottom:8px solid #9a6a3a;background:#fff8ec;margin:4px;width:96px;height:90px}
+.classroom .board{background:#2f5a46;color:#fff;font-weight:900;padding:8px 40px;border-radius:8px;border:6px solid #b0805a}
+.classroom .seats{display:grid;gap:10px 18px}
+.classroom .seat{background:linear-gradient(transparent 62%,#d8b080 62%);border-radius:10px;width:82px;height:78px}
+@media (max-width:560px){.qa{font-size:28px;padding:1px;border-width:2px;border-radius:10px}.bus{font-size:38px}.queue{padding:12px 8px 34px;gap:3px}.qarrow{left:50px}
+  .shelf .seat{width:74px;height:70px;font-size:42px}.classroom .seat{width:62px;height:60px;font-size:40px}.classroom .seats{gap:8px 8px}}

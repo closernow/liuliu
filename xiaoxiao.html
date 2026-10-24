@@ -59,6 +59,9 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
 .boardWrap{position:relative}
 .toolTip{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:5;background:rgba(255,255,255,.95);color:#5a3aa8;font-weight:900;padding:6px 16px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.25);white-space:nowrap;pointer-events:none}
 .toolTip[hidden]{display:none}
+.listenBar{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:6;background:linear-gradient(160deg,#7dff9a,#3ac0ff);color:#1a2a5a;font-weight:900;font-size:18px;padding:8px 10px 8px 18px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;display:flex;align-items:center;gap:10px;animation:glow 1.2s infinite;pointer-events:none;opacity:.94}
+.listenBar[hidden]{display:none}
+.listenBar button{pointer-events:auto;border:none;border-radius:999px;background:#fff;color:#1a2a5a;font-weight:900;padding:5px 12px}
 .p3{font-style:normal;font-weight:900;color:#1a9a4a;font-family:system-ui}
 .gift{display:inline-block;background:#fff3c0;border-radius:999px;padding:3px 12px;margin:3px;font-weight:800}
 /* 路线地图 */
@@ -141,7 +144,7 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
   .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
   .tools{flex-direction:column;gap:10px}.tool{width:46px;height:40px;border-radius:12px}.tool span{font-size:20px}.tool em{display:none}
 }
-@media (max-width:520px){.top h1:not(#lvName){display:none}.top{gap:8px}.mitems{display:none}.maptop h1{font-size:16px}.boost{width:82px}.mnode{width:58px;height:58px}.mnode.cur{width:70px;height:70px}}
+@media (max-width:520px){.listenBar{font-size:14px;padding:5px 6px 5px 12px;gap:6px}.top h1:not(#lvName){display:none}.top{gap:8px}.mitems{display:none}.maptop h1{font-size:16px}.boost{width:82px}.mnode{width:58px;height:58px}.mnode.cur{width:70px;height:70px}}
 </style>
 </head>
 <body>
@@ -155,9 +158,9 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
     <div class="card movesBox"><h3>还剩几步</h3><b id="moves">0</b></div>
     <div class="card"><h3>目标</h3><div class="goals" id="goals"></div></div>
     <div class="card"><h3>分数</h3><div class="scorebar"><i id="scoreBar"></i><span class="st" id="st1">⭐</span><span class="st" id="st2">⭐</span><span class="st" id="st3">⭐</span></div><div class="scoreNum" id="score">0</div></div>
-    <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p>魔法瓶<br>攒满后，把能组成词语的两个字换到一起！</p></div>
+    <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p>魔法瓶<br>攒满后，把能组成词语的两个字换到一起！（发光的字）</p></div>
   </div>
-  <div class="boardWrap" id="boardWrap"><div class="toolTip" id="toolTip" hidden></div><canvas id="board"></canvas></div>
+  <div class="boardWrap" id="boardWrap"><div class="toolTip" id="toolTip" hidden></div><div class="listenBar" id="listenBar" hidden>👂 听一听，在棋盘上点出这个字 <button id="listenAgain">🔊 再听</button></div><canvas id="board"></canvas></div>
   <div class="side">
     <div class="card"><h3>这一课的字（点一点听读音）</h3><div class="legend" id="legend"></div></div>
     <div class="card"><h3>道具<small>（不算步数）</small></h3><div class="tools" id="tools"></div></div>

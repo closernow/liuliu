@@ -44,6 +44,7 @@ PROMPTS = {
     'x_good': '好棒！', 'x_great': '太厉害了！', 'x_super': '无敌啦！', 'x_amazing': '超级无敌！',
     'x_word': '组词魔法！', 'x_more': '送你五步，加油！', 'x_win': '过关啦！', 'x_bonus': '剩下的步数，变成火箭！',
     'x_hammer': '点一个方块，用锤子砸掉它！', 'x_swap': '点两个挨着的方块，直接换位置！',
+    'x_listen': '听一听，在棋盘上点出这个字。', 'x_again': '再听一听。', 'x_findword': '魔法瓶满啦！找一找，哪两个字能组成词语？',
     'f_done': '过关啦！',
     'f_clear': '满啦，帮你清掉一些。',
     'star3': '写得真棒！三颗星！',
@@ -127,6 +128,15 @@ async def main():
         for e in stg.get('eggs', []):
             if 'kind' in e: continue
             p = f'{OUT}/w/{code(e["w"])}.mp3'; add(g, e['w'], e['p'], p, lambda w=e['w'], p=p: tts(w, p))
+    # 溜溜消消乐：每一课的字和词（词的拼音用这一课字的拼音拼起来）
+    if os.path.exists('content/match_levels.json'):
+        for ls in json.load(open('content/match_levels.json', encoding='utf-8'))['lessons']:
+            g, py = f"消消乐 {ls['title']}", dict(ls['chars'])
+            for ch, p1 in ls['chars']:
+                p = f'{OUT}/z/{code(ch)}.mp3'; add(g, ch, p1, p, lambda py=p1, p=p: tts(py, p))
+            for w in ls['words']:
+                wp = ' '.join(py[c] for c in w)
+                p = f'{OUT}/w/{code(w)}.mp3'; add(g, w, wp, p, lambda wp=wp, p=p: tts(wp, p))
     # 写字表的字
     if os.path.exists('content/writing.json'):
         for grp in json.load(open('content/writing.json', encoding='utf-8'))['groups']:

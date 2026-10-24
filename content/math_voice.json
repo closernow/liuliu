@@ -45,5 +45,18 @@
   "q_rule_add": "你发现了吗？斜着看，和都一样。", "q_rule_sub": "你发现了吗？斜着看，差都一样。",
   "g_shape": "猜一猜，是几？", "g_up": "比它大。", "g_down": "比它小。", "g_got": "猜对啦！就是它！",
   "like_0": "这个数像鸡蛋。", "like_1": "这个数像铅笔细长条。", "like_2": "这个数像小鸭水上漂。", "like_3": "这个数像耳朵听声音。",
-  "like_4": "这个数像小旗迎风飘。", "like_5": "这个数像衣钩挂衣帽。", "like_8": "这个数像麻花拧一道。", "like_9": "这个数像勺子能盛饭。"
+  "like_4": "这个数像小旗迎风飘。", "like_5": "这个数像衣钩挂衣帽。", "like_8": "这个数像麻花拧一道。", "like_9": "这个数像勺子能盛饭。",
+  "sh_which_cuboid": "哪个是长方体？", "sh_which_cube": "哪个是正方体？", "sh_which_cylinder": "哪个是圆柱？", "sh_which_ball": "哪个是球？",
+  "sh_is_cuboid": "这是长方体。", "sh_is_cube": "这是正方体。", "sh_is_cylinder": "这是圆柱。", "sh_is_ball": "这是球。",
+  "rd_cuboid": "长长的，方方的，像一块砖头。猜猜是哪种图形？", "rd_cube": "方方正正的，像一个小骰子。猜猜是哪种图形？",
+  "rd_cylinder": "上下一样粗，直直的，放倒了能滚。猜猜是哪种图形？", "rd_ball": "圆圆的，从哪边看都是圆的，能滚来滚去。猜猜是哪种图形？",
+  "q_looklike": "它的样子像哪种图形？",
+  "q_roll": "点一个图形，把它放到斜坡上，看看它会不会滚。", "r_roll": "它滚下去了！", "r_stay": "它停在斜坡上，没有滚。",
+  "q_canroll": "哪个能滚？", "q_cantroll": "哪个不能滚？",
+  "q_stack": "点下面的积木，一块一块搭起来，搭到小旗那么高。", "r_ballroll": "球是圆的，放不稳，滚走了。", "q_topfall": "哪个放在最上面，会滚下来？",
+  "nm_cat": "小猫", "nm_dog": "小狗", "nm_rabbit": "小兔", "nm_bear": "小熊", "nm_panda": "熊猫", "nm_monkey": "小猴",
+  "nm_pig": "小猪", "nm_frog": "青蛙", "nm_chick": "小鸡", "nm_fox": "狐狸", "nm_tiger": "老虎", "nm_koala": "考拉",
+  "pos_in": "在", "pos_which": "的哪一面？",
+  "pos_up_who": "的上面是谁？", "pos_down_who": "的下面是谁？", "pos_left_who": "的左面是谁？", "pos_right_who": "的右面是谁？",
+  "pos_front_who": "的前面是谁？", "pos_back_who": "的后面是谁？", "pos_first": "排在最前面的是谁？", "pos_last": "排在最后面的是谁？"
 }

@@ -80,10 +80,10 @@ export async function pickGroup(box, step) {
 
 /* ---------- 分一分：把东西拖到对的筐里（点一下东西再点筐也行） ---------- */
 export async function sort(box, step) {
-  clear(box); title(box, step.bins.map((b) => b.label).join(' 和 ') + '，分一分'); say('q_sort');
+  clear(box); title(box, step.bins.length > 2 ? '一样形状的放在一起' : step.bins.map((b) => b.label).join(' 和 ') + '，分一分'); say('q_sort');
   const items = shuffle(step.bins.flatMap((b, bi) => shuffle(b.items).slice(0, step.per).map((e) => ({ e, bi }))));
   const tray = h('<div class="tray"></div>'), bins = h('<div class="bins"></div>'); box.append(tray, bins);
-  const binEls = step.bins.map((b) => { const el = h(`<div class="bin"><div class="blabel">${b.label}</div><div class="bitems"></div></div>`); bins.appendChild(el); return el; });
+  const binEls = step.bins.map((b) => { const el = h(`<div class="bin"><div class="blabel">${b.shape ? shapeSVG(b.shape, undefined, 56) : ''}${b.label}</div><div class="bitems"></div></div>`); bins.appendChild(el); return el; });
   let wrong = 0, left = items.length, sel = null;
   return new Promise((res) => {
     const place = (it, el, bi) => {
@@ -479,6 +479,199 @@ export async function guess(box, step) {
         b.classList.add('out'); sfx.tap(); fb.innerHTML = `比 ${v} <b>${secret > v ? '大' : '小'}</b>`; say(secret > v ? 'g_up' : 'g_down');
       };
     }));
+  }
+  return wrong;
+}
+
+/* ================= 第三单元：认识立体图形 ================= */
+const SHAPES = ['cuboid', 'cube', 'cylinder', 'ball'];
+const SH_NAME = { cuboid: '长方体', cube: '正方体', cylinder: '圆柱', ball: '球' };
+const SH_COL = ['#4a9aff', '#ffb03a', '#4cc96a', '#ff6a7a', '#b56aff', '#3ac8c8'];
+const mix = (hex, to, k) => { const a = parseInt(hex.slice(1), 16), b = to === 'w' ? 255 : 0, f = (v) => Math.round(v + (b - v) * k); return `rgb(${f(a >> 16)},${f((a >> 8) & 255)},${f(a & 255)})`; };
+let svgId = 0;
+// 画一个立体图形（看得出是立体的：正面、顶面、侧面不同深浅）
+export function shapeSVG(kind, col = SH_COL[SHAPES.indexOf(kind)], size = 96) {
+  const top = mix(col, 'w', .35), side = mix(col, 'k', .22), ln = mix(col, 'k', .45), id = 'sg' + svgId++;
+  let body;
+  if (kind === 'cuboid') body = `<polygon points="6,50 76,50 76,84 6,84" fill="${col}"/><polygon points="6,50 22,36 92,36 76,50" fill="${top}"/><polygon points="76,50 92,36 92,70 76,84" fill="${side}"/><path d="M6 50h70v34H6zM6 50l16-14h70l-16 14M76 84l16-14V36" fill="none" stroke="${ln}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  else if (kind === 'cube') body = `<polygon points="14,42 60,42 60,88 14,88" fill="${col}"/><polygon points="14,42 32,24 78,24 60,42" fill="${top}"/><polygon points="60,42 78,24 78,70 60,88" fill="${side}"/><path d="M14 42h46v46H14zM14 42l18-18h46l-18 18M60 88l18-18V24" fill="none" stroke="${ln}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  else if (kind === 'cylinder') body = `<defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="0" stop-color="${side}"/><stop offset=".45" stop-color="${top}"/><stop offset="1" stop-color="${side}"/></linearGradient></defs><path d="M26 22V80A24 9 0 0 0 74 80V22Z" fill="url(#${id})" stroke="${ln}" stroke-width="2.5"/><ellipse cx="50" cy="22" rx="24" ry="9" fill="${top}" stroke="${ln}" stroke-width="2.5"/>`;
+  else body = `<defs><radialGradient id="${id}" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="${top}"/><stop offset=".6" stop-color="${col}"/><stop offset="1" stop-color="${side}"/></radialGradient></defs><circle cx="50" cy="52" r="38" fill="url(#${id})" stroke="${ln}" stroke-width="2.5"/><ellipse cx="38" cy="36" rx="11" ry="6" fill="#fff" opacity=".55" transform="rotate(-30 38 36)"/>`;
+  return `<svg class="shp" viewBox="0 0 100 100" width="${size}" height="${size}">${body}</svg>`;
+}
+const shapeBtn = (k) => shapeSVG(k, pick(SH_COL), 120);
+// 身边的东西是什么形状
+const LOOKS = { cuboid: ['📦', '🧱', '📕', '🧃', '📺'], cube: ['🎲', '🧊', '🎁'], cylinder: ['🥫', '🔋', '🕯️', '🧻', '🥁'], ball: ['⚽', '🏀', '🌍', '🎾', '🍊'] };
+
+/* ---------- 认一认：哪个是圆柱？/ 猜一猜 / 它像哪种图形 ---------- */
+export async function pickShape(box, step) {
+  let wrong = 0, last = null;
+  for (let r = 0; r < step.rounds; r++) {
+    let k; do { k = pick(SHAPES); } while (k === last); last = k;
+    clear(box);
+    if (step.mode === 'riddle') { title(box, '猜一猜，是哪种图形？'); box.appendChild(h(`<div class="clues">💭 ${RIDDLE[k]}</div>`)); say('rd_' + k); }
+    else if (step.mode === 'obj') { title(box, '它的样子像哪种图形？'); box.appendChild(h(`<div class="likepic">${pick(LOOKS[k])}</div>`)); say('q_looklike'); }
+    else { title(box, `哪个是<b>${SH_NAME[k]}</b>？`); say('sh_which_' + k); }
+    wrong += await choose(box, shuffle(SHAPES), k, { label: shapeBtn, cls: 'shapes' });
+    await say('sh_is_' + k); await sleep(300);
+  }
+  return wrong;
+}
+const RIDDLE = { cuboid: '长长的，方方的，像一块砖头。', cube: '方方正正的，像一个小骰子。', cylinder: '上下一样粗，直直的，放倒了能滚。', ball: '圆圆的，从哪边看都是圆的，能滚来滚去。' };
+
+/* ---------- 物理：滚一滚、搭积木（matter.js，和水果合成用的同一个） ---------- */
+async function loadMatter() {
+  if (window.Matter) return window.Matter;
+  await new Promise((res) => { const s = document.createElement('script'); s.src = '../js/vendor/matter.min.js'; s.onload = res; document.head.appendChild(s); });
+  return window.Matter;
+}
+const PW = 640, PH = 360, PCOL = { cuboid: '#4a9aff', cube: '#ffb03a', cylinder: '#4cc96a', ball: '#ff6a7a' };
+// 一块物理画布：返回 { M, eng, add(kind, x, y, opt), bodies(), stop() }
+async function physBox(box, statics, deco = null) {
+  const M = await loadMatter(), { Engine, Bodies, Composite } = M;
+  const cv = h(`<canvas class="phys" width="${PW * 2}" height="${PH * 2}"></canvas>`); box.appendChild(cv);
+  const g = cv.getContext('2d'), eng = Engine.create(); g.scale(2, 2);
+  Composite.add(eng.world, [Bodies.rectangle(PW / 2, PH + 20, PW * 2, 60, { isStatic: true, friction: 1 }), Bodies.rectangle(-20, PH / 2, 40, PH * 3, { isStatic: true }), Bodies.rectangle(PW + 20, PH / 2, 40, PH * 3, { isStatic: true }), ...statics(Bodies)]);
+  const add = (kind, x, y, standing = true, angle = 0) => {
+    const o = { friction: 1, frictionStatic: 8, restitution: 0.05, label: kind };
+    let b;
+    if (kind === 'ball') b = Bodies.circle(x, y, 22, { ...o, friction: 0.05, frictionStatic: 0.1, frictionAir: 0.004, restitution: 0.3 });
+    else if (kind === 'cylinder' && !standing) b = Bodies.circle(x, y, 22, { ...o, friction: 0.05, frictionStatic: 0.1, frictionAir: 0.004, restitution: 0.15 });
+    else { const [w, hh] = kind === 'cube' ? [44, 44] : kind === 'cuboid' ? [88, 40] : [40, 62]; b = Bodies.rectangle(x, y, w, hh, { ...o, angle }); b.size = [w, hh]; }
+    b.kind = kind; b.col = PCOL[kind]; Composite.add(eng.world, b); return b;
+  };
+  // 物理按真实时间一步一步算（窗口在后台、画面不刷新时也照样走），画面跟着刷新画
+  let alive = true, last = performance.now(), acc = 0;
+  const tick = setInterval(() => {
+    if (!alive || !cv.isConnected) return clearInterval(tick);
+    const now = performance.now(); acc = Math.min(acc + now - last, 200); last = now;
+    while (acc >= 1000 / 60) { Engine.update(eng, 1000 / 60); acc -= 1000 / 60; }
+  }, 16);
+  const draw = () => {
+    if (!alive || !cv.isConnected) return;
+    g.clearRect(0, 0, PW, PH); if (deco) deco(g);
+    for (const b of Composite.allBodies(eng.world)) {
+      if (b.isStatic) { if (b.show) { g.fillStyle = b.show; g.beginPath(); b.vertices.forEach((v, i) => g[i ? 'lineTo' : 'moveTo'](v.x, v.y)); g.closePath(); g.fill(); } continue; }
+      g.save(); g.translate(b.position.x, b.position.y); g.rotate(b.angle);
+      const c = b.col, ln = mix(c, 'k', .45); g.lineWidth = 2.5; g.strokeStyle = ln;
+      if (b.kind === 'ball') { const gr = g.createRadialGradient(-7, -8, 2, 0, 0, 24); gr.addColorStop(0, mix(c, 'w', .45)); gr.addColorStop(1, mix(c, 'k', .15)); g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 22, 0, 7); g.fill(); g.stroke(); g.strokeStyle = '#fff'; g.globalAlpha = .7; g.beginPath(); g.arc(0, 0, 14, -0.6, 0.6); g.stroke(); }
+      else if (!b.size) { g.fillStyle = mix(c, 'k', .12); g.beginPath(); g.arc(0, 0, 22, 0, 7); g.fill(); g.stroke(); g.fillStyle = mix(c, 'w', .3); g.beginPath(); g.arc(0, 0, 15, 0, 7); g.fill(); g.beginPath(); g.moveTo(0, 0); g.lineTo(15, 0); g.stroke(); }   // 横着的圆柱：看到圆圆的底面
+      else {
+        const [w, hh] = b.size; g.fillStyle = c; g.fillRect(-w / 2, -hh / 2, w, hh);
+        if (b.kind === 'cylinder') { g.fillStyle = mix(c, 'w', .35); g.beginPath(); g.ellipse(0, -hh / 2, w / 2, 6, 0, 0, 7); g.fill(); g.stroke(); g.beginPath(); g.moveTo(-w / 2, -hh / 2); g.lineTo(-w / 2, hh / 2); g.ellipse(0, hh / 2, w / 2, 6, 0, Math.PI, 0, true); g.lineTo(w / 2, -hh / 2); g.stroke(); }
+        else { g.fillStyle = mix(c, 'w', .35); g.fillRect(-w / 2, -hh / 2, w, 8); g.strokeRect(-w / 2, -hh / 2, w, hh); }
+      }
+      g.restore();
+    }
+    requestAnimationFrame(draw);
+  };
+  draw();
+  return { M, eng, cv, add, bodies: () => Composite.allBodies(eng.world).filter((b) => !b.isStatic), remove: (b) => Composite.remove(eng.world, b), stop: () => (alive = false) };
+}
+
+/* ---------- 滚一滚：放到斜坡上，看谁会滚 ---------- */
+export async function roll(box, step) {
+  clear(box); title(box, '放到斜坡上，看看谁会滚'); say('q_roll');
+  const ph = await physBox(box, (B) => { const r = B.rectangle(235, 205, 460, 22, { isStatic: true, angle: 0.36, friction: 1, frictionStatic: 8 }); r.show = '#c8925a'; return [r]; },
+    (g) => { g.fillStyle = '#ead2a8'; g.beginPath(); g.moveTo(20, 130); g.lineTo(450, 288); g.lineTo(450, PH - 10); g.lineTo(20, PH - 10); g.fill(); g.fillStyle = '#9ad06a'; g.fillRect(0, PH - 10, PW, 10); });   // 斜坡下面垫实，地面是草地
+  const fb = h('<div class="splitread">&nbsp;</div>'), row = h('<div class="choices shapes"></div>'); box.append(fb, row);
+  const tried = new Set();
+  await new Promise((res) => SHAPES.forEach((k) => {
+    const b = h(`<button class="cbtn">${shapeSVG(k, PCOL[k], 72)}</button>`); row.appendChild(b);
+    b.onclick = () => {
+      ph.bodies().forEach((x) => ph.remove(x)); sfx.tap();
+      const body = ph.add(k, 70, k === 'ball' || k === 'cylinder' ? 60 : 100, false, 0.36);   // 方的顺着斜坡放上去，不是扔上去 fb.innerHTML = `把<b>${SH_NAME[k]}</b>放上去……`;
+      setTimeout(() => {   // 滚了一大段就算滚下去
+        if (body.position.x - 70 > 140) { fb.innerHTML = `${SH_NAME[k]}<b>滚下去了</b>！`; say('r_roll'); }
+        else { fb.innerHTML = `${SH_NAME[k]}<b>停在坡上</b>，没有滚`; say('r_stay'); }
+        b.classList.add('right'); tried.add(k); if (tried.size === 4 && !box.querySelector('.nextbtn')) { const nb = h('<button class="nextbtn">都试过了 ▶</button>'); box.appendChild(nb); nb.onclick = res; }
+      }, 2600);
+    };
+  }));
+  ph.stop();
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const can = pick(['ball', 'cylinder']), cant = pick(['cube', 'cuboid']), q = r % 2;
+    clear(box); title(box, q ? '哪个<b>不能</b>滚？' : '哪个<b>能</b>滚？'); say(q ? 'q_cantroll' : 'q_canroll');
+    wrong += await choose(box, shuffle([can, cant]), q ? cant : can, { label: shapeBtn, cls: 'shapes' });
+  }
+  return wrong;
+}
+
+/* ---------- 搭积木：搭到小旗那么高；球放上去会滚下来 ---------- */
+export async function stack(box, step) {
+  clear(box); title(box, '搭积木，搭到小旗那么高'); say('q_stack');
+  const FLAG = PH - 150;   // 地面在 PH-10，大约要搭 3~4 块
+  const ph = await physBox(box, () => [], (g) => { g.fillStyle = '#9ad06a'; g.fillRect(0, PH - 10, PW, 10); g.save(); g.strokeStyle = '#ffb000'; g.lineWidth = 3; g.setLineDash([10, 8]); g.beginPath(); g.moveTo(PW / 2 - 150, FLAG); g.lineTo(PW / 2 + 150, FLAG); g.stroke(); g.font = '34px "Segoe UI Emoji",sans-serif'; g.fillText('🚩', PW / 2 + 150, FLAG + 4); g.restore(); });
+  const fb = h('<div class="splitread">点下面的积木，放下去</div>'), row = h('<div class="choices shapes"></div>'); box.append(fb, row);
+  const again = h('<button class="btn ghost">重来</button>');
+  await new Promise((res) => {
+    let won = false;
+    SHAPES.forEach((k) => {
+      const b = h(`<button class="cbtn">${shapeSVG(k, PCOL[k], 72)}</button>`); row.appendChild(b);
+      b.onclick = () => {
+        if (won) return;
+        const bs = ph.bodies(); if (bs.length >= 10) ph.remove(bs[0]);
+        const top = Math.min(PH - 10, ...ph.bodies().filter((x) => Math.abs(x.position.x - PW / 2) < 60).map((x) => x.bounds.min.y));
+        ph.add(k, PW / 2, Math.max(30, top - 50), true); sfx.tap();   // 从正上方、离顶上不远的地方轻轻放下
+        if (k === 'ball') setTimeout(() => !won && (fb.innerHTML = '球是圆的，<b>放不稳</b>，滚走了', say('r_ballroll')), 1600);
+      };
+    });
+    row.appendChild(again); again.onclick = () => { ph.bodies().forEach((x) => ph.remove(x)); fb.innerHTML = '点下面的积木，放下去'; };
+    const chk = setInterval(() => {
+      if (!box.isConnected) return clearInterval(chk);
+      const bs = ph.bodies(); if (!bs.length || bs.some((b) => b.speed > 0.08)) return;
+      if (bs.some((b) => b.bounds.min.y < FLAG && Math.abs(b.position.x - PW / 2) < 120)) { won = true; clearInterval(chk); sfx.win(); say('great'); fb.innerHTML = '搭到小旗啦！'; setTimeout(res, 1400); }
+    }, 400);
+  });
+  ph.stop();
+  clear(box); title(box, '哪个放在最上面，会<b>滚下来</b>？'); say('q_topfall');
+  return await choose(box, shuffle(SHAPES), 'ball', { label: shapeBtn, cls: 'shapes' });
+}
+
+/* ================= 综合与实践：前后、上下、左右 ================= */
+const ANI = [['🐱', 'cat', '小猫'], ['🐶', 'dog', '小狗'], ['🐰', 'rabbit', '小兔'], ['🐻', 'bear', '小熊'], ['🐼', 'panda', '熊猫'], ['🐵', 'monkey', '小猴'], ['🐷', 'pig', '小猪'], ['🐸', 'frog', '青蛙'], ['🐔', 'chick', '小鸡'], ['🦊', 'fox', '狐狸'], ['🐯', 'tiger', '老虎'], ['🐨', 'koala', '考拉']];
+const DIRS = { up: [-1, 0, '上面'], down: [1, 0, '下面'], left: [0, -1, '左面'], right: [0, 1, '右面'], front: [-1, 0, '前面'], back: [1, 0, '后面'] };
+// 在场景里点出是谁（点错晃一下，记一次错）
+function tapWho(cells, ans) {
+  return new Promise((res) => { let wrong = 0, done = false; cells.forEach((el, i) => (el.onclick = () => {
+    if (done) return;
+    if (i === ans) { done = true; el.classList.add('right'); sfx.ok(); say('good'); setTimeout(() => res(wrong), 1000); }
+    else { wrong++; el.classList.add('wrong'); sfx.no(); say('again'); setTimeout(() => el.classList.remove('wrong'), 500); }
+  })); });
+}
+export async function position(box, step) {
+  let wrong = 0;
+  const order = shuffle([0, 1, 2, 3]);   // 方向轮着问，不会一直问左面
+  for (let r = 0; r < step.rounds; r++) {
+    clear(box);
+    if (step.mode === 'queue') {   // 排队上车：离车近的是前面
+      const q = shuffle(ANI).slice(0, 5), kind = ['front', 'back', 'first', 'last'][r % 4];
+      let who = rint(1, 3), ans;
+      if (kind === 'front') ans = who - 1; else if (kind === 'back') ans = who + 1; else ans = kind === 'first' ? 0 : 4;
+      title(box, kind === 'first' ? '排在<b>最前面</b>的是谁？' : kind === 'last' ? '排在<b>最后面</b>的是谁？' : `${q[who][0]} ${q[who][2]}的<b>${DIRS[kind][2]}</b>是谁？`);
+      const sc = h(`<div class="queue"><span class="bus">🚌<small>车站</small></span>${q.map((a, i) => `<button class="qa${(kind === 'front' || kind === 'back') && i === who ? ' me' : ''}"${i === ans ? ' data-ok="1"' : ''}>${a[0]}</button>`).join('')}<div class="qarrow">← 前　　　后 →</div></div>`); box.appendChild(sc);
+      say(...(kind === 'first' ? ['pos_first'] : kind === 'last' ? ['pos_last'] : ['nm_' + q[who][1], `pos_${kind}_who`]));
+      wrong += await tapWho([...sc.querySelectorAll('.qa')], ans);
+      continue;
+    }
+    // shelf：玩具架 3×3（上下左右）；class：教室座位 3 排 4 个，黑板在前面（前后左右）
+    const R = 3, C = step.mode === 'class' ? 4 : 3, an = shuffle(ANI).slice(0, R * C), dirs = step.mode === 'class' ? ['front', 'back', 'left', 'right'] : ['up', 'down', 'left', 'right'];
+    const askDir = step.mode === 'shelf' && r % 2 === 1;   // 玩具架上隔一题问"在哪一面"
+    let me, d, rr, cc;
+    d = dirs[order[Math.floor(r / (step.mode === 'shelf' ? 2 : 1)) % 4]];
+    do { me = rint(0, R * C - 1); rr = Math.floor(me / C) + DIRS[d][0]; cc = (me % C) + DIRS[d][1]; } while (rr < 0 || rr >= R || cc < 0 || cc >= C);
+    const other = rr * C + cc;
+    const sc = h(`<div class="${step.mode === 'class' ? 'classroom' : 'shelf'}">${step.mode === 'class' ? '<div class="board">黑板（前面）</div>' : ''}<div class="seats" style="grid-template-columns:repeat(${C},1fr)">${an.map((a, i) => `<button class="seat${i === (askDir ? other : me) ? ' me' : ''}"${!askDir && i === other ? ' data-ok="1"' : ''}>${a[0]}</button>`).join('')}</div></div>`);
+    if (askDir) {   // 小猫在小狗的哪一面？（问 other 在 me 的哪一面）
+      title(box, `${an[other][0]} ${an[other][2]}在${an[me][0]} ${an[me][2]}的哪一面？`); box.appendChild(sc); sc.querySelectorAll('.seat')[me].classList.add('me2');
+      say('nm_' + an[other][1], 'pos_in', 'nm_' + an[me][1], 'pos_which');
+      wrong += await choose(box, ['up', 'down', 'left', 'right'], d, { label: (v) => DIRS[v][2] });
+    } else {
+      title(box, `${an[me][0]} ${an[me][2]}的<b>${DIRS[d][2]}</b>是谁？`); box.appendChild(sc);
+      say('nm_' + an[me][1], `pos_${d}_who`);
+      wrong += await tapWho([...sc.querySelectorAll('.seat')], other);
+    }
   }
   return wrong;
 }
