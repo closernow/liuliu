@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>溜溜消消乐 · 语文</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:#fff;user-select:none;-webkit-user-select:none;
+  background:radial-gradient(circle at 20% 10%,#ff8ad8 0,transparent 40%),radial-gradient(circle at 85% 90%,#6ad8ff 0,transparent 45%),linear-gradient(160deg,#5a3aa8,#2a1a6a)}
+button{font:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;height:58px}
+.home{border:none;border-radius:999px;background:rgba(255,255,255,.9);color:#3a2a6a;padding:8px 14px;font-weight:800}
+.top h1{font-size:20px;margin:0;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.wrap{display:grid;grid-template-columns:220px 1fr 220px;gap:16px;padding:0 16px 16px;height:calc(100% - 58px)}
+.side{display:flex;flex-direction:column;gap:12px;min-height:0}
+.card{background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.25);border-radius:22px;padding:12px;backdrop-filter:blur(4px)}
+.card h3{margin:0 0 8px;font-size:15px;opacity:.85}
+.movesBox{text-align:center}.movesBox b{display:block;font-size:56px;line-height:1;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.goals{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.goal{display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .2s}
+.goal.bump{animation:bump .3s}.goal.ok b{color:#7dff9a}
+@keyframes bump{50%{transform:scale(1.25)}}
+.goal b{font-size:24px;text-shadow:0 2px 0 rgba(0,0,0,.3)}.goal em{font-style:normal;font-size:12px;opacity:.8}
+.gch,.lg,.flyer{width:58px;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"KaiTi","STKaiti",serif;font-weight:900;font-size:30px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 3px 8px rgba(0,0,0,.2);line-height:1}
+.gch small,.lg small{font-family:"Andika","Segoe UI",sans-serif;font-size:12px;font-weight:800;margin-bottom:2px}
+.gico{font-size:40px;line-height:58px}
+.scorebar{position:relative;height:16px;border-radius:999px;background:rgba(0,0,0,.25);margin:20px 4px 6px}
+.scorebar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ffe14a,#ff8a3a);transition:width .3s}
+.scorebar .st{position:absolute;top:-22px;transform:translateX(-50%);font-size:20px;filter:grayscale(1) brightness(.8)}
+.scorebar .st.on{filter:none;animation:bump .4s}
+#st3{left:100%}
+.scoreNum{text-align:center;font-size:22px;font-weight:900}
+.magic{display:flex;align-items:center;gap:10px}
+.bottle{position:relative;width:46px;height:70px;border:3px solid rgba(255,255,255,.8);border-radius:10px 10px 18px 18px;overflow:hidden;background:rgba(0,0,0,.2)}
+.bottle i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#b56aff,#ff8ad8,#ffe14a);transition:height .3s}
+.magic.full .bottle{box-shadow:0 0 18px #fff6a0;animation:glow 1s infinite}
+@keyframes glow{50%{box-shadow:0 0 30px #fff6a0}}
+.magic p{margin:0;font-size:13px;line-height:1.4}
+.boardWrap{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0}
+canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,60,.35);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 0 3px rgba(255,255,255,.25)}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;justify-items:center}
+.lg{border:none}
+.words{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.wd{border:none;border-radius:999px;background:rgba(255,255,255,.9);color:#5a3aa8;font-family:"KaiTi",serif;font-weight:900;font-size:20px;padding:4px 12px}
+.flyer{position:fixed;z-index:30;transform:translate(-50%,-50%);transition:left .6s cubic-bezier(.5,-0.3,.7,1),top .6s cubic-bezier(.4,-0.6,.7,1),transform .6s;pointer-events:none}
+.overlay{position:fixed;inset:0;background:rgba(20,10,60,.55);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.overlay[hidden]{display:none}
+.panel{background:linear-gradient(160deg,#fff,#f4ecff);color:#3a2a6a;border-radius:28px;padding:24px 30px;text-align:center;max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.panel h2{font-size:34px;margin:0 0 6px}
+.lvs{display:flex;gap:14px;justify-content:center;margin:16px 0}
+.lvb{border:none;width:110px;height:120px;border-radius:24px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
+.lvb b{font-size:48px;line-height:1}.lvb span{color:#ffe14a;font-size:20px}
+.lvb[disabled]{opacity:.45;cursor:not-allowed}
+.btn{border:none;border-radius:999px;padding:12px 26px;font-weight:900;font-size:20px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;margin:6px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.btn.ghost{background:#efe6ff;color:#5a3aa8}
+.bigstars{font-size:60px;color:#ffc83a;letter-spacing:6px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.side{flex-direction:row;flex-wrap:wrap}.card{flex:1}}
+</style>
+</head>
+<body>
+<div class="top">
+  <button class="home" onclick="location.href='index.html#yuwen'">🏠 返回</button>
+  <h1>🍬 溜溜消消乐</h1><h1 id="lvName" style="opacity:.85;font-size:16px"></h1>
+</div>
+<div class="wrap">
+  <div class="side">
+    <div class="card movesBox"><h3>还剩几步</h3><b id="moves">0</b></div>
+    <div class="card"><h3>目标</h3><div class="goals" id="goals"></div></div>
+    <div class="card"><h3>分数</h3><div class="scorebar"><i id="scoreBar"></i><span class="st" id="st1">⭐</span><span class="st" id="st2">⭐</span><span class="st" id="st3">⭐</span></div><div class="scoreNum" id="score">0</div></div>
+    <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p>魔法瓶<br>攒满后，把能组成词语的两个字换到一起！</p></div>
+  </div>
+  <div class="boardWrap" id="boardWrap"><canvas id="board"></canvas></div>
+  <div class="side">
+    <div class="card"><h3>这一课的字（点一点听读音）</h3><div class="legend" id="legend"></div></div>
+  </div>
+</div>
+<div class="overlay" id="startLayer"><div class="panel"><h2>🍬 溜溜消消乐</h2><div id="lessonTitle" style="font-size:20px;font-weight:800"></div>
+  <div class="lvs" id="lvList"></div>
+  <p>交换两个方块，三个一样的连成一排就消掉！<br>连 4 个出 🚀 火箭，L 形出 💣 炸弹，连 5 个出 🌈 彩虹球。</p>
+  <button class="btn ghost" id="helloBtn">🔊 听怎么玩</button></div></div>
+<div class="overlay" id="moreLayer" hidden><div class="panel"><h2>步数用完啦</h2><p style="font-size:20px">没关系，送你 5 步！</p><button class="btn" id="moreBtn">+5 步，继续 ▶</button></div></div>
+<div class="overlay" id="winLayer" hidden><div class="panel"><h2>🎉 过关啦！</h2><div class="bigstars" id="winStars"></div><p style="font-size:22px">分数 <b id="winScore"></b></p>
+  <button class="btn" id="winNext">下一关 ▶</button> <button class="btn ghost" id="winAgain">再玩一次</button> <button class="btn ghost" id="winMenu">选关</button></div></div>
+<script type="module" src="js/match.js"></script>
+</body>
+</html>

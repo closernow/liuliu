@@ -53,9 +53,17 @@
   <div class="hub" id="hubMain">
     <div class="hubtitle">溜溜 · 一年级上册</div>
     <div class="hubcards">
-      <button class="hubcard yuwen" id="startBtn"><span class="hi">🎵</span><b>语文</b><small>溜溜乐队 · 识字 拼音 课文 写字</small></button>
+      <button class="hubcard yuwen" id="yuwenBtn"><span class="hi">📖</span><b>语文</b><small>溜溜乐队 · 溜溜消消乐</small></button>
       <button class="hubcard shuxue" id="mathBtn"><span class="hi">🔢</span><b>数学</b><small>闯关地图 · 水果合成</small></button>
     </div>
+  </div>
+  <div class="hub" id="hubYuwen" hidden>
+    <div class="hubtitle">语文</div>
+    <div class="hubcards">
+      <button class="hubcard yuwen" id="startBtn"><span class="hi">🎵</span><b>溜溜乐队</b><small>识字 拼音 课文 写字</small></button>
+      <button class="hubcard xxl" onclick="location.href='xiaoxiao.html'"><span class="hi">🍬</span><b>溜溜消消乐</b><small>消掉这一课的生字</small></button>
+    </div>
+    <button class="tbtn" id="hubBack2">◀ 返回</button>
   </div>
   <div class="hub" id="hubMath" hidden>
     <div class="hubtitle">数学</div>
@@ -70,9 +78,12 @@
 <script src="js/vendor/hanzi-writer.min.js"></script>
 <script type="module" src="js/main.js"></script>
 <script>
-// 首页：语文 / 数学（数学里再选闯关地图或水果合成）
+// 首页：语文 / 数学（语文里再选乐队或消消乐，数学里再选闯关地图或水果合成）
 document.getElementById('mathBtn').onclick = () => { hubMain.hidden = true; hubMath.hidden = false; };
 document.getElementById('hubBack').onclick = () => { hubMath.hidden = true; hubMain.hidden = false; };
+document.getElementById('yuwenBtn').onclick = () => { hubMain.hidden = true; hubYuwen.hidden = false; };
+document.getElementById('hubBack2').onclick = () => { hubYuwen.hidden = true; hubMain.hidden = false; };
+if (location.hash === '#yuwen') { hubMain.hidden = true; hubYuwen.hidden = false; }
 if (location.hash === '#math') { hubMain.hidden = true; hubMath.hidden = false; }
 </script>
 <script>

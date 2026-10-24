@@ -336,4 +336,5 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .hubcard.yuwen{background:linear-gradient(160deg,#ffd166,#ff8fa3)}
 .hubcard.shuxue{background:linear-gradient(160deg,#8ee3a8,#5bb8f0)}
 .hubcard.fruit{background:linear-gradient(160deg,#e8f6a0,#8ee3a8)}
+.hubcard.xxl{background:linear-gradient(160deg,#ff9ad8,#a87aff);color:#fff}
 .hubcard.mapcard{background:linear-gradient(160deg,#ffe08a,#ffb36b)}
