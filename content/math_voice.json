@@ -58,5 +58,10 @@
   "nm_pig": "小猪", "nm_frog": "青蛙", "nm_chick": "小鸡", "nm_fox": "狐狸", "nm_tiger": "老虎", "nm_koala": "考拉",
   "pos_in": "在", "pos_which": "的哪一面？",
   "pos_up_who": "的上面是谁？", "pos_down_who": "的下面是谁？", "pos_left_who": "的左面是谁？", "pos_right_who": "的右面是谁？",
-  "pos_front_who": "的前面是谁？", "pos_back_who": "的后面是谁？", "pos_first": "排在最前面的是谁？", "pos_last": "排在最后面的是谁？"
+  "pos_front_who": "的前面是谁？", "pos_back_who": "的后面是谁？", "pos_first": "排在最前面的是谁？", "pos_last": "排在最后面的是谁？",
+  "b_tap": "点一点小棒，数够十根，捆成一捆。", "b_ten": "十个一是一个十！", "b_total": "一共有几根？",
+  "b_combine_a": "一个十和", "b_combine_b": "个一，合起来是几？",
+  "ab_read": "计数器上拨的是几？", "ab_make": "在计数器上拨出",
+  "nl_fill": "按顺序填一填，问号是几？", "nl_than": "比", "nl_more1": "多一的数是几？", "nl_less1": "少一的数是几？",
+  "nl_after": "后面的数是几？", "nl_before": "前面的数是几？"
 }

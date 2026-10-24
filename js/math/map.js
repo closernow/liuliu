@@ -1,9 +1,13 @@
 // 数学闯关地图：33 关，按课本顺序沿路走。过了上一关开下一关；家长面板"解锁数学全部关卡"后全开。
 import { $, h, getSave } from './common.js';
+import * as store from '../store.js';
+import { isParent, bindToggle, tools } from '../parent.js';
 
 (async () => {
   const [data, save] = await Promise.all([fetch('../content/math_stages.json').then((r) => r.json()), getSave()]);
-  const st = save.stages, all = !!save.all;
+  const st = save.stages, all = !!save.all || isParent();   // 家长测试模式：全部能进
+  bindToggle(document.querySelector('.top h1'));
+  tools([['清空数学闯关进度', async () => { if (!confirm('清空数学闯关的星星？水果合成不动。')) return; const m = await getSave(); m.stages = {}; await store.set('math', m); location.reload(); }]]);
   let open = 1; while (st[open]) open++;   // 第一个还没过的关
   const path = $('path');
   data.stages.forEach((s) => {

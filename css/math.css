@@ -166,3 +166,35 @@ button{font:inherit;cursor:pointer}
 .classroom .seat{background:linear-gradient(transparent 62%,#d8b080 62%);border-radius:10px;width:82px;height:78px}
 @media (max-width:560px){.qa{font-size:28px;padding:1px;border-width:2px;border-radius:10px}.bus{font-size:38px}.queue{padding:12px 8px 34px;gap:3px}.qarrow{left:50px}
   .shelf .seat{width:74px;height:70px;font-size:42px}.classroom .seat{width:62px;height:60px;font-size:40px}.classroom .seats{gap:8px 8px}}
+
+/* 第四单元：小棒、计数器、数轴 */
+.stick{display:inline-block;width:8px;height:70px;border-radius:4px;background:linear-gradient(90deg,#e8a040,#ffd27a,#e8a040);box-shadow:0 1px 2px rgba(0,0,0,.25);position:relative}
+.stick.b{background:linear-gradient(90deg,#3a8ae0,#8ac8ff,#3a8ae0)}
+.stick.x{opacity:.3}.stick.x::after{content:'✕';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#d02020;font-weight:900;font-size:20px}
+.sticks{display:flex;gap:26px;align-items:flex-end;justify-content:center;margin:6px 0}
+.loose{display:flex;gap:6px}.loose.add{padding-left:14px;border-left:3px dashed #b8dcc6}
+.bundle{display:inline-flex;gap:1px;position:relative;padding:0 2px}
+.bundle.tied::after{content:'';position:absolute;left:-3px;right:-3px;top:42%;height:9px;border-radius:4px;background:#e04848}
+.bundle.open{min-width:120px;min-height:74px;align-items:flex-end;border-bottom:3px solid #d8b080}
+.stray{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;max-width:620px;min-height:84px}
+.stk{border:none;background:none;padding:4px 6px;border-radius:10px;cursor:pointer}.stk:hover{background:#fff3c8}
+.sbin{display:flex;flex-direction:column;align-items:center;gap:6px;border:4px dashed #b8dcc6;border-radius:20px;padding:10px 24px;background:#f6fcf8}
+.sbin .blab{font-weight:900;color:var(--green)}
+.ptab{display:flex;align-items:center;gap:6px;font-size:26px}
+.ptab div{display:flex;flex-direction:column;align-items:center;border:3px solid #b8dcc6;border-radius:10px;padding:2px 14px;background:#fff}
+.ptab small{font-size:14px;color:var(--muted);font-weight:800}.ptab b{font-size:34px}.ptab span{font-size:40px;font-weight:900;margin-left:14px;color:#d0402a}
+.counter{display:flex;gap:40px;justify-content:center;background:#fff8ec;border:4px solid #c8925a;border-radius:18px;padding:14px 36px 10px}
+.counter.wrong{animation:shake .4s}
+.rod{position:relative;display:flex;flex-direction:column;align-items:center;width:90px}
+.rod .pole{display:none}
+.rod .beads{position:relative;isolation:isolate;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;height:220px;gap:2px;padding-top:6px;width:70px}
+.rod .beads::before{content:'';position:absolute;left:50%;top:0;bottom:-4px;width:8px;transform:translateX(-50%);border-radius:4px;background:#8a6a3a;z-index:-1}
+.bead{display:block;position:relative;width:62px;height:20px;border-radius:50%;background:radial-gradient(ellipse at 40% 35%,#ff9a9a,#d03838);box-shadow:0 2px 2px rgba(0,0,0,.25)}
+.rod small{font-weight:900;color:var(--muted);margin-top:6px}
+.rbtn{display:flex;gap:6px;margin-top:6px}.rbtn button{border:none;border-radius:12px;width:40px;height:40px;font-size:22px;font-weight:900;background:#e3f2e8;color:var(--green)}
+.nline{display:flex;flex-wrap:wrap;justify-content:center;gap:0;max-width:760px;border-top:4px solid #3a5a4a;padding-top:4px;margin-top:10px}
+.tick{position:relative;width:34px;text-align:center;font-weight:900;font-size:20px}
+.tick::before{content:'';position:absolute;left:50%;top:-12px;width:3px;height:10px;background:#3a5a4a}
+.tick.q b{color:#fff;background:#ff9a3a;border-radius:6px;padding:0 6px}.tick.focus b{outline:3px solid #ffc83a}
+.tick.hit b{background:#2fbf71;color:#fff;border-radius:6px;padding:0 4px}
+@media (max-width:560px){.stick{width:6px;height:52px}.sticks{gap:14px}.loose{gap:4px}.counter{gap:20px;padding:10px 16px 8px}.rod .beads{height:180px}.bead{width:50px;height:16px}.tick{width:28px;font-size:16px}.ptab span{font-size:30px}}

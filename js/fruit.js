@@ -2,6 +2,7 @@
 // 自己玩时按关卡走；从数学地图进来时（?t=目标&pool=会掉的数&goal=几次&ret=回去的地址）只玩一局，玩完回地图。
 import { UNITS, LEVELS, TIPS } from './fruit_levels.js';
 import * as store from './store.js';
+import { isParent } from './parent.js';
 
 const { Engine, Bodies, Body, Composite, Events } = Matter;
 const $ = (id) => document.getElementById(id);
@@ -531,7 +532,7 @@ $('goBtn').onclick = async () => { $('startLayer').hidden = true; await audioIni
 
 (async () => {
   mathSave = await store.get('math', {});
-  save.fruit = mathSave.fruit || {}; save.cur = mathSave.fruitCur || 'c3'; save.all = mathSave.all;
+  save.fruit = mathSave.fruit || {}; save.cur = mathSave.fruitCur || 'c3'; save.all = mathSave.all || isParent();   // 家长测试模式：全部能进
   if (STAGE) {   // 地图上的一关：只玩这一局
     LEVELS.unshift({ id: 'stage', name: Q.get('name') || '水果合成', mode: 'target', t: +Q.get('t'), pool: Q.get('pool').split(',').map(Number), goal: +Q.get('goal') || 5 });
     $('levelsBtn').hidden = true; $('backBtn').onclick = () => (location.href = Q.get('ret') || 'map.html');

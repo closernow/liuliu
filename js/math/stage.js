@@ -2,9 +2,10 @@
 // stage.html?id=6；水果合成那一步会跳到 fruit.html，玩完带着 &step= 回来接着走。
 import { $, h, loadVoice, audio, say, sfx, stopVoice, setStars } from './common.js';
 import * as A from './acts.js';
+import { isParent, bindToggle, tools } from '../parent.js';
 
 const Q = new URLSearchParams(location.search), id = +Q.get('id') || 1;
-let data, stage, mistakes = 0;
+let data, stage, mistakes = 0, cur = 0;
 const KEY = `mathStage${id}`;   // 跳去水果合成时记住已经错了几次
 
 async function main() {
@@ -16,7 +17,9 @@ async function main() {
   $('stPage').textContent = `课本第 ${stage.page} 页`;
   $('dots').innerHTML = stage.steps.map(() => '<i></i>').join('');
   const from = +Q.get('step') || 0;
-  if (from) {   // 从水果合成回来
+  parentTools();
+  if (Q.get('jump')) { $('startLayer').hidden = true; audio(); run(from); }   // 家长测试：直接跳到这一步
+  else if (from) {   // 从水果合成回来
     mistakes = +(sessionStorage.getItem(KEY) || 0);
     const st = +(sessionStorage.getItem('fruitResult') || 3); mistakes += 3 - st; sessionStorage.removeItem('fruitResult');
     $('startLayer').hidden = true; run(from);
@@ -29,7 +32,7 @@ async function main() {
 async function run(from) {
   const box = $('act');
   for (let i = from; i < stage.steps.length; i++) {
-    const step = stage.steps[i];
+    const step = stage.steps[i]; cur = i;
     [...$('dots').children].forEach((d, k) => (d.className = k < i ? 'done' : k === i ? 'cur' : ''));
     $('replay').onclick = () => step.say && say(step.say);
     if (step.type === 'fruit') {   // 水果合成：跳过去玩一局，玩完回来
@@ -61,4 +64,21 @@ async function finish() {
   $('doneLayer').hidden = false;
 }
 $('againBtn').onclick = () => (location.href = `stage.html?id=${id}`);
+
+/* ---------- 家长测试模式：跳步、直接过关、显示答案、换关 ---------- */
+const go = (sid, step) => (location.href = `stage.html?id=${sid}${step ? `&step=${step}&jump=1` : ''}`);
+function parentTools() {
+  bindToggle($('stTitle'));
+  if (!isParent()) return;
+  const ready = data.stages.filter((s) => s.ready).map((s) => s.id), k = ready.indexOf(id);
+  tools([
+    ['⏭ 跳过这一步', () => (cur + 1 < stage.steps.length ? go(id, cur + 1) : (stopVoice(), finish()))],
+    ['🏁 直接过关（3 颗星）', () => { mistakes = 0; stopVoice(); finish(); }],
+    ['👀 显示 / 隐藏答案', () => document.body.classList.toggle('showans')],
+    ...(k > 0 ? [['◀ 上一关', () => go(ready[k - 1])]] : []),
+    ...(k < ready.length - 1 ? [['下一关 ▶', () => go(ready[k + 1])]] : []),
+  ]);
+  // 上面的小圆点也能点：跳到那一步
+  [...$('dots').children].forEach((d, i) => { d.style.cursor = 'pointer'; d.title = `跳到第 ${i + 1} 步`; d.onclick = () => go(id, i); });
+}
 main();

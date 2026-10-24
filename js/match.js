@@ -8,6 +8,7 @@
 // 选关是正版那样的路线地图：一条弯弯的路从下往上走，每一课一段风景，溜溜站在现在这一关上。
 import * as store from './store.js';
 import { charSVG } from './art.js';
+import { isParent, bindToggle, tools, toast } from './parent.js';
 
 const $ = (id) => document.getElementById(id);
 const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
@@ -39,6 +40,12 @@ const COLORS = ['#ff5a6a', '#ffa63a', '#ffd23a', '#4cc96a', '#4a9aff', '#b56aff'
 const SHAPES = ['circle', 'square', 'hex', 'diamond', 'oct', 'drop'];
 const CH = (k) => lesson.chars[use[k]];   // 第 k 种方块是哪个字 [字, 拼音]
 const CHICK = -1;                        // 小鸡：不能消，只能往下送
+// 拼音课：方块是声母（sm）、韵母（ym）、整体认读音节（zt:读音）、带调的单韵母（yd:读音）；词写成 "b+a"，读音和带调的写法在 lesson.say 里
+const PY = () => lesson && lesson.type === 'pinyin';
+const ROLE = { sm: '声母', ym: '韵母', yd: '韵母', zt: '整体认读' };
+const tagOf = (ls, ch) => (ls.type === 'pinyin' ? ROLE[ch[1].split(':')[0]] : ch[1]);   // 方块上面那一行小字：识字课是拼音，拼音课是"声母""韵母"
+const wparts = (w) => (w.includes('+') ? w.split('+') : [...w]);
+const wordShow = (w) => (lesson.say && lesson.say[w] ? lesson.say[w][0] : w);
 
 /* ================= 画布 ================= */
 const cv = $('board'), ctx = cv.getContext('2d');
@@ -98,10 +105,11 @@ function sprite(k, sp) {
   }
   if (sp === 'bomb') { g.lineWidth = s * .06; g.strokeStyle = '#fff'; g.setLineDash([s * .06, s * .05]); shapePath(g, SHAPES[k], r * .88); g.stroke(); g.setLineDash([]); g.fillStyle = '#ffe14a'; g.beginPath(); g.arc(r * .62, -r * .7, s * .06, 0, 7); g.fill(); }
   if (sp === 'fish') { g.font = `${s * .3}px "Segoe UI Emoji","Apple Color Emoji",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🐟', r * .55, r * .55); }
-  // 字和拼音
+  // 字和拼音（拼音课：大的是声母韵母，上面小字写"声母""韵母"）
   g.fillStyle = '#fff'; g.strokeStyle = shade(col, .45); g.lineJoin = 'round'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = `900 ${s * .42}px "KaiTi","STKaiti","Kaiti SC","Microsoft YaHei",serif`; g.lineWidth = s * .05; g.strokeText(ch[0], 0, s * .06); g.fillText(ch[0], 0, s * .06);
-  g.font = `800 ${s * .13}px "Andika","Segoe UI",sans-serif`; g.lineWidth = s * .03; g.strokeText(ch[1], 0, -r * .62); g.fillText(ch[1], 0, -r * .62);
+  g.font = PY() ? `900 ${s * [0, .5, .44, .36, .3][Math.min(4, [...ch[0]].length)]}px "Andika","Segoe UI","Arial",sans-serif` : `900 ${s * .42}px "KaiTi","STKaiti","Kaiti SC","Microsoft YaHei",serif`;
+  g.lineWidth = s * .05; g.strokeText(ch[0], 0, s * .06); g.fillText(ch[0], 0, s * .06);
+  const tg = tagOf(lesson, ch); g.font = `800 ${s * (PY() ? .11 : .13)}px "Andika","Segoe UI","Microsoft YaHei",sans-serif`; g.lineWidth = s * .03; g.strokeText(tg, 0, -r * .62); g.fillText(tg, 0, -r * .62);
   return (sprites[id] = c);
 }
 
@@ -119,8 +127,13 @@ async function voice(url, force = false) {
   if (music) music.gain.setTargetAtTime(0.04, ac.currentTime, 0.05);
   s.onended = () => { if (voiceSrc === s) voiceSrc = null; if (music) music.gain.setTargetAtTime(0.13, ac.currentTime, 0.2); };
 }
-const sayChar = (k, force = false) => k >= 0 && voice(`audio/voice/z/${hex(CH(k)[0])}.mp3`, force);
-const sayWord = (w) => voice(`audio/voice/w/${hex(w)}.mp3`, true);
+function charUrl(ch) {
+  if (!PY()) return `audio/voice/z/${hex(ch[0])}.mp3`;
+  const [r, f] = ch[1].split(':');
+  return r === 'sm' ? `audio/voice/sm/${ch[0]}.mp3` : r === 'ym' ? `audio/voice/ym/${ch[0].replace(/ü/g, 'v')}.mp3` : `audio/voice/p/${f}.mp3`;
+}
+const sayChar = (k, force = false) => k >= 0 && voice(charUrl(CH(k)), force);
+const sayWord = (w) => voice(PY() ? `audio/voice/p/${lesson.say[w][1]}.mp3` : `audio/voice/w/${hex(w)}.mp3`, true);
 const sayUi = (k, force = true) => voice(`audio/voice/ui/${k}.mp3`, force);
 async function startMusic() {
   if (music) return; audio(); music = ac.createGain(); music.gain.value = 0.13; music.connect(ac.destination);
@@ -181,7 +194,7 @@ function randKind() { return rint(0, use.length - 1); }
 async function startLevel(li, i, boosts = []) {
   lesson = data.lessons[li]; lvIdx = i; L = lesson.levels[i]; N = L.board.length; M = L.board[0].length;
   use = L.use || [...Array(L.kinds).keys()];
-  const has = (w) => [...w].every((ch) => use.some((u) => lesson.chars[u][0] === ch));
+  const has = (w) => wparts(w).every((ch) => use.some((u) => lesson.chars[u][0] === ch));
   words = lesson.words.filter(has);
   tiles = []; hole = []; ice = []; crate = []; lock = []; mud = [];
   for (let r = 0; r < N; r++) {
@@ -200,9 +213,12 @@ async function startLevel(li, i, boosts = []) {
   listenK = -1; listenWrong = 0; listenGap = 0; lastListen = -1; magicSaid = false; $('listenBar').hidden = true;
   goals = L.goals.map((g) => ({ ...g, left: { collect: g.n, word: g.n, drop: g.n, listen: g.n, ice: countIce(), crate: countOf(crate), lock: countOf(lock), mud: countOf(mud) }[g.type] }));
   $('lvName').textContent = `${lessonName(lesson)} ${lesson.title} · 第 ${i + 1} 关`;
-  $('magic').style.display = words.some((w) => w.length === 2) ? '' : 'none';   // 这一关没有两个字的词就不要魔法瓶
+  $('magic').style.display = words.some((w) => wparts(w).length === 2) ? '' : 'none';   // 这一关没有两个字的词就不要魔法瓶
+  $('magicTip').innerHTML = PY() ? '魔法瓶<br>攒满后，把能拼在一起的声母和韵母换到一起！（发光的）' : '魔法瓶<br>攒满后，把能组成词语的两个字换到一起！（发光的字）';
+  document.body.classList.toggle('py', PY());
   renderGoals(); renderHud(); renderLegend(); renderTools();
   layout();   // 左右的卡片填好了再算棋盘多大
+  gameTools();
   busy = true; await waitSettle();
   if (boosts.length) await applyBoosts(boosts);
   busy = false;
@@ -227,13 +243,13 @@ const countOf = (layer) => layer.flat().filter((v) => v > 0).length;
 
 /* ---------- 界面：目标、步数、分数、魔法瓶、这一课的字 ---------- */
 const GOAL_ICON = { listen: ['👂', '听音点字'], ice: ['🧊', '糖霜'], crate: ['📦', '木箱'], word: ['✨', '组词魔法'], lock: ['⛓️', '锁链'], mud: ['🍫', '巧克力'], drop: ['🐣', '送小鸡'] };
-const lessonName = (ls) => `${ls.unit || '第'} ${ls.id}${ls.unit ? '' : ' 课'}`;
+const lessonName = (ls) => `${ls.unit || '第'} ${ls.no || ls.id}${ls.unit ? '' : ' 课'}`;
 const useOf = (lv) => lv.use || [...Array(lv.kinds).keys()];
 // 目标的小图标：收集的字用它方块的颜色
 function goalIcon(ls, u, g) {
   if (g.type !== 'collect') return [`<span class="gico">${GOAL_ICON[g.type][0]}</span>`, GOAL_ICON[g.type][1]];
   const k = u.findIndex((x) => ls.chars[x][0] === g.ch);
-  return [`<span class="gch" style="background:${COLORS[k]}"><small>${ls.chars[u[k]][1]}</small>${g.ch}</span>`, ''];
+  return [`<span class="gch" style="background:${COLORS[k]}"><small>${tagOf(ls, ls.chars[u[k]])}</small>${g.ch}</span>`, ''];
 }
 function renderGoals() {
   $('goals').innerHTML = goals.map((g, i) => {
@@ -247,12 +263,12 @@ function renderHud() {
   $('st1').style.left = s1 / s3 * 100 + '%'; $('st2').style.left = s2 / s3 * 100 + '%';
   ['st1', 'st2', 'st3'].forEach((id, i) => $(id).classList.toggle('on', score >= L.stars[i]));
   $('magicFill').style.height = Math.min(100, magic / magicMax * 100) + '%'; $('magic').classList.toggle('full', magic >= magicMax);
-  if (magic >= magicMax && !magicSaid && words.some((w) => w.length === 2) && !done) { magicSaid = true; setTimeout(() => sayUi('x_findword'), 900); }
+  if (magic >= magicMax && !magicSaid && words.some((w) => wparts(w).length === 2) && !done) { magicSaid = true; setTimeout(() => sayUi(PY() ? 'x_findpy' : 'x_findword'), 900); }
   if (magic < magicMax) magicSaid = false;
 }
 function renderLegend() {
-  $('legend').innerHTML = use.map((u, k) => `<button class="lg" data-k="${k}" style="background:${COLORS[k]}"><small>${lesson.chars[u][1]}</small>${lesson.chars[u][0]}</button>`).join('')
-    + `<div class="words">${words.map((w) => `<button class="wd" data-w="${w}">${w}</button>`).join('')}</div>`;
+  $('legend').innerHTML = use.map((u, k) => `<button class="lg" data-k="${k}" style="background:${COLORS[k]}"><small>${tagOf(lesson, lesson.chars[u])}</small>${lesson.chars[u][0]}</button>`).join('')
+    + `<div class="words">${words.slice(0, 10).map((w) => `<button class="wd" data-w="${w}">${wordShow(w)}</button>`).join('')}</div>`;
   $('legend').querySelectorAll('.lg').forEach((b) => (b.onclick = () => { audio(); sayChar(+b.dataset.k, true); }));
   $('legend').querySelectorAll('.wd').forEach((b) => (b.onclick = () => { audio(); sayWord(b.dataset.w); }));
 }
@@ -297,8 +313,8 @@ function findSquares(taken) {
 // 三个字以上的词语连成一排（从左到右或从上到下）
 function findWordLines() {
   const out = [];
-  for (const w of words.filter((w) => w.length >= 3)) {
-    const ks = [...w].map((ch) => use.findIndex((u) => lesson.chars[u][0] === ch)), n = ks.length;
+  for (const w of words.filter((w) => wparts(w).length >= 3)) {
+    const ks = wparts(w).map((ch) => use.findIndex((u) => lesson.chars[u][0] === ch)), n = ks.length;
     for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) {
       if (c + n <= M && ks.every((k, i) => tiles[r][c + i] && !tiles[r][c + i].sp && tiles[r][c + i].k === k)) out.push({ w, cells: ks.map((_, i) => [r, c + i]) });
       if (r + n <= N && ks.every((k, i) => tiles[r + i][c] && !tiles[r + i][c].sp && tiles[r + i][c].k === k)) out.push({ w, cells: ks.map((_, i) => [r + i, c]) });
@@ -306,7 +322,7 @@ function findWordLines() {
   }
   return out;
 }
-const wordOf = (a, b) => a.k >= 0 && b.k >= 0 && words.find((w) => w.length === 2 && ((w[0] === CH(a.k)[0] && w[1] === CH(b.k)[0]) || (w[1] === CH(a.k)[0] && w[0] === CH(b.k)[0])));
+const wordOf = (a, b) => a.k >= 0 && b.k >= 0 && words.find((w) => { const p = wparts(w); return p.length === 2 && ((p[0] === CH(a.k)[0] && p[1] === CH(b.k)[0]) || (p[1] === CH(a.k)[0] && p[0] === CH(b.k)[0])); });
 function wouldMatch(r1, c1, r2, c2) {
   if (!movable(r1, c1) || !movable(r2, c2)) return false;
   const a = tiles[r1][c1], b = tiles[r2][c2];
@@ -377,7 +393,8 @@ function startListen() {
   const k = pick(kinds.filter((x) => x !== lastListen));
   listenK = k; lastListen = k; listenWrong = 0; listenGap = 0; tool = null; toolSel = null; sel = null; hintMove = null; renderTools();
   $('listenBar').hidden = false; sfx.chick();
-  sayUi('x_listen'); setTimeout(() => listenK === k && sayChar(k, true), 1700);
+  $('listenTxt').textContent = PY() ? '👂 听一听，在棋盘上点出这个音' : '👂 听一听，在棋盘上点出这个字';
+  sayUi(PY() ? 'x_listenpy' : 'x_listen'); setTimeout(() => listenK === k && sayChar(k, true), 1700);
 }
 function onListenCell(r, c) {
   const t = tiles[r][c]; if (!t || t.k < 0 || busy) return;
@@ -635,9 +652,9 @@ async function specialSwap(a, b) {
 async function wordMagic(w, a, b) {
   magic = 0; renderHud(); goalHit('word', null, 1); renderGoals();
   const ka = a.k, kb = b.k, t = performance.now();
-  sfx.magic(); sayUi('x_word'); setTimeout(() => sayWord(w), 900);
+  sfx.magic(); sayUi(PY() ? 'x_pymagic' : 'x_word'); setTimeout(() => sayWord(w), 900);
   fx.push({ type: 'wave', x: (cx(a.c) + cx(b.c)) / 2, y: (cy(a.r) + cy(b.r)) / 2, t0: t, dur: 1200 });
-  texts.push({ txt: `✨ ${w} ✨`, x: W / 2, y: H * 0.4, t0: t, col: '#fff3a0', big: 2 });
+  texts.push({ txt: `✨ ${wordShow(w)} ✨`, x: W / 2, y: H * 0.4, t0: t, col: '#fff3a0', big: 2 });
   shake = 12; await sleep(700);
   const clear = new Map();
   for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) { const tt = tiles[r][c]; if (tt && (tt.k === ka || tt.k === kb)) { clear.set(key(r, c), [r, c]); fx.push({ type: 'zap', x0: cx(a.c), y0: cy(a.r), x1: cx(c), y1: cy(r), t0: t + 300 }); } }
@@ -843,7 +860,7 @@ cv.addEventListener('pointerup', () => {
 
 /* ================= 路线地图：一条弯弯的路从下往上，每一课一段风景 ================= */
 let ALL = [];   // 全书的关按顺序排好：{ li, i, ls, lv }
-const unlocked = (li, i) => (li === 0 && i === 0) || save.levels[`${data.lessons[li].id}-${i + 1}`] || (i > 0 ? save.levels[`${data.lessons[li].id}-${i}`] : save.levels[`${data.lessons[li - 1].id}-${data.lessons[li - 1].levels.length}`]) || save.all;
+const unlocked = (li, i) => (li === 0 && i === 0) || isParent() || save.levels[`${data.lessons[li].id}-${i + 1}`] || (i > 0 ? save.levels[`${data.lessons[li].id}-${i}`] : save.levels[`${data.lessons[li - 1].id}-${data.lessons[li - 1].levels.length}`]) || save.all;
 const passed = (o) => !!save.levels[`${o.ls.id}-${o.i + 1}`];
 const curIndex = () => { const j = ALL.findIndex((o) => unlocked(o.li, o.i) && !passed(o)); return j < 0 ? ALL.length - 1 : j; };
 // 每一课一种风景，按顺序轮着用
@@ -901,6 +918,10 @@ function placeAvatar(j) { const a = $('mav'), p = mapPos[j]; if (a && p) { a.sty
 // 打开地图；from 给了就让溜溜从那一关走到现在这一关，走完再 then()
 function openMap(from = -1, then = null) {
   $('mapLayer').hidden = false; $('preLayer').hidden = true;
+  tools([
+    ['🎁 每种道具 +5', () => { [...TOOLS, ...BOOSTS].forEach((k) => (save.items[k] = itemCount(k) + 5)); store.set('xiaoxiao', save); renderMap(); toast('每种道具 +5'); }],
+    ['清空消消乐进度', async () => { if (!confirm('清空消消乐的星星和道具？')) return; save = { levels: {}, items: { ...FIRST_ITEMS } }; await store.set('xiaoxiao', save); location.reload(); }],
+  ]);
   renderMap();
   const cur = curIndex(), sc = $('mapScroll'), show = (j) => (sc.scrollTop = mapPos[j].y - sc.clientHeight * 0.55);
   if (from >= 0 && from !== cur) {
@@ -910,6 +931,19 @@ function openMap(from = -1, then = null) {
   } else { show(cur); if (then) then(); }
 }
 window.addEventListener('resize', () => { if (!$('mapLayer').hidden) renderMap(); });
+
+/* ---------- 家长测试模式：玩的时候用的按钮 ---------- */
+function gameTools() {
+  const wait = (fn) => () => (busy || done ? toast('等方块落好再点') : fn());
+  tools([
+    ['🏁 直接过关', wait(() => { listenK = -1; $('listenBar').hidden = true; goals.forEach((g) => (g.left = 0)); renderGoals(); win(); })],
+    ['🍯 魔法瓶装满', () => { magic = magicMax; renderHud(); }],
+    ['👂 马上听音点字', wait(() => startListen())],
+    ['👀 提示答案（发光）', () => { if (listenK >= 0) listenWrong = 2; else hintMove = findMove(); }],
+    ['➕ 多 5 步', () => { moves += 5; renderHud(); }],
+    ['🗺️ 回地图', () => { if (!busy || done) openMap(); }],
+  ]);
+}
 
 /* ---------- 开始这一关之前：看看目标，挑开局道具 ---------- */
 let preSel = new Set();
@@ -951,6 +985,7 @@ function openPre(li, i) {
   $('preX').onclick = () => { $('preLayer').hidden = true; };
   $('listenAgain').onclick = () => { audio(); if (listenK >= 0) sayChar(listenK, true); };
   $('helloBtn').onclick = () => { audio(); sayUi('x_hello'); };
+  bindToggle(document.querySelector('.maptop h1'));
   openMap();
   requestAnimationFrame(frame);
   if (location.search.includes('test')) window.__xxl = { get tiles() { return tiles; }, trySwap, findMove: () => findMove(), get busy() { return busy; }, get goals() { return goals; }, get moves() { return moves; }, get score() { return score; }, setMagic: (v) => (magic = v), start: (li, i, bs) => startLevel(li, i, bs), get lock() { return lock; }, get mud() { return mud; }, get items() { return save.items; }, get listenK() { return listenK; }, startListen, onListenCell, pickTool, onToolCell, openMap, openPre, allMoves: () => { const out = []; for (let r = 0; r < N; r++) for (let c = 0; c < M; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) if (inside(r + dr, c + dc) && wouldMatch(r, c, r + dr, c + dc)) out.push([[r, c], [r + dr, c + dc]]); return out; } };   // 测试用

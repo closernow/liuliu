@@ -217,14 +217,14 @@ export async function compareSym(box, step) {
   let wrong = 0;
   for (let r = 0; r < step.rounds; r++) {
     if (step.mode === 'expr') {   // 算式和数比：7 ○ 2 + 7
-      const e = makeEq(pick(['a+b', 'a-b']), 9, true), o = Math.max(0, Math.min(9, e.res + (r === 1 ? 0 : pick([-2, -1, 1, 2])))), ex = `${e.nums[0]} ${e.ops[0]} ${e.nums[1]}`;
+      const e = step.teen ? makeTeen(pick(['T+a', 'T-a', '10+a', 'T-10'])) : makeEq(pick(['a+b', 'a-b']), 9, true), o = Math.max(0, Math.min(20, e.res + (r === 1 ? 0 : pick([-2, -1, 1, 2])))), ex = `${e.nums[0]} ${e.ops[0]} ${e.nums[1]}`;
       const [ls, rs, lv, rv] = rint(0, 1) ? [ex, o, e.res, o] : [o, ex, o, e.res], ans = lv === rv ? '=' : lv > rv ? '>' : '<';
       clear(box); title(box, '先算一算，再选符号'); box.appendChild(h(`<div class="symq big expr">${ls} ○ ${rs}</div>`)); say('q_cmp');
       wrong += await choose(box, ['>', '=', '<'], ans, { cls: 'sym' });
       box.querySelector('.symq').innerHTML = `${ls} <b>${ans}</b> ${rs}`; await sleep(1200);
       continue;
     }
-    let a = rint(step.mode === 'rows' ? 1 : 0, step.max), b = rint(step.mode === 'rows' ? 1 : 0, step.max);
+    let a = rint(step.mode === 'rows' ? 1 : step.min || 0, step.max), b = rint(step.mode === 'rows' ? 1 : step.min || 0, step.max);
     if (r === 1) b = a;   // 至少有一次一样多
     const ans = a === b ? '=' : a > b ? '>' : '<';
     clear(box); title(box, step.mode === 'rows' ? '对着摆一摆，选符号' : '比一比，选符号');
@@ -286,7 +286,9 @@ const dots = (n, cls = '') => Array.from({ length: n }, () => `<i class="pdot ${
 // 做一道算式题：显示算式，选答案，答对了把 □ 换成答案
 async function solve(box, e, pic = false) {
   const wrap = h('<div class="calcbox"></div>'); box.appendChild(wrap);
-  if (pic && e.nums.length === 2 && e.hide < 0) wrap.appendChild(h(`<div class="eqpic">${e.ops[0] === '+' ? dots(e.nums[0]) + '<span class="gap"></span>' + dots(e.nums[1], 'b') : dots(e.nums[0] - e.nums[1]) + dots(e.nums[1], 'x')}</div>`));
+  const big = Math.max(...e.nums) > 9;   // 十几的题配小棒（一捆 + 几根），10 以内配圆点
+  if (pic && big && e.hide < 0 && e.nums[1] < 10 && e.nums[0] >= 10) wrap.appendChild(h(e.ops[0] === '+' ? bundlePic(1, e.nums[0] - 10, e.nums[1]) : bundlePic(1, e.nums[0] - 10, 0, e.nums[1])));
+  else if (pic && !big && e.nums.length === 2 && e.hide < 0) wrap.appendChild(h(`<div class="eqpic">${e.ops[0] === '+' ? dots(e.nums[0]) + '<span class="gap"></span>' + dots(e.nums[1], 'b') : dots(e.nums[0] - e.nums[1]) + dots(e.nums[1], 'x')}</div>`));
   const eq = h(eqCols(eqToks(e))); wrap.appendChild(eq); say(...eqSay(e));
   const w = await choose(box, near(e.ans, 0, Math.max(9, e.ans + 1), 4), e.ans);
   eq.replaceWith(h(eqCols(eqToks(e, true)))); box.querySelector('.choices').remove();
@@ -321,7 +323,7 @@ export async function addTogether(box, step) {
 export async function calc(box, step) {
   let wrong = 0;
   for (let r = 0; r < step.rounds; r++) {
-    const e = makeEq(step.forms[r % step.forms.length], step.max || 9, step.zero && r % 3 === 1);
+    const f = step.forms[r % step.forms.length], e = isTeen(f) ? makeTeen(f) : makeEq(f, step.max || 9, step.zero && r % 3 === 1);
     clear(box); title(box, e.hide < 0 ? '算一算' : '□ 里填几？');
     wrong += await solve(box, e, step.pic);
     await sleep(600);
@@ -351,6 +353,7 @@ export async function table(box, step) {
   const f = step.find, want = all.filter((e) => e.res === f).length;
   title(box, `把${add ? '和' : '差'}是 <b>${f}</b> 的算式都点出来`).classList.add('sub'); say(add ? 'q_find_sum' : 'q_find_diff', num(f), 'q_find_b');
   let got = 0;
+  cells.forEach((c, i) => all[i].res === f && (c.dataset.ok = 1));
   await new Promise((res) => cells.forEach((c, i) => (c.onclick = () => {
     if (c.classList.contains('hit')) return;
     if (all[i].res === f) { c.classList.add('hit'); sfx.ok(); if (++got === want) setTimeout(res, 600); }
@@ -672,6 +675,125 @@ export async function position(box, step) {
       say('nm_' + an[me][1], `pos_${d}_who`);
       wrong += await tapWho([...sc.querySelectorAll('.seat')], other);
     }
+  }
+  return wrong;
+}
+
+/* ================= 第四单元：10~20 的认识 ================= */
+// 十几的题：T 是 11~19。'T+a' 'a+T' 'T-a'（不进位、不退位）'T-t'（得 10）'T-10' '10+a' 'a+10' '10-a' 'a+?=10'
+function makeTeen(form) {
+  const t = rint(1, 9);
+  switch (form) {
+    case 'T+a': { const t2 = rint(1, 8), a = rint(1, 9 - t2); return { nums: [10 + t2, a], ops: ['+'], res: 10 + t2 + a, hide: -1, ans: 10 + t2 + a }; }
+    case 'a+T': { const t2 = rint(1, 8), a = rint(1, 9 - t2); return { nums: [a, 10 + t2], ops: ['+'], res: 10 + t2 + a, hide: -1, ans: 10 + t2 + a }; }
+    case 'T-a': { const t2 = rint(2, 9), a = rint(1, t2 - 1); return { nums: [10 + t2, a], ops: ['-'], res: 10 + t2 - a, hide: -1, ans: 10 + t2 - a }; }
+    case 'T-t': return { nums: [10 + t, t], ops: ['-'], res: 10, hide: -1, ans: 10 };
+    case 'T-10': return { nums: [10 + t, 10], ops: ['-'], res: t, hide: -1, ans: t };
+    case '10+a': return { nums: [10, t], ops: ['+'], res: 10 + t, hide: -1, ans: 10 + t };
+    case 'a+10': return { nums: [t, 10], ops: ['+'], res: 10 + t, hide: -1, ans: 10 + t };
+    case '10-a': return { nums: [10, t], ops: ['-'], res: 10 - t, hide: -1, ans: 10 - t };
+    case 'a+?=10': return { nums: [t, 10 - t], ops: ['+'], res: 10, hide: 1, ans: 10 - t };
+  }
+}
+const isTeen = (f) => /T|10/.test(f);
+// 小棒：一捆（10 根）+ 几根；cross 根打叉（拿走的）；extra 根是后来添上的（蓝色）
+const sticks = (n, cls = '') => Array.from({ length: n }, () => `<i class="stick ${cls}"></i>`).join('');
+const bundlePic = (tens, ones, extra = 0, cross = 0) => `<div class="sticks">${`<span class="bundle tied">${sticks(10)}</span>`.repeat(tens)}<span class="loose">${sticks(ones - cross)}${sticks(cross, 'x')}</span>${extra ? `<span class="loose add">${sticks(extra, 'b')}</span>` : ''}</div>`;
+
+/* ---------- 数一数，捆一捆：10 根捆成 1 捆，10 个一是 1 个十 ---------- */
+export async function bundle(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const n = step.nums ? step.nums[r % step.nums.length] : rint(11, 19);
+    clear(box); title(box, '点一点小棒，数够 10 根捆成一捆'); say('b_tap');
+    const tray = h(`<div class="stray">${Array.from({ length: n }, () => `<button class="stk"><i class="stick"></i></button>`).join('')}</div>`);
+    const bin = h('<div class="sbin"><span class="blab">10 根捆一捆</span><span class="bundle open"></span></div>'); box.append(tray, bin);
+    let k = 0;
+    await new Promise((res) => tray.querySelectorAll('.stk').forEach((b) => (b.onclick = () => {
+      if (k >= 10) return; k++; b.remove(); bin.querySelector('.bundle').insertAdjacentHTML('beforeend', '<i class="stick"></i>'); sfx.tap(); say(num(k));
+      if (k === 10) setTimeout(res, 600);
+    })));
+    bin.querySelector('.bundle').classList.replace('open', 'tied'); sfx.ok(); await say('b_ten');
+    if (n === 10) { title(box, '一共有几根？').classList.add('sub'); say('b_total'); }
+    else { title(box, `1 个十和 ${n - 10} 个一，合起来是几？`).classList.add('sub'); say('b_combine_a', num(n - 10), 'b_combine_b'); }
+    wrong += await choose(box, near(n, 9, 20, 4), n);
+    box.querySelector('.choices').remove(); box.appendChild(h(placeTable(n))); await say(num(n)); await sleep(900);
+  }
+  return wrong;
+}
+const placeTable = (n) => `<div class="ptab"><div><small>十位</small><b>${Math.floor(n / 10)}</b></div><div><small>个位</small><b>${n % 10}</b></div><span>${n}</span></div>`;
+
+/* ---------- 计数器：拨出几（make），或者看珠子说是几（read） ---------- */
+const beads = (n) => Array.from({ length: n }, () => '<i class="bead"></i>').join('');
+function counterEl(tens, ones, edit) {
+  return h(`<div class="counter"><div class="rod"><div class="beads">${beads(tens)}</div><div class="pole"></div><small>十位</small>${edit ? '<div class="rbtn"><button data-d="t-">－</button><button data-d="t+">＋</button></div>' : ''}</div>
+    <div class="rod"><div class="beads">${beads(ones)}</div><div class="pole"></div><small>个位</small>${edit ? '<div class="rbtn"><button data-d="o-">－</button><button data-d="o+">＋</button></div>' : ''}</div></div>`);
+}
+export async function abacus(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const n = rint(step.min, step.max);
+    clear(box);
+    if (step.mode === 'read') {
+      title(box, '计数器上拨的是几？'); say('ab_read');
+      box.appendChild(counterEl(Math.floor(n / 10), n % 10, false));
+      wrong += await choose(box, near(n, 10, 20, 4), n);
+      continue;
+    }
+    title(box, `在计数器上拨出 <b>${n}</b>`); say('ab_make', num(n));
+    let t = 0, o = 0; const wrap = h('<div></div>'); box.appendChild(wrap);
+    const draw = () => { wrap.innerHTML = ''; wrap.appendChild(counterEl(t, o, true)); wrap.querySelectorAll('[data-d]').forEach((b) => (b.onclick = () => { const d = b.dataset.d; if (d === 't+' && t < 2) t++; if (d === 't-' && t > 0) t--; if (d === 'o+' && o < 9) o++; if (d === 'o-' && o > 0) o--; sfx.tap(); draw(); })); };
+    draw();
+    const ok = h('<button class="nextbtn">拨好了 ▶</button>'); box.appendChild(ok);
+    await new Promise((res) => (ok.onclick = () => {
+      if (t * 10 + o === n) { sfx.ok(); say('good'); ok.disabled = true; setTimeout(res, 900); }
+      else { wrong++; sfx.no(); say(t * 10 + o > n ? 'g_down' : 'g_up'); wrap.firstChild.classList.add('wrong'); setTimeout(() => wrap.firstChild && wrap.firstChild.classList.remove('wrong'), 500); }
+    }));
+    box.appendChild(h(placeTable(n))); await sleep(800);
+  }
+  return wrong;
+}
+
+/* ---------- 数轴：按顺序填空，再问前面、后面、多 1、少 1 ---------- */
+export async function numline(box, step) {
+  let wrong = 0;
+  const from = step.from || 0, to = step.to || 20, all = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+  const blanks = shuffle(all.filter((v) => v !== from)).slice(0, step.blanks || 0).sort((a, b) => a - b);
+  clear(box); title(box, '按顺序填一填'); say('nl_fill');
+  const line = h(`<div class="nline">${all.map((v) => `<span class="tick${blanks.includes(v) ? ' q' : ''}" data-v="${v}"><b>${blanks.includes(v) ? '?' : v}</b></span>`).join('')}</div>`); box.appendChild(line);
+  for (const v of blanks) {
+    const el = line.querySelector(`[data-v="${v}"]`); el.classList.add('focus');
+    wrong += await choose(box, near(v, from, to, 4), v);
+    box.querySelector('.choices').remove(); el.classList.remove('focus', 'q'); el.querySelector('b').textContent = v; say(num(v));
+  }
+  const ASK = [['after', '后面的数是几？', 1], ['before', '前面的数是几？', -1], ['more1', '多 1 的数是几？', 1], ['less1', '少 1 的数是几？', -1]];
+  for (let r = 0; r < (step.asks || 0); r++) {
+    const [key, txt, d] = ASK[r % 4], x = rint(from + 1, to - 1);
+    const t = title(box, `${key.startsWith('more') || key.startsWith('less') ? '比 ' : ''}<b>${x}</b> ${key === 'more1' ? '多 1 的数' : key === 'less1' ? '少 1 的数' : key === 'after' ? '后面的数' : '前面的数'}是几？`); t.classList.add('sub');
+    say(...(key.endsWith('1') ? ['nl_than', num(x), 'nl_' + key] : [num(x), 'nl_' + key]));
+    wrong += await choose(box, near(x + d, from, to, 4), x + d);
+    box.querySelector('.choices').remove(); t.remove(); line.querySelector(`[data-v="${x + d}"]`)?.classList.add('hit'); await sleep(700);
+    line.querySelectorAll('.hit').forEach((e) => e.classList.remove('hit'));
+  }
+  return wrong;
+}
+
+/* ---------- 不进位加法、不退位减法：摆小棒，先算个位，再加上一捆 ---------- */
+export async function teenAdd(box, step) {
+  let wrong = 0;
+  for (let r = 0; r < step.rounds; r++) {
+    const e = makeTeen(step.forms[r % step.forms.length]), add = e.ops[0] === '+', T = add ? Math.max(...e.nums) : e.nums[0], a = add ? Math.min(...e.nums) : e.nums[1], t = T - 10;
+    clear(box); title(box, '摆一摆，算一算');
+    box.appendChild(h(add ? bundlePic(1, t, a) : bundlePic(1, t, 0, a)));
+    const eq = h(eqCols(eqToks(e))); box.appendChild(eq); say(...eqSay(e));
+    const ones = { nums: [t, a], ops: [e.ops[0]], res: add ? t + a : t - a, hide: -1 };
+    const tens = { nums: [10, ones.res], ops: ['+'], res: e.res, hide: -1 };
+    for (const [part, key, txt] of [[ones, 'q_first', `先算 ${add ? '' : '个位：'}`], [tens, 'q_then', '再算']]) {
+      const line = h(`<div class="steptip"><span>${txt}</span>${eqCols(eqToks(part))}</div>`); box.appendChild(line); say(key, ...eqSay(part));
+      wrong += await choose(box, near(part.res, 0, 20, 4), part.res);
+      box.querySelector('.choices').remove(); line.lastElementChild.replaceWith(h(eqCols(eqToks(part, true))));
+    }
+    eq.replaceWith(h(eqCols(eqToks(e, true)))); await say(...eqRead(e)); await sleep(700);
   }
   return wrong;
 }

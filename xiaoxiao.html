@@ -44,6 +44,7 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
 .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;justify-items:center}
 .lg{border:none}
 .words{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+body.py .lg,body.py .gch,body.py .flyer{font-family:"Andika","Segoe UI",Arial,sans-serif;font-size:22px}body.py .wd{font-family:"Andika","Segoe UI",Arial,sans-serif}
 .wd{border:none;border-radius:999px;background:rgba(255,255,255,.9);color:#5a3aa8;font-family:"KaiTi",serif;font-weight:900;font-size:20px;padding:4px 12px}
 .flyer{position:fixed;z-index:30;transform:translate(-50%,-50%);transition:left .6s cubic-bezier(.5,-0.3,.7,1),top .6s cubic-bezier(.4,-0.6,.7,1),transform .6s;pointer-events:none}
 .overlay{position:fixed;inset:0;background:rgba(20,10,60,.55);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
@@ -158,9 +159,9 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
     <div class="card movesBox"><h3>还剩几步</h3><b id="moves">0</b></div>
     <div class="card"><h3>目标</h3><div class="goals" id="goals"></div></div>
     <div class="card"><h3>分数</h3><div class="scorebar"><i id="scoreBar"></i><span class="st" id="st1">⭐</span><span class="st" id="st2">⭐</span><span class="st" id="st3">⭐</span></div><div class="scoreNum" id="score">0</div></div>
-    <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p>魔法瓶<br>攒满后，把能组成词语的两个字换到一起！（发光的字）</p></div>
+    <div class="card magic" id="magic"><div class="bottle"><i id="magicFill"></i></div><p id="magicTip">魔法瓶<br>攒满后，把能组成词语的两个字换到一起！（发光的字）</p></div>
   </div>
-  <div class="boardWrap" id="boardWrap"><div class="toolTip" id="toolTip" hidden></div><div class="listenBar" id="listenBar" hidden>👂 听一听，在棋盘上点出这个字 <button id="listenAgain">🔊 再听</button></div><canvas id="board"></canvas></div>
+  <div class="boardWrap" id="boardWrap"><div class="toolTip" id="toolTip" hidden></div><div class="listenBar" id="listenBar" hidden><span id="listenTxt">👂 听一听，在棋盘上点出这个字</span> <button id="listenAgain">🔊 再听</button></div><canvas id="board"></canvas></div>
   <div class="side">
     <div class="card"><h3>这一课的字（点一点听读音）</h3><div class="legend" id="legend"></div></div>
     <div class="card"><h3>道具<small>（不算步数）</small></h3><div class="tools" id="tools"></div></div>
