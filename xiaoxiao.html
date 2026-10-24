@@ -39,7 +39,7 @@ button{font:inherit;cursor:pointer}
 .magic.full .bottle{box-shadow:0 0 18px #fff6a0;animation:glow 1s infinite}
 @keyframes glow{50%{box-shadow:0 0 30px #fff6a0}}
 .magic p{margin:0;font-size:13px;line-height:1.4}
-.boardWrap{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0}
+.boardWrap{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;overflow:hidden}
 canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,60,.35);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 0 3px rgba(255,255,255,.25)}
 .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;justify-items:center}
 .lg{border:none}
@@ -51,13 +51,38 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
 .panel{background:linear-gradient(160deg,#fff,#f4ecff);color:#3a2a6a;border-radius:28px;padding:24px 30px;text-align:center;max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
 .panel h2{font-size:34px;margin:0 0 6px}
 .lvs{display:flex;gap:14px;justify-content:center;margin:16px 0}
+.ltabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.ltab{border:none;border-radius:16px;background:#efe6ff;color:#5a3aa8;padding:6px 14px;font-size:13px;line-height:1.3}.ltab b{font-size:18px;font-family:"KaiTi",serif}
+.ltab.on{background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff}
 .lvb{border:none;width:110px;height:120px;border-radius:24px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
 .lvb b{font-size:48px;line-height:1}.lvb span{color:#ffe14a;font-size:20px}
 .lvb[disabled]{opacity:.45;cursor:not-allowed}
 .btn{border:none;border-radius:999px;padding:12px 26px;font-weight:900;font-size:20px;background:linear-gradient(160deg,#ff8ad8,#b56aff);color:#fff;margin:6px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
 .btn.ghost{background:#efe6ff;color:#5a3aa8}
 .bigstars{font-size:60px;color:#ffc83a;letter-spacing:6px}
-@media (max-width:900px){.wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.side{flex-direction:row;flex-wrap:wrap}.card{flex:1}}
+/* 横着的小窗口：卡片放左边一列，棋盘占右边 */
+@media (max-width:900px) and (min-aspect-ratio:1/1){
+  .wrap{grid-template-columns:190px 1fr;grid-template-rows:auto 1fr;gap:10px}
+  .side:first-child{grid-column:1;grid-row:1;gap:6px}
+  .boardWrap{grid-column:2;grid-row:1/3}
+  .side:last-child{grid-column:1;grid-row:2;min-height:0;overflow:auto}
+  .card{padding:6px 10px}.card h3{font-size:12px;margin-bottom:2px}
+  .movesBox b{font-size:32px}.magic p{display:none}.bottle{width:30px;height:44px}
+  .lg,.gch{width:40px;height:40px;font-size:21px;border-radius:12px}.gch small,.lg small{font-size:10px}.gico{font-size:28px;line-height:40px}.goal b{font-size:18px}
+  .scorebar{margin-top:14px}.scoreNum{font-size:16px}.wd{font-size:15px;padding:2px 8px}
+}
+/* 竖着的小屏幕：卡片排成一行，棋盘在中间 */
+@media (max-width:900px) and (max-aspect-ratio:1/1){
+  .wrap{display:flex;flex-direction:column;gap:8px}
+  .side{flex-direction:row;gap:8px;flex:none}
+  .side .card{flex:1 1 0;min-width:0;padding:8px}
+  .boardWrap{flex:1 1 0;min-height:0}
+  .movesBox b{font-size:36px}.card h3{font-size:13px;margin-bottom:4px}
+  .magic p{display:none}
+  .legend{grid-template-columns:repeat(6,auto);justify-content:center}.words{margin-top:2px}
+  .lg,.gch{width:42px;height:42px;font-size:22px;border-radius:12px}.gch small,.lg small{font-size:10px}.gico{font-size:30px;line-height:42px}
+  .scorebar{margin-top:16px}
+}
 </style>
 </head>
 <body>
@@ -77,9 +102,9 @@ canvas{display:block;touch-action:none;border-radius:20px;background:rgba(20,10,
     <div class="card"><h3>这一课的字（点一点听读音）</h3><div class="legend" id="legend"></div></div>
   </div>
 </div>
-<div class="overlay" id="startLayer"><div class="panel"><h2>🍬 溜溜消消乐</h2><div id="lessonTitle" style="font-size:20px;font-weight:800"></div>
+<div class="overlay" id="startLayer"><div class="panel"><h2>🍬 溜溜消消乐</h2><div class="ltabs" id="lessonTabs"></div>
   <div class="lvs" id="lvList"></div>
-  <p>交换两个方块，三个一样的连成一排就消掉！<br>连 4 个出 🚀 火箭，L 形出 💣 炸弹，连 5 个出 🌈 彩虹球。</p>
+  <p>交换两个方块，三个一样的连成一排就消掉！<br>连 4 个出 🚀 火箭，L 形出 💣 炸弹，连 5 个出 🌈 彩虹球，2×2 出 🐟 小鱼。</p>
   <button class="btn ghost" id="helloBtn">🔊 听怎么玩</button></div></div>
 <div class="overlay" id="moreLayer" hidden><div class="panel"><h2>步数用完啦</h2><p style="font-size:20px">没关系，送你 5 步！</p><button class="btn" id="moreBtn">+5 步，继续 ▶</button></div></div>
 <div class="overlay" id="winLayer" hidden><div class="panel"><h2>🎉 过关啦！</h2><div class="bigstars" id="winStars"></div><p style="font-size:22px">分数 <b id="winScore"></b></p>
